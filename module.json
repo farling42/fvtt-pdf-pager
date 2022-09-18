@@ -1,6 +1,6 @@
 {
   "id": "pdf-pager",
-  "title": "Open PDFs Immediately and/or at Specific Page",
+  "title": "PDF Pager",
   "description": "Allows automatically loading of PDFs, and addition of specific page numbers in document links.",
   "version": "0.0.1",
   "library": "false",

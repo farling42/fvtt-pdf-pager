@@ -11,7 +11,11 @@
 This module provides two key functions:
 
 - the ability to automatically load a PDF into a page as soon as the page is displayed.
-- the ability to include "|page=xxx" as a document link to open a PDF document at the requested page.
+- the ability to include "#page=xxx" as a suffix on the document link to open a PDF document at the requested page.
+
+```
+@UUID{JournalEntry.T29aMDmLCPYybApI.JournalEntryPage.iYV6uMnFwdgZORxi#page=10}
+```
 
 ## Configuration
 
