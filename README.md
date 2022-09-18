@@ -8,11 +8,12 @@
 
 # PDF Pager
 
-This module provides three key functions:
+This module provides the following:
 
 - Automatically load a PDF into a page as soon as the page is displayed.
 - Include "#page=xxx" as a suffix on the document link to open a PDF document at the requested page.
 - Include a page offset in the PDF document definition, so that page=xxx can reference the book's page numbering (some PDFs have extra pages before page 1).
+- Automatically migrates PDFoundry PDF information to new pages in journals.
 
 ## Example
 
