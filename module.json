@@ -1,33 +1,41 @@
 {
-  "name": "module",
-  "title": "New Module",
-  "description": "",
-  "version": "This is auto replaced",
+  "id": "pdf-pager",
+  "title": "Open PDFs Immediately and/or at Specific Page",
+  "description": "Allows automatically loading of PDFs, and addition of specific page numbers in document links.",
+  "version": "0.0.1",
   "library": "false",
-  "manifestPlusVersion": "1.0.0",
-  "minimumCoreVersion": "9",
-  "compatibleCoreVersion": "9",
+  "compatibility": {
+    "minimum": 10,
+    "verified": 10,
+    "maximum": 11
+  },
   "authors": [
-    {
-      "name": "The League of Extraordinary FVTT Developers",
-      "url": "https://github.com/League-of-Foundry-Developers",
-      "discord": "discordID#0001"
-    }
+		{
+			"name": "Farling",
+			"url": "https://github.com/farling42",
+			"email": "foundryvtt@amusingtime.uk",
+			"discord": "Farling#9579",
+			"ko-fi": "farling",
+			"patreon": "amusingtime",
+			"twitter": "@shambles42"
+		}
   ],
-  "dependencies": [
-
-  ],
-  "conflicts": [
-    
-  ],
+  "relationships": {
+    "systems": [],
+    "requires": [
+      {
+        "id": "lib-wrapper",
+        "type": "module",
+        "manifest": "https://github.com/ruipin/fvtt-lib-wrapper/releases/latest/download/module.json",
+        "compatibility": {}
+      }      
+    ]
+  },
   "esmodules": [
-    "scripts/module.js"
-  ],
-  "scripts": [
-    "scripts/lib/lib.js"
+    "scripts/pdf-pager.mjs"
   ],
   "styles": [
-    "styles/module.css"
+    "styles/pdf-pager.css"
   ],
   "languages": [
     {
@@ -36,15 +44,9 @@
       "path": "languages/en.json"
     }
   ],
-  "url": "This is auto replaced",
-  "manifest": "This is auto replaced",
-  "download": "This is auto replaced",
+  "url": "https://github.com/farling42/fvtt-pdf-pager",
+  "manifest": "https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json",
+  "download": "https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.zip",
   "license": "LICENSE",
-  "readme": "README.md",
-  "media": [
-    {
-      "type": "icon",
-      "url": "https://avatars2.githubusercontent.com/u/71292812?s=400&u=ccdb4eeb7abf551ca8f314e5a9bfd0479a4d3d41&v=4"
-    }
-  ]
+  "readme": "README.md"
 }
