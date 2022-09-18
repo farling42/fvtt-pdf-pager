@@ -8,15 +8,14 @@
 
 # PDF Pager
 
-This module provides two key functions:
+This module provides three key functions:
 
-- the ability to automatically load a PDF into a page as soon as the page is displayed.
-- the ability to include "#page=xxx" as a suffix on the document link to open a PDF document at the requested page.
+- Automatically load a PDF into a page as soon as the page is displayed.
+- Include "#page=xxx" as a suffix on the document link to open a PDF document at the requested page.
+- Include a page offset in the PDF document definition, so that page=xxx can reference the book's page numbering (some PDFs have extra pages before page 1).
+
+## Example
 
 ```
 @UUID{JournalEntry.T29aMDmLCPYybApI.JournalEntryPage.iYV6uMnFwdgZORxi#page=10}
 ```
-
-## Configuration
-
-The Edit page for a Journal PDF page will include an additional entry which is a page offset, so that the "|page=xxx" parameter can reference the page number in the rulebook, even though the PDF might have other pages preceding the document's proper "Page 1".
