@@ -1,6 +1,7 @@
 ## 0.3.0
 
 - Add migratePDFoundry global function for users to put into a macro or run from console command-line.
+- Add migratePDFlinks  global function for users to migrate the old @PDF[id|page=xx] link format to the new @UUID[uuid#page=xx] format.
 - Fix size issue with the PDF Editor window containing the new "Page Offset" field.
 
 ## 0.2.0
