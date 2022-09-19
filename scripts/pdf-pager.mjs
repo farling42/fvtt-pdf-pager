@@ -56,27 +56,41 @@ Hooks.once('init', () => {
 
 Hooks.once('ready', async () => {
     // Need to capture the PDF page number
-    libWrapper.register(MODULE_NAME, 'JournalSheet.prototype._render', my_journal_render, libWrapper.WRAPPER);
+    libWrapper.register(MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner', my_render_inner, libWrapper.WRAPPER);
+    libWrapper.register(MODULE_NAME, 'JournalSheet.prototype._render', my_render, libWrapper.WRAPPER);
     await migratePDFoundry({onlyIfEmpty:true});
 });
 
 // Ugly hack to get the PAGE number from the JournalSheet#render down to the JournalPDFPageSheet#render
 let pdfpageid=undefined;
-let pdfpage=undefined;
+let pdfpagenumber=undefined;
 
 /**
  * my_journal_render reads the page=xxx anchor from the original link, and stores it temporarily for use by renderJournalPDFPageSheet later
  */
-async function my_journal_render(wrapper,force,options) {
+async function my_render(wrapper,force,options) {
     if (options.anchor?.startsWith('page=')) {
-        pdfpageid = options.pageId;
-        pdfpage   = +options.anchor.slice(5);
+        pdfpageid     = options.pageId;
+        pdfpagenumber = +options.anchor.slice(5);
         delete options.anchor;   // we don't want the wrapper trying to set the anchor
     }
     let result = await wrapper(force,options);
-    pdfpageid = undefined;
-    pdfpage   = undefined;
+    pdfpagenumber = undefined;  // in case renderJournalPDFPageSheet didn't get called
     return result;
+}
+
+
+async function my_render_inner(wrapper, ...args) {
+    let html = wrapper(...args);   // jQuery
+    if (this.isEditable) {
+        html = await html;
+        const page_offset = args[0].document.getFlag(MODULE_NAME,FLAG_PAGE_OFFSET);
+        const value = page_offset ? ` value="${page_offset}"` : "";
+        let elem = html.find('div.picker');
+        let newelem = `<div class="form-group"><label>Page Offset</label><input class="pageOffset" type="number" name="flags.${MODULE_NAME}.${FLAG_PAGE_OFFSET}"${value}"/></div>`;
+        $(newelem).insertAfter(elem);
+    }
+    return html;
 }
 
 /**
@@ -86,25 +100,20 @@ async function my_journal_render(wrapper,force,options) {
  * @param {Object}     [data]  Data (data.document = JournalEntryPage)
  */
 Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
-    const page_offset = data.document.getFlag(MODULE_NAME,FLAG_PAGE_OFFSET);
-    // Don't do anything if editting the page.
-    if (sheet.isEditable) {
-        const value = page_offset ? ` value="${page_offset}"` : "";
-        $(`<div class="form-group"><label>Page Offset</label><input class="pageOffset" type="number" name="flags.${MODULE_NAME}.${FLAG_PAGE_OFFSET}" ${value}"/></div>`).insertBefore(html.find('footer'));
-        return;
-    }
+    // If editing the page, then don't try to press the button.
+    if (sheet.isEditable) return;
+
     // Sanity check for using the correct pdfpage value.
     if (sheet.object._id !== pdfpageid)
-        pdfpage = undefined;
+        pdfpagenumber = undefined;
 
     // html.find('div.load-pdf') doesn't work
-    if (pdfpage || game.settings.get(MODULE_NAME, CONFIG_ALWAYS_LOAD_PDF)) {
+    if (pdfpagenumber || game.settings.get(MODULE_NAME, CONFIG_ALWAYS_LOAD_PDF)) {
         $("div.load-pdf").replaceWith ( (index,a) => {
             // Immediately do JournalPagePDFSheet#_onLoadPDF
-            //const page = data.document  (JournalEntryPage)
-            const page_marker = pdfpage ? `#page=${pdfpage+(page_offset||0)}` : '';
-            pdfpage = undefined;
-            // return a;   // if no change is required.
+            const page_offset = data.document.getFlag(MODULE_NAME,FLAG_PAGE_OFFSET);
+            const page_marker = pdfpagenumber ? `#page=${pdfpagenumber+(page_offset||0)}` : '';
+            pdfpagenumber = undefined;  // only use the buffered page number once
             return `<iframe src="scripts/pdfjs/web/viewer.html?${sheet._getViewerParams()}${page_marker}"/>`;
 	    });
     }
@@ -136,7 +145,7 @@ async function migratePDFoundry(options={}) {
     }
     for (const pack of game.packs) {
         if (pack.locked || pack.metadata.type != 'JournalEntry') continue;
-        console.log(`Migrating JournalEntry pack '${pack.metadata.label}'`)
+        console.log(`Checking JournalEntry compendium '${pack.metadata.label}'`)
         for (const elem of pack.index) {
             await migrateOne(await pack.getDocument(elem._id), options);
         }
