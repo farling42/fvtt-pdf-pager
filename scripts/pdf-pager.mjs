@@ -88,12 +88,12 @@ async function my_render(wrapper,force,options) {
 async function my_render_inner(wrapper, ...args) {
     let html = wrapper(...args);   // jQuery
     if (this.isEditable) {
-        html = await html;
+        html = await html;  // resolve the Promise before using the value
         const page_offset = args[0].document.getFlag(MODULE_NAME,FLAG_PAGE_OFFSET);
         const value = page_offset ? ` value="${page_offset}"` : "";
-        let elem = html.find('div.picker');
-        let label = game.i18n.localize(`${MODULE_NAME}.PageOffset.Label`);
-        let newelem = `<div class="form-group"><label>${label}</label><input class="pageOffset" type="number" name="flags.${MODULE_NAME}.${FLAG_PAGE_OFFSET}"${value}"/></div>`;
+        const elem = html.find('div.picker');
+        const label = game.i18n.localize(`${MODULE_NAME}.PageOffset.Label`);
+        const newelem = `<div class="form-group"><label>${label}</label><input class="pageOffset" type="number" name="flags.${MODULE_NAME}.${FLAG_PAGE_OFFSET}"${value}"/></div>`;
         $(newelem).insertAfter(elem);
     }
     return html;
