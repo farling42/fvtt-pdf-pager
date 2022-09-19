@@ -24,7 +24,7 @@ This module provides the following:
 
 The module is available from the Foundry Module Management window, just search for "PDF Pager", or it can be manually added with the following link:
 
-[https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json]
+https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json
 
 ## Migrating from PDFoundry
 
