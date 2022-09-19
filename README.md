@@ -16,8 +16,10 @@ This module provides the following:
 
 ## Example
 
+Showing a link to an existing PDF page within a journal entry, and specifying that the link will open the PDF at page 10:
+
 ```text
-@UUID{JournalEntry.T29aMDmLCPYybApI.JournalEntryPage.iYV6uMnFwdgZORxi#page=10}
+@UUID[JournalEntry.T29aMDmLCPYybApI.JournalEntryPage.iYV6uMnFwdgZORxi#page=10]{label}
 ```
 
 ## Installation
