@@ -1,6 +1,8 @@
 ## 0.4.0
 
+- Remove unused files from the manifest file.
 - Move MigratePDF* functions to a separate file, to keep them isolated from the main functionality of the module.
+- Fix the example link, and give a simple explanation of it.
 
 ## 0.3.0
 
