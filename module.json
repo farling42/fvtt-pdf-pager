@@ -21,7 +21,6 @@
 		}
   ],
   "relationships": {
-    "systems": [],
     "requires": [
       {
         "id": "lib-wrapper",
@@ -32,10 +31,8 @@
     ]
   },
   "esmodules": [
-    "scripts/pdf-pager.mjs"
-  ],
-  "styles": [
-    "styles/pdf-pager.css"
+    "scripts/pdf-pager.mjs",
+    "scripts/pdf-migrate.mjs"
   ],
   "languages": [
     {
