@@ -1,3 +1,7 @@
+## 0.4.0
+
+- Move MigratePDF* functions to a separate file, to keep them isolated from the main functionality of the module.
+
 ## 0.3.0
 
 - Add migratePDFoundry global function for users to put into a macro or run from console command-line.
