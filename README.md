@@ -51,6 +51,8 @@ migratePDFoundry({onlyIfEmpty:true})
 
 A second function will update all the @PDF links in your journal entries (both in the world and in unlocked) compendiums to the new syntax.
 
+The new link will be to a Journal Entry called "bookname" (see OLD syntax below), and one of the PDF pages inside that journal entry: either a PDF page called "bookname" otherwise the first PDF page in that journal entry.
+
 OLD: @PDF[bookname|page=xxx]{label}
 
 NEW: @UUID[full-uid-to-pdf-page#page=xxx]{label}
