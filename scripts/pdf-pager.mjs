@@ -52,6 +52,7 @@ Hooks.once('init', () => {
 		config: true
 	});
     globalThis.migratePDFoundry = migratePDFoundry;
+    globalThis.migratePDFlinks  = migratePDFlinks;
 });
 
 Hooks.once('ready', async () => {
@@ -157,4 +158,78 @@ async function migratePDFoundry(options={}) {
         }
     }
     console.log(`Finished migratePDFoundry`)
+}
+
+/**
+ * Convert all occurrences of @PDF[id]{label} to @UUID[type.id]{label}
+ */
+
+async function migratePDFlinks(options={}) {
+
+    const pattern = /@PDF\[([^|]+)\|page=(\d*)]{([^}]+)}/g;
+
+    async function migrateOne(entry, options) {
+        entry.pages.filter(page => page.type === 'text').forEach(async (page) => {
+            const text = page.text.content;
+            if (!text.includes('@PDF[')) return;
+
+            // OLD - @PDF[shortid|page=xxx]{label}
+            // NEW - @UUID[longuid#page=xxx]{label}
+
+            function getpdfpageid(entry, pagenum, label) {
+                for (const page of entry.pages) {
+                    if (page.type === 'pdf') {
+                        return `@UUID[${page.uuid}#page=${pagenum}]{${label}}`
+                    }
+                }
+                return undefined;
+            }
+            
+            // Handle await not working inside replaceAll
+            const promises = [];
+            async function readpack(pack, id, match, pagenum, label) {
+                let entry = pack.getDocument(oldid.slice(dotpos+1));
+                return {match, replacement: entry ? getpdfpageid(entry) : undefined}
+            }
+
+            let newtext = text.replaceAll(pattern, (match,oldid,pagenum,label) => {
+                const dotpos = oldid.lastIndexOf('.');
+                let entry;
+                if (dotpos>0) {
+                    const compname = oldid.slice(0,dotpos-1);
+                    const pack = game.packs.find(pack => pack.metadata.name === compname);
+                    if (pack && !pack.locked) promises.push(readpack(pack, oldid.slice(dotpos+1), match, pagenum, label));
+                    return match;
+                } else {
+                    entry = game.journal.get(oldid);
+                    return entry ? getpdfpageid(entry, pagenum, label) : match;
+                }
+            });
+
+            if (promises.length > 0) {
+                const data = await Promise.all(promises);
+                for (const match of data) {
+                    newtext = newtext.replace(match.match, match.replacement);
+                }
+            }
+        
+            if (newtext != text) {
+                page.update({"text.content": newtext});
+                console.log(`Journal '${entry.name}', Page '${page.name}', replaced all @PDF`);
+            }
+        })
+    }
+
+    console.log(`Starting migratePDFlinks`)
+    for (const entry of game.journal) {
+        await migrateOne(entry, options);
+    }
+    for (const pack of game.packs) {
+        if (pack.locked || pack.metadata.type != 'JournalEntry') continue;
+        console.log(`Checking JournalEntry compendium '${pack.metadata.label}'`)
+        for (const elem of pack.index) {
+            await migrateOne(await pack.getDocument(elem._id), options);
+        }
+    }
+    console.log(`Finished migratePDFlinks`)
 }

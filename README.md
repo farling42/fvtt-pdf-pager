@@ -28,7 +28,9 @@ https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json
 
 ## Migrating from PDFoundry
 
-A function is available which can be called directly from a macro script or from the console command-line.
+Function are available which can be called directly from a macro script or from the console command-line to migrate your existing PDFoundry documents and links to the new format.
+
+### migratePDFoundry()
 
 It takes a single optional parameter which is an object that can contain the single boolean field 'onlyIfEmpty', which if set will only migrate PDFoundry
 journal entries which currently have no pages.
@@ -41,4 +43,12 @@ OR
 
 ```js
 migratePDFoundry({onlyIfEmpty:true})
+```
+
+### migratePDFlinks
+
+A second function will update all the @PDF links in your journal entries (both in the world and in unlocked) compendiums to the new syntax.
+
+```js
+migratePDFlinks()
 ```
