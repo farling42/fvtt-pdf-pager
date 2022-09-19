@@ -79,7 +79,12 @@ async function my_render(wrapper,force,options) {
     return result;
 }
 
-
+/**
+ * Adds the "Page Offset" field to the PDF page editor window.
+ * @param {*} wrapper from libWrapper
+ * @param  {...any} args an array of 1 element, the first element being the same as the data passed to the render function
+ * @returns 
+ */
 async function my_render_inner(wrapper, ...args) {
     let html = wrapper(...args);   // jQuery
     if (this.isEditable) {
@@ -87,7 +92,8 @@ async function my_render_inner(wrapper, ...args) {
         const page_offset = args[0].document.getFlag(MODULE_NAME,FLAG_PAGE_OFFSET);
         const value = page_offset ? ` value="${page_offset}"` : "";
         let elem = html.find('div.picker');
-        let newelem = `<div class="form-group"><label>Page Offset</label><input class="pageOffset" type="number" name="flags.${MODULE_NAME}.${FLAG_PAGE_OFFSET}"${value}"/></div>`;
+        let label = game.i18n.localize(`${MODULE_NAME}.PageOffset.Label`);
+        let newelem = `<div class="form-group"><label>${label}</label><input class="pageOffset" type="number" name="flags.${MODULE_NAME}.${FLAG_PAGE_OFFSET}"${value}"/></div>`;
         $(newelem).insertAfter(elem);
     }
     return html;
