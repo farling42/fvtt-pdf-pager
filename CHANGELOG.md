@@ -1,6 +1,7 @@
 ## 0.5.0
 
 - migratePDFlinks needs to handle @PDF[bookname|page=xxx] not @PDF[docid|page=xxx]
+- migratePDFlinks will look for a Journal Entry called 'bookname' (in above example). If one is found, then it will prefer to use a PDF page within that journal called 'bookname', otherwise it will use the first PDF page in that journal entry.
 
 ## 0.4.0
 

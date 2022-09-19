@@ -78,18 +78,24 @@ async function migratePDFlinks(options={}) {
             // OLD - @PDF[shortid|page=xxx]{label}
             // NEW - @UUID[longuid#page=xxx]{label}
 
-            function getpdfpageid(entry, pagenum, label) {
-                for (const page of entry.pages) {
-                    if (page.type === 'pdf') {
-                        return `@UUID[${page.uuid}#page=${pagenum}]{${label}}`
+            function getpdfpageid(entry, bookname, pagenum, label) {
+                // Look for a PDF page with the same name as the book.
+                let thepage = entry.pages.find(entry => entry.type === 'pdf' && entry.name === bookname);
+                if (!thepage) {
+                   // No page with same name as book, so use the first PDF page
+                    for (const page of entry.pages) {
+                        if (page.type === 'pdf') {
+                            thepage = page;
+                            break;
+                        }
                     }
                 }
-                return undefined;
+                return thepage ? `@UUID[${thepage.uuid}#page=${pagenum}]{${label}}` : undefined;
             }
             
             let newtext = text.replaceAll(pattern, (match,bookname,pagenum,label) => {
                 const entry = game.journal.getName(bookname);
-                return entry ? getpdfpageid(entry, pagenum, label) : match;
+                return entry ? getpdfpageid(entry, bookname, pagenum, label) : match;
             });
 
             if (newtext != text) {
