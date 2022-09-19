@@ -5,7 +5,6 @@
 ![Foundry Info](https://img.shields.io/badge/Foundry-v10-informational)
 ![Latest Release Download Count](https://img.shields.io/github/downloads/farling42/fvtt-pdf-pager/latest/module.zip)
 
-
 # PDF Pager
 
 This module provides the following:
@@ -17,7 +16,7 @@ This module provides the following:
 
 ## Example
 
-```
+```text
 @UUID{JournalEntry.T29aMDmLCPYybApI.JournalEntryPage.iYV6uMnFwdgZORxi#page=10}
 ```
 
@@ -25,6 +24,21 @@ This module provides the following:
 
 The module is available from the Foundry Module Management window, just search for "PDF Pager", or it can be manually added with the following link:
 
+[https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json]
+
+## Migrating from PDFoundry
+
+A function is available which can be called directly from a macro script or from the console command-line.
+
+It takes a single optional parameter which is an object that can contain the single boolean field 'onlyIfEmpty', which if set will only migrate PDFoundry
+journal entries which currently have no pages.
+
+```js
+migratePDFoundry()
 ```
-https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json
+
+OR
+
+```js
+migratePDFoundry({onlyIfEmpty:true})
 ```
