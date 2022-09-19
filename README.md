@@ -51,6 +51,10 @@ migratePDFoundry({onlyIfEmpty:true})
 
 A second function will update all the @PDF links in your journal entries (both in the world and in unlocked) compendiums to the new syntax.
 
+OLD: @PDF[bookname|page=xxx]{label}
+
+NEW: @UUID[full-uid-to-pdf-page#page=xxx]{label}
+
 ```js
 migratePDFlinks()
 ```
