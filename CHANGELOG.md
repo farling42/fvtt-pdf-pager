@@ -1,0 +1,22 @@
+## 0.3.0
+
+- Add migratePDFoundry global function for users to put into a macro or run from console command-line.
+- Fix size issue with the PDF Editor window containing the new "Page Offset" field.
+
+## 0.2.0
+
+- On startup, for any journal entry which has no pages, if there is PDFoundry information available on the journal entry then create a Page containing the PDF information.
+
+## 0.1.0
+
+- Add Page Offset to the PDF editor page, and use this page offset when determining what page number to pass to pdfjs.
+
+## 0.0.1
+
+- Configuration parameter to always load a PDF as soon as the page is selected in the Journal Entry - this can be configured from the module settings panel.
+
+- Allow #page=xxx (where xxx is a number) to be appended to the UUID of a PDF document reference so that the PDF will be opened at the indicated page, e.g.
+
+```text
+@UUID{JournalEntry.T29aMDmLCPYybApI.JournalEntryPage.iYV6uMnFwdgZORxi#page=10}
+```
