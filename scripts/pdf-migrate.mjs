@@ -22,9 +22,7 @@ SOFTWARE.
 */
 
 const MODULE_NAME="pdf-pager";
-const CONFIG_ALWAYS_LOAD_PDF="alwaysLoadPdf";
 const FLAG_PAGE_OFFSET="pageOffset";
-
 
 Hooks.once('init', () => {
     globalThis.migratePDFoundry = migratePDFoundry;
