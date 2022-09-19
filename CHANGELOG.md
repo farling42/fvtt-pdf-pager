@@ -1,3 +1,7 @@
+## 0.5.0
+
+- migratePDFlinks needs to handle @PDF[bookname|page=xxx] not @PDF[docid|page=xxx]
+
 ## 0.4.0
 
 - Remove unused files from the manifest file.
