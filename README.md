@@ -53,6 +53,8 @@ OR
 migratePDFoundry({onlyIfEmpty:true})
 ```
 
+The second version is triggered automatically on starting the game (or enabling the module).
+
 ### migratePDFlinks
 
 A second function will update all the @PDF links in your journal entries (both in the world and in unlocked) compendiums to the @UUID syntax.
