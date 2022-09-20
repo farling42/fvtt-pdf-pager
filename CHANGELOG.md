@@ -1,3 +1,8 @@
+## 0.6.0
+
+- Support encoding existing @PDF links in the same way as PDFoundry (if the link doesn't exist, then just show the label without any link box).
+- Support an additional part to the @PDF name so that @PDF[journalname#pagename|page=xx] will look in the journal called 'journalname' for a page called 'pagename'
+
 ## 0.5.0
 
 - migratePDFlinks needs to handle @PDF[bookname|page=xxx] not @PDF[docid|page=xxx]

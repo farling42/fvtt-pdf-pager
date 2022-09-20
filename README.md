@@ -9,9 +9,11 @@
 
 This module provides the following:
 
-- Automatically load a PDF into a page as soon as the page is displayed.
+- Configuration option to automatically load a PDF into a page as soon as the page is displayed.
 - Include "#page=xxx" as a suffix on the document link to open a PDF document at the requested page.
 - Include a page offset in the PDF document definition, so that page=xxx can reference the book's page numbering (some PDFs have extra pages before page 1).
+- Supports the existing @PDF[name]{label}   but the page name must have the same name as the journal.
+- Provide additional syntax of @PDF[journalname#pagename|page=xx]{label} to allow PDFs to be displayed in a page whose name does not match the journal name.
 - Automatically migrates PDFoundry PDF information to new pages in journals.
 
 ## Example
@@ -20,6 +22,8 @@ Showing a link to an existing PDF page within a journal entry, and specifying th
 
 ```text
 @UUID[JournalEntry.T29aMDmLCPYybApI.JournalEntryPage.iYV6uMnFwdgZORxi#page=10]{label}
+@PDF[name|page=xxx]{label}            <note that the journal and page must both match the single 'name'>
+@PDF[journalname#pagename|page=xxx]{label}
 ```
 
 ## Installation
@@ -33,6 +37,8 @@ https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json
 Function are available which can be called directly from a macro script or from the console command-line to migrate your existing PDFoundry documents and links to the new format.
 
 ### migratePDFoundry()
+
+This function creates a page in each journal entry containing the information previously configured using PDFoundry for each PDF.
 
 It takes a single optional parameter which is an object that can contain the single boolean field 'onlyIfEmpty', which if set will only migrate PDFoundry
 journal entries which currently have no pages.
@@ -49,7 +55,7 @@ migratePDFoundry({onlyIfEmpty:true})
 
 ### migratePDFlinks
 
-A second function will update all the @PDF links in your journal entries (both in the world and in unlocked) compendiums to the new syntax.
+A second function will update all the @PDF links in your journal entries (both in the world and in unlocked) compendiums to the @UUID syntax.
 
 The new link will be to a Journal Entry called "bookname" (see OLD syntax below), and one of the PDF pages inside that journal entry: either a PDF page called "bookname" otherwise the first PDF page in that journal entry.
 
