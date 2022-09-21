@@ -83,9 +83,9 @@ let pdfpagenumber=undefined;
         const elem_offset  = `<div class="form-group"><label>${label_offset}</label><input class="pageOffset" type="number" name="flags.${MODULE_NAME}.${FLAG_OFFSET}"${value_offset}/></div>`;
 
         const page_code   = pagedoc.getFlag(MODULE_NAME,FLAG_CODE);
-        const value_code  = page_offset ? ` value="${page_code}"` : "";
+        const value_code  = page_code ? ` value="${page_code}"` : "";
         const label_code  = game.i18n.localize(`${MODULE_NAME}.Code.Label`);
-        const elem_code   = `<div class="form-group"><label>${label_code}</label><input class="code" type="text" name="flags.${MODULE_NAME}.${FLAG_CODE}"${value_code}/></div>`;
+        const elem_code   = `<div class="form-group"><label>${label_code}</label><input class="pageCode" type="text" name="flags.${MODULE_NAME}.${FLAG_CODE}"${value_code}/></div>`;
 
         const elem_hook = html.find('div.picker');
         $(elem_offset + elem_code).insertAfter(elem_hook);

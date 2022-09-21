@@ -1,3 +1,7 @@
+## 0.7.1
+
+- Fix bug with PDF code not being displayed if no page offset was present for the PDF.
+
 ## 0.7.0
 
 - Add global function to support opening pages using shortcut code defined for a PDF, and add shortcode field to PDF editor page.
