@@ -67,26 +67,12 @@ let pdfpageid=undefined;
 let pdfpagenumber=undefined;
 
 /**
- * my_journal_render reads the page=xxx anchor from the original link, and stores it temporarily for use by renderJournalPDFPageSheet later
- */
-async function my_render(wrapper,force,options) {
-    if (options.anchor?.startsWith('page=')) {
-        pdfpageid     = options.pageId;
-        pdfpagenumber = +options.anchor.slice(5);
-        delete options.anchor;   // we don't want the wrapper trying to set the anchor
-    }
-    let result = await wrapper(force,options);
-    pdfpagenumber = undefined;  // in case renderJournalPDFPageSheet didn't get called
-    return result;
-}
-
-/**
- * Adds the "Page Offset" field to the PDF page editor window.
+ * Adds the "Page Offset" field to the JournalPDFPageSheet EDITOR window.
  * @param {*} wrapper from libWrapper
  * @param  {...any} args an array of 1 element, the first element being the same as the data passed to the render function
  * @returns 
  */
-async function my_render_inner(wrapper, ...args) {
+ async function my_render_inner(wrapper, ...args) {
     let html = wrapper(...args);   // jQuery
     if (this.isEditable) {
         html = await html;  // resolve the Promise before using the value
@@ -108,9 +94,24 @@ async function my_render_inner(wrapper, ...args) {
 }
 
 /**
+ * my_journal_render reads the page=xxx anchor from the original link, and stores it temporarily for use by renderJournalPDFPageSheet later
+ * Wraps JournalSheet#_render
+ */
+async function my_render(wrapper,force,options) {
+    if (options.anchor?.startsWith('page=')) {
+        pdfpageid     = options.pageId;
+        pdfpagenumber = +options.anchor.slice(5);
+        delete options.anchor;   // we don't want the wrapper trying to set the anchor
+    }
+    let result = await wrapper(force,options);
+    pdfpagenumber = undefined;  // in case renderJournalPDFPageSheet didn't get called
+    return result;
+}
+
+/**
  * Hook to replace "Load PDF" button with actual PDF document
- * @param {JournalPDFPageSheet} [sheet] Sheet for renderJournalSheet and renderActorSheet hooks
- * @param {jQuery}     [html]  HTML  for renderJournalSheet and renderActorSheet hooks
+ * @param {JournalPDFPageSheet} [sheet] Sheet for renderJournalSheet hooks
+ * @param {jQuery}     [html]  HTML  for renderJournalSheet hooks
  * @param {Object}     [data]  Data (data.document = JournalEntryPage)
  */
 Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
@@ -168,23 +169,18 @@ function openPdfByCode(pdfcode, options={}) {
     }
 
     // Now request that the corresponding page be loaded.
-    if (uuid) {
-        let pagedoc = fromUuidSync(uuid);
-        if (!pagedoc) {
-            console.error(`openPdfByCode failed to retrieve document uuid '${uuid}`)
-            return;
-        }
-        let pageoptions = {
-            pageId: pagedoc.id,
-        }
-        if (options?.page) {
-            pageoptions.anchor = `page=${options.page}`;
-            console.log(`open at page ${options.page}`)
-        }
-
-        // Render journal entry showing the appropriate page (JOurnalEntryPage#_onClickDocumentLink)
-        pagedoc.parent.sheet.render(true, pageoptions);
-    } else {
-        console.error(`openPdfByCode: unable to find PDF with code 'pdfcode'`)
+    if (!uuid) {
+        console.error(`openPdfByCode: unable to find PDF with code '${pdfcode}'`)
+        return;
     }
+    let pagedoc = fromUuidSync(uuid);
+    if (!pagedoc) {
+        console.error(`openPdfByCode failed to retrieve document uuid '${uuid}`)
+        return;
+    }
+    let pageoptions = { pageId: pagedoc.id };
+    if (options?.page) pageoptions.anchor = `page=${options.page}`;
+
+    // Render journal entry showing the appropriate page (JOurnalEntryPage#_onClickDocumentLink)
+    pagedoc.parent.sheet.render(true, pageoptions);
 }
