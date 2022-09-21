@@ -1,3 +1,12 @@
+## 0.7.0
+
+- Add global function to support opening pages using shortcut code defined for a PDF, and add shortcode field to PDF editor page.
+
+```js
+openPdfByCode("PHB");
+openPdfByCode("DMG", {page:10});
+```
+
 ## 0.6.0
 
 - Support encoding existing @PDF links in the same way as PDFoundry (if the link doesn't exist, then just show the label without any link box).
