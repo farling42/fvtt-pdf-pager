@@ -23,7 +23,8 @@ SOFTWARE.
 
 const MODULE_NAME="pdf-pager";
 const CONFIG_ALWAYS_LOAD_PDF="alwaysLoadPdf";
-const FLAG_PAGE_OFFSET="pageOffset";
+const FLAG_OFFSET="pageOffset";
+const FLAG_CODE="code";
 
 /**
  * @UUID{JournalEntry.T29aMDmLCPYybApI.JournalEntryPage.iYV6uMnFwdgZORxi#page=10}
@@ -51,6 +52,7 @@ Hooks.once('init', () => {
 		default: true,
 		config: true
 	});
+    globalThis.openPdfByCode = openPdfByCode;
 });
 
 Hooks.once('ready', async () => {
@@ -88,12 +90,19 @@ async function my_render_inner(wrapper, ...args) {
     let html = wrapper(...args);   // jQuery
     if (this.isEditable) {
         html = await html;  // resolve the Promise before using the value
-        const page_offset = args[0].document.getFlag(MODULE_NAME,FLAG_PAGE_OFFSET);
-        const value = page_offset ? ` value="${page_offset}"` : "";
-        const elem = html.find('div.picker');
-        const label = game.i18n.localize(`${MODULE_NAME}.PageOffset.Label`);
-        const newelem = `<div class="form-group"><label>${label}</label><input class="pageOffset" type="number" name="flags.${MODULE_NAME}.${FLAG_PAGE_OFFSET}"${value}"/></div>`;
-        $(newelem).insertAfter(elem);
+        const pagedoc = args[0].document;
+        const page_offset  = pagedoc.getFlag(MODULE_NAME,FLAG_OFFSET);
+        const value_offset = page_offset ? ` value="${page_offset}"` : "";
+        const label_offset = game.i18n.localize(`${MODULE_NAME}.PageOffset.Label`);
+        const elem_offset  = `<div class="form-group"><label>${label_offset}</label><input class="pageOffset" type="number" name="flags.${MODULE_NAME}.${FLAG_OFFSET}"${value_offset}/></div>`;
+
+        const page_code   = pagedoc.getFlag(MODULE_NAME,FLAG_CODE);
+        const value_code  = page_offset ? ` value="${page_code}"` : "";
+        const label_code  = game.i18n.localize(`${MODULE_NAME}.Code.Label`);
+        const elem_code   = `<div class="form-group"><label>${label_code}</label><input class="code" type="text" name="flags.${MODULE_NAME}.${FLAG_CODE}"${value_code}/></div>`;
+
+        const elem_hook = html.find('div.picker');
+        $(elem_offset + elem_code).insertAfter(elem_hook);
     }
     return html;
 }
@@ -116,10 +125,66 @@ Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
     if (pdfpagenumber || game.settings.get(MODULE_NAME, CONFIG_ALWAYS_LOAD_PDF)) {
         $("div.load-pdf").replaceWith ( (index,a) => {
             // Immediately do JournalPagePDFSheet#_onLoadPDF
-            const page_offset = data.document.getFlag(MODULE_NAME,FLAG_PAGE_OFFSET);
+            const page_offset = data.document.getFlag(MODULE_NAME,FLAG_OFFSET);
             const page_marker = pdfpagenumber ? `#page=${pdfpagenumber+(page_offset||0)}` : '';
             pdfpagenumber = undefined;  // only use the buffered page number once
             return `<iframe src="scripts/pdfjs/web/viewer.html?${sheet._getViewerParams()}${page_marker}"/>`;
 	    });
     }
 });
+
+
+let code_cache = new Map();
+
+/**
+ * 
+ * @param {*} pdfcode The short code of the PDF page to be displayed
+ * @param {*} options Can include {page: <number>}
+ */
+function openPdfByCode(pdfcode, options={}) {
+    let uuid = code_cache.get(pdfcode);
+    // Check cache value is still valid
+    if (uuid) {
+        let code = fromUuidSync(uuid)?.getFlag(MODULE_NAME, FLAG_CODE);
+        if (!code) {
+            // CODE no longer matches, so remove from cache
+            code_cache.delete(pdfcode);
+            uuid = null;
+        }
+    }
+    // Not in cache, so find an entry and add it to the cache
+    if (!uuid) {
+        for (const journal of game.journal) {
+            for (const page of journal.pages) {
+                if (page.type === 'pdf' &&
+                    page.getFlag(MODULE_NAME, FLAG_CODE) == pdfcode) {
+                    uuid = page.uuid;
+                    code_cache.set(pdfcode, uuid);
+                    break;
+                }
+            }
+            if (uuid) break;
+        }
+    }
+
+    // Now request that the corresponding page be loaded.
+    if (uuid) {
+        let pagedoc = fromUuidSync(uuid);
+        if (!pagedoc) {
+            console.error(`openPdfByCode failed to retrieve document uuid '${uuid}`)
+            return;
+        }
+        let pageoptions = {
+            pageId: pagedoc.id,
+        }
+        if (options?.page) {
+            pageoptions.anchor = `page=${options.page}`;
+            console.log(`open at page ${options.page}`)
+        }
+
+        // Render journal entry showing the appropriate page (JOurnalEntryPage#_onClickDocumentLink)
+        pagedoc.parent.sheet.render(true, pageoptions);
+    } else {
+        console.error(`openPdfByCode: unable to find PDF with code 'pdfcode'`)
+    }
+}

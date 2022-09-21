@@ -22,7 +22,8 @@ SOFTWARE.
 */
 
 const MODULE_NAME="pdf-pager";
-const FLAG_PAGE_OFFSET="pageOffset";
+const FLAG_OFFSET="pageOffset";
+const FLAG_CODE="code";
 
 Hooks.once('init', () => {
     globalThis.migratePDFoundry = migratePDFoundry;
@@ -42,7 +43,10 @@ Hooks.once('init', () => {
         await entry.createEmbeddedDocuments("JournalEntryPage", [{
             name:  pdfdata.name || entry.name,
             type:  "pdf",
-            flags: { [MODULE_NAME]: { [FLAG_PAGE_OFFSET]: pdfdata.offset }},
+            flags: { [MODULE_NAME]: { 
+                [FLAG_OFFSET]: pdfdata.offset,
+                [FLAG_CODE]:   pdfdata.code
+            }},
             src:   pdfdata.url
          }]);
          console.log(`Migrated '${pdfdata.name||entry.name}' to new PDF format`);

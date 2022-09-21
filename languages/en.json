@@ -1,3 +1,4 @@
 {
-    "pdf-pager.PageOffset.Label": "Page Offset"
+    "pdf-pager.PageOffset.Label": "Page Offset",
+    "pdf-pager.Code.Label": "PDF Code"
 }
