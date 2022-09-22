@@ -40,7 +40,7 @@ A new function is available for modules to use which will open a PDF using a sho
 
 ```js
 ui.pdfpager.openPDFByCode("PHB")
-ui.pdfpager.openPDFByCode("DMG", {page:30})
+ui.pdfpager.openPDFByCode("DMG", { page : 30 } )
 ```
 
 ## Migrating from PDFoundry
@@ -60,7 +60,7 @@ ui.pdfpager.migratePDFoundry()
 OR
 
 ```js
-ui.pdfpager.migratePDFoundry({onlyIfEmpty:true})
+ui.pdfpager.migratePDFoundry( { onlyIfEmpty:true } )
 ```
 
 The second version is triggered automatically on starting the game (or enabling the module).
