@@ -1,3 +1,8 @@
+## 0.8.1
+
+- Rename openPdfByCode to openPDFByCode (to maintain compatibility with PDFoundry)
+- Fix syntax error in translation file.
+
 ## 0.8.0
 
 - Move publicly accessible functions to be under ui.pdfpager.\<function>.

@@ -37,8 +37,8 @@ https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json
 A new function is available for modules to use which will open a PDF using a short-code defined for that specific PDF (e.g. "DMG" or "PHB"), optionally specifying a specific page number to open, such as:
 
 ```js
-ui.pdfpager.openPdfByCode("PHB")
-ui.pdfpager.openPdfByCode("DMG", {page:30})
+ui.pdfpager.openPDFByCode("PHB")
+ui.pdfpager.openPDFByCode("DMG", {page:30})
 ```
 
 ## Migrating from PDFoundry

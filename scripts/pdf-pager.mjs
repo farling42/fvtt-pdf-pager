@@ -53,7 +53,7 @@ Hooks.once('init', () => {
 		config: true
 	});
     if (!ui.pdfpager) ui.pdfpager = {};
-    ui.pdfpager.openPdfByCode = openPdfByCode;
+    ui.pdfpager.openPDFByCode = openPDFByCode;
 });
 
 Hooks.once('ready', async () => {
@@ -143,7 +143,7 @@ let code_cache = new Map();
  * @param {*} pdfcode The short code of the PDF page to be displayed
  * @param {*} options Can include {page: <number>}
  */
-function openPdfByCode(pdfcode, options={}) {
+function openPDFByCode(pdfcode, options={}) {
     let uuid = code_cache.get(pdfcode);
     // Check cache value is still valid
     if (uuid) {

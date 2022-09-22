@@ -2,5 +2,5 @@
     "pdf-pager.PageOffset.Label": "Page Offset",
     "pdf-pager.Code.Label": "PDF Code",
     "pdf-pager.Error.NoPDFWithCode": "Unable to find PDF with specified code.",
-    "pdf-pager.Error.FailedLoadPage": "Failed to load page for PDF with specified code.",
+    "pdf-pager.Error.FailedLoadPage": "Failed to load page for PDF with specified code."
 }
