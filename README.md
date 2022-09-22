@@ -55,11 +55,6 @@ It takes a single optional parameter which is an object that can contain the sin
 
 ```js
 ui.pdfpager.migratePDFoundry()
-```
-
-OR
-
-```js
 ui.pdfpager.migratePDFoundry( { onlyIfEmpty:true } )
 ```
 
