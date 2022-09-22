@@ -52,14 +52,15 @@ Hooks.once('init', () => {
 		default: true,
 		config: true
 	});
-    globalThis.openPdfByCode = openPdfByCode;
+    if (!ui.pdfpager) ui.pdfpager = {};
+    ui.pdfpager.openPdfByCode = openPdfByCode;
 });
 
 Hooks.once('ready', async () => {
     // Need to capture the PDF page number
     libWrapper.register(MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner', my_render_inner, libWrapper.WRAPPER);
     libWrapper.register(MODULE_NAME, 'JournalSheet.prototype._render', my_render, libWrapper.WRAPPER);
-    await migratePDFoundry({onlyIfEmpty:true});
+    await ui.pdfpager.migratePDFoundry({onlyIfEmpty:true});
 });
 
 // Ugly hack to get the PAGE number from the JournalSheet#render down to the JournalPDFPageSheet#render
@@ -171,11 +172,13 @@ function openPdfByCode(pdfcode, options={}) {
     // Now request that the corresponding page be loaded.
     if (!uuid) {
         console.error(`openPdfByCode: unable to find PDF with code '${pdfcode}'`)
+        ui.notifications.error(game.i18n.localize(`${MODULE_NAME}.Error.NoPDFWithCode`))
         return;
     }
     let pagedoc = fromUuidSync(uuid);
     if (!pagedoc) {
         console.error(`openPdfByCode failed to retrieve document uuid '${uuid}`)
+        ui.notifications.error(game.i18n.localize(`${MODULE_NAME}.Error.FailedLoadPage`))
         return;
     }
     let pageoptions = { pageId: pagedoc.id };

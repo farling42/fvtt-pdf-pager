@@ -26,8 +26,9 @@ const FLAG_OFFSET="pageOffset";
 const FLAG_CODE="code";
 
 Hooks.once('init', () => {
-    globalThis.migratePDFoundry = migratePDFoundry;
-    globalThis.migratePDFlinks  = migratePDFlinks;
+    if (!ui.pdfpager) ui.pdfpager = {};
+    ui.pdfpager.migratePDFoundry = migratePDFoundry;
+    ui.pdfpager.replacePDFlinks  = replacePDFlinks;
 });
 
 /**
@@ -70,7 +71,7 @@ Hooks.once('init', () => {
  * Convert all occurrences of @PDF[source name]{label} to @UUID[type.id]{label}
  */
 
-async function migratePDFlinks(options={}) {
+async function replacePDFlinks(options={}) {
 
     const pattern = /@PDF\[([^|]+)\|page=(\d*)]{([^}]+)}/g;
 

@@ -1,3 +1,8 @@
+## 0.8.0
+
+- Move publicly accessible functions to be under ui.pdfpager.\<function>.
+- Add UI notifications if openPdfByCode fails to find the relevant document.
+
 ## 0.7.1
 
 - Fix bug with PDF code not being displayed if no page offset was present for the PDF.

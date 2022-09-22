@@ -34,12 +34,11 @@ https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json
 
 ## Utility Function
 
-A new function is available for modules to use which will open a PDF using a short-code defined for that specific PDF (e.g. "DMG" or "PHB"), optionally specifying
-a specific page number to open, such as:
+A new function is available for modules to use which will open a PDF using a short-code defined for that specific PDF (e.g. "DMG" or "PHB"), optionally specifying a specific page number to open, such as:
 
 ```js
-openPdfByCode("PHB")
-openPdfByCode("DMG", {page:30})
+ui.pdfpager.openPdfByCode("PHB")
+ui.pdfpager.openPdfByCode("DMG", {page:30})
 ```
 
 ## Migrating from PDFoundry
@@ -50,24 +49,23 @@ Function are available which can be called directly from a macro script or from 
 
 This function creates a page in each journal entry containing the information previously configured using PDFoundry for each PDF.
 
-It takes a single optional parameter which is an object that can contain the single boolean field 'onlyIfEmpty', which if set will only migrate PDFoundry
-journal entries which currently have no pages.
+It takes a single optional parameter which is an object that can contain the single boolean field 'onlyIfEmpty', which if set will only migrate PDFoundry journal entries which currently have no pages.
 
 ```js
-migratePDFoundry()
+ui.pdfpager.migratePDFoundry()
 ```
 
 OR
 
 ```js
-migratePDFoundry({onlyIfEmpty:true})
+ui.pdfpager.migratePDFoundry({onlyIfEmpty:true})
 ```
 
 The second version is triggered automatically on starting the game (or enabling the module).
 
-### migratePDFlinks
+### replacePDFlinks
 
-A second function will update all the @PDF links in your journal entries (both in the world and in unlocked) compendiums to the @UUID syntax.
+If you no longer want to have `@PDF[name]` links in your documents, a function is provided to convert them to the Foundry V10 standard format of `@UUID[longuuid]` format.
 
 The new link will be to a Journal Entry called "bookname" (see OLD syntax below), and one of the PDF pages inside that journal entry: either a PDF page called "bookname" otherwise the first PDF page in that journal entry.
 
@@ -76,5 +74,5 @@ OLD: @PDF[bookname|page=xxx]{label}
 NEW: @UUID[full-uid-to-pdf-page#page=xxx]{label}
 
 ```js
-migratePDFlinks()
+ui.pdfpager.replacePDFlinks()
 ```
