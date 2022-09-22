@@ -14,7 +14,7 @@ This module provides the following:
 - Include a page offset in the PDF document definition, so that `page=xxx` can reference the book's page numbering (some PDFs have extra pages before page 1).
 - Supports the existing `@PDF[name]{label}`   but the page name must have the same name as the journal.
 - Provide additional syntax of `@PDF[journalname#pagename|page=xx]{label}` to allow PDFs to be displayed in a page whose name does not match the journal name.
-- Automatically migrates PDFoundry PDF information to new pages in journals.
+- Automatically migrates PDFoundry PDF information to new PDF pages in journals (if the journal does not have any other pages already in it).
 
 ## Example
 
