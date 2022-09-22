@@ -26,6 +26,8 @@ Showing a link to an existing PDF page within a journal entry, and specifying th
 @PDF[journalname#pagename|page=xxx]{label}
 ```
 
+Note the use of "#page=10" with a `@@UID, and the use of "|page=10" with a `@PDF` link.
+
 ## Installation
 
 The module is available from the Foundry Module Management window, just search for "PDF Pager", or it can be manually added with the following link:
