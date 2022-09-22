@@ -10,10 +10,10 @@
 This module provides the following:
 
 - Configuration option to automatically load a PDF into a page as soon as the page is displayed.
-- Include "#page=xxx" as a suffix on the document link to open a PDF document at the requested page.
-- Include a page offset in the PDF document definition, so that page=xxx can reference the book's page numbering (some PDFs have extra pages before page 1).
-- Supports the existing @PDF[name]{label}   but the page name must have the same name as the journal.
-- Provide additional syntax of @PDF[journalname#pagename|page=xx]{label} to allow PDFs to be displayed in a page whose name does not match the journal name.
+- Include `#page=xxx` as a suffix on the document link to open a PDF document at the requested page.
+- Include a page offset in the PDF document definition, so that `page=xxx` can reference the book's page numbering (some PDFs have extra pages before page 1).
+- Supports the existing `@PDF[name]{label}`   but the page name must have the same name as the journal.
+- Provide additional syntax of `@PDF[journalname#pagename|page=xx]{label}` to allow PDFs to be displayed in a page whose name does not match the journal name.
 - Automatically migrates PDFoundry PDF information to new pages in journals.
 
 ## Example
@@ -71,9 +71,9 @@ If you no longer want to have `@PDF[name]` links in your documents, a function i
 
 The new link will be to a Journal Entry called "bookname" (see OLD syntax below), and one of the PDF pages inside that journal entry: either a PDF page called "bookname" otherwise the first PDF page in that journal entry.
 
-OLD: @PDF[bookname|page=xxx]{label}
+OLD: `@PDF[bookname|page=xxx]{label}`
 
-NEW: @UUID[full-uid-to-pdf-page#page=xxx]{label}
+NEW: `@UUID[full-uid-to-pdf-page#page=xxx]{label}`
 
 ```js
 ui.pdfpager.replacePDFlinks()
