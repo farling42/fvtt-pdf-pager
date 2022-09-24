@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { PDFCONFIG } from './pdf-config.mjs'
+
 /**
  * Handle @PDF links inline:
  * 
@@ -44,6 +46,7 @@ SOFTWARE.
  Hooks.once('ready', () => {
     // Fields on Actors and Items call enrichHTML with async=false
 	libWrapper.register('pdf-pager', 'TextEditor.enrichHTML', _myenrichHTML, 'WRAPPER');
+	libWrapper.register('pdf-pager', 'JournalEntryPage.prototype._createDocumentLink', _mycreateDocumentLink, 'MIXED');
 
     // The TextEditor.encrichers only works when enrichHTML is called with async=true
     CONFIG.TextEditor.enrichers.push({pattern, enricher});
@@ -93,11 +96,27 @@ function _myenrichHTML(wrapped, content, options) {
 }
 
 /**
- * Registered with CONFIG.TextEditor.enrichers to cope with async=true (not strictly necessary at this time)
+ * Registered with PDFCONFIG.TextEditor.enrichers to cope with async=true (not strictly necessary at this time)
  * @param {*} match 
  * @param {*} options 
  * @returns 
  */
 async function enricher(match, options) {
     return getAnchor(match) || match[4];
+}
+
+/**
+ * Wraps JournalEntryPage.prototype._createDocumentLink in order to create @PDF links
+ * when dropping a PDF journal page into another object.
+ * 
+ * @param {function} wrapped the original JournalEntryPage.prototype._createDocumentLink
+ * @param {Object}} eventData first parameter for JournalEntryPage.prototype._createDocumentLink
+ * @param {Object} args second parameter for JournalEntryPage.prototype._createDocumentLink
+ * @returns 
+ */
+function _mycreateDocumentLink(wrapped, eventData, args) {
+    if (this.type !== 'pdf' || !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.CREATE_PDF_LINK_ON_DROP)) 
+        return wrapped(eventData, args);
+    else
+        return `@PDF[${this.parent.name}#${this.name}|page=1]{${this.name}}`;
 }

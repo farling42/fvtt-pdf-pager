@@ -21,21 +21,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-const MODULE_NAME="pdf-pager";
-const FLAG_OFFSET="pageOffset";
-const FLAG_CODE="code";
-
-Hooks.once('init', () => {
-    if (!ui.pdfpager) ui.pdfpager = {};
-    ui.pdfpager.migratePDFoundry = migratePDFoundry;
-    ui.pdfpager.replacePDFlinks  = replacePDFlinks;
-});
+import { PDFCONFIG } from './pdf-config.mjs'
 
 /**
  * Convert existing journal entries from PDFoundry to PDF-Pager format
  */
 
- async function migratePDFoundry(options={}) {
+export async function migratePDFoundry(options={}) {
     async function migrateOne(entry, options) {
         if (options.onlyIfEmpty && entry.pages.size>0) return;  // Presumably we've already converted it
         let pdfdata = entry.flags?.pdfoundry?.PDFData;
@@ -44,9 +36,9 @@ Hooks.once('init', () => {
         await entry.createEmbeddedDocuments("JournalEntryPage", [{
             name:  pdfdata.name || entry.name,
             type:  "pdf",
-            flags: { [MODULE_NAME]: { 
-                [FLAG_OFFSET]: pdfdata.offset,
-                [FLAG_CODE]:   pdfdata.code
+            flags: { [PDFCONFIG.MODULE_NAME]: { 
+                [PDFCONFIG.FLAG_OFFSET]: pdfdata.offset,
+                [PDFCONFIG.FLAG_CODE]:   pdfdata.code
             }},
             src:   pdfdata.url
          }]);
@@ -71,7 +63,7 @@ Hooks.once('init', () => {
  * Convert all occurrences of @PDF[source name]{label} to @UUID[type.id]{label}
  */
 
-async function replacePDFlinks(options={}) {
+export async function replacePDFlinks(options={}) {
 
     const pattern = /@PDF\[([^|]+)\|page=(\d*)]{([^}]+)}/g;
 

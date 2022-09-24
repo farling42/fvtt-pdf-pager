@@ -1,3 +1,7 @@
+## 0.9.0
+
+- Provide a configuration option to automatically create a @PDF link when dropping a PDF page into another document being edited.
+
 ## 0.8.1
 
 - Rename openPdfByCode to openPDFByCode (to maintain compatibility with PDFoundry)

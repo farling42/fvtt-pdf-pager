@@ -31,6 +31,7 @@
     ]
   },
   "esmodules": [
+    "scripts/pdf-config.mjs",
     "scripts/pdf-linker.mjs",
     "scripts/pdf-pager.mjs",
     "scripts/pdf-migrate.mjs"

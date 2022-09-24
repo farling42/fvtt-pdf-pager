@@ -2,5 +2,9 @@
     "pdf-pager.PageOffset.Label": "Page Offset",
     "pdf-pager.Code.Label": "PDF Code",
     "pdf-pager.Error.NoPDFWithCode": "Unable to find PDF with specified code.",
-    "pdf-pager.Error.FailedLoadPage": "Failed to load page for PDF with specified code."
+    "pdf-pager.Error.FailedLoadPage": "Failed to load page for PDF with specified code.",
+    "pdf-pager.alwaysLoadPdf.Name" : "Immediately Display PDF",
+    "pdf-pager.alwaysLoadPdf.Hint" : "When checked, then PDFs will be immediately displayed when their page is selected, removing the need to press the 'Load PDF' button",
+    "pdf-pager.dropPdfLink.Name" : "Create @PDF link on drop",
+    "pdf-pager.dropPdfLink.Hint" : "When a journal PDF page is dropped into another document, create a @PDF[journalname#pagename|page=1]{pagename} link instead of a @UUID link"
 }
