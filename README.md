@@ -101,6 +101,26 @@ An example of using registerActorMapping to provide a mapping from PDF-field nam
   })
 ```
 
+If there is a complex mapping for a field in the PDF, then the entry in the mapping can be defined as an object with the following functions:
+
+- A `getValue(actor)` function that returns a string which will be the value put into the PDF field.
+- An optional `setValue(actor,value)` function which is called when the user changes a value in the field. `value` contains the value that the user entered, and the setValue function is responsible for calling `actor.update()` with the relevant updates.
+
+A simple example to convert a Boolean stored in the Actor record into a string ("Y") displayed in the PDF field.
+
+```js
+export let namemap = {
+    "Inspiration": { // "system.attributes.inspiration"
+        getValue(actor) {
+            return actor.system.attributes.inspiration ? "Y" : "";
+        },
+        setValue(actor, value) {
+            actor.update( { ["system.attributes.inspiration"] : (value?.length > 0) })
+        }
+    },
+}
+```
+
 Feel free to forward me any system-specific .mjs files which you've created for inclusion in the systems folder.
 
 ### Translations

@@ -45,8 +45,14 @@ function setValues(container, document) {
     console.debug(`${PDFCONFIG.MODULE_NAME}: setting values on '${container}' for '${document.name}'`)
     let inputs = container.querySelectorAll('input,textarea');
     for (let elem of inputs) {
-        let docfield = pdf2actormap[elem.name.trim()];
-        let curvalue = docfield ? foundry.utils.getProperty(document, docfield) : undefined;
+        let curvalue;
+        const docfield = pdf2actormap[elem.name.trim()];
+        if (docfield instanceof Object) {
+            curvalue = docfield.getValue(document);
+            if (!docfield.setValue) elem.readOnly = true;
+        } else if (docfield) {
+            curvalue = foundry.utils.getProperty(document, docfield);
+        }
         if (curvalue!==undefined) {
             if (elem.type === 'checkbox') {
                 elem.checked = curvalue;
@@ -66,11 +72,14 @@ function setValues(container, document) {
  */
 function updateDocument(document, inputid, inputname, value) {
     let docfield = pdf2actormap[inputname.trim()] || pdf2actormap[inputid.trim()];
-    if (docfield) {
+    if (!docfield)
+        console.debug(`${PDFCONFIG.MODULE_NAME}: unmapped PDF field:\nID '${inputid}', NAME '${inputname}' = '${value}'`)
+    else if (typeof docfield === 'string') {
         console.debug(`${PDFCONFIG.MODULE_NAME}: '${document.name}':\n'${docfield}' = '${value}'`);
         document.update({ [docfield]: value });
-    } else {
-        console.debug(`${PDFCONFIG.MODULE_NAME}: unmapped input id '${inputid}':\n'${inputname}' = '${value}'`)
+    } else if (docfield.setValue) {
+        console.debug(`${PDFCONFIG.MODULE_NAME}: '${document.name}':\n'calculated field = '${value}'`);
+        docfield.setValue(document, value);
     }
 }
 

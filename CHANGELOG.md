@@ -1,3 +1,8 @@
+## 0.12.0
+
+- Allow calculated fields to be configured for the spreadsheet. In the definition of the field define an object as the value for the object-field. The object should get a `getValue(actor)` function and an optional `setValue(actor,value)` function. If the setValue function is not present then the field will be made read-only.
+- Add additional fields to the dnd5e.mjs as a testing environment (including examples of calculated fields).
+
 ## 0.11.0
 
 - When dragging a PDF to create a `@PDF` link, if the PDF is currently being displayed then the page number on display will be put into the link (otherwise page=1 will be put into the link).
