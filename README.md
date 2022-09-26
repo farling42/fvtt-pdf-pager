@@ -15,7 +15,7 @@ This module provides the following:
 - Supports the existing `@PDF[name]{label}`   but the page name must have the same name as the journal.
 - Provide additional syntax of `@PDF[journalname#pagename|page=xx]{label}` to allow PDFs to be displayed in a page whose name does not match the journal name.
 - Automatically migrates PDFoundry PDF information to new PDF pages in journals (if the journal does not have any other pages already in it).
-- An option to automatically create a `@PDF[journalname#pagename|page=1]{pagename}` link when dropping a journal PDF page into another document.
+- An option to automatically create a `@PDF[journalname#pagename|page=xx]{pagename}` link when dropping a journal PDF page into another document.
 
 ## Example
 

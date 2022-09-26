@@ -118,5 +118,19 @@ function _mycreateDocumentLink(wrapped, eventData, args) {
     if (this.type !== 'pdf' || !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.CREATE_PDF_LINK_ON_DROP)) 
         return wrapped(eventData, args);
     else
-        return `@PDF[${this.parent.name}#${this.name}|page=1]{${this.name}}`;
+    {
+        // this = JournalEntryPage
+        let pagenum=1;
+        let sheet = this.parent?.sheet;  // JournalEntry
+        if (sheet && sheet._pages[sheet.pageIndex]._id == this.id)
+        {
+            let iframe = sheet.element?.find('iframe');
+            if (iframe?.length>0) {
+                let pdfviewer = iframe[0].contentWindow.PDFViewerApplication;
+                const page_offset = this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) || 0;
+                pagenum = pdfviewer.page - page_offset;
+            }
+        }
+        return `@PDF[${this.parent.name}#${this.name}|page=${pagenum}]{${this.name}}`;
+    }
 }

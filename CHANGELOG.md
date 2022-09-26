@@ -1,3 +1,7 @@
+## 0.11.0
+
+- When dragging a PDF to create a `@PDF` link, if the PDF is currently being displayed then the page number on display will be put into the link (otherwise page=1 will be put into the link).
+
 ## 0.10.0
 
 - Provide support for Form-Fillable PDFs as Journal PDF Pages which are linked to an Actor through the PDF Page's Code field.
