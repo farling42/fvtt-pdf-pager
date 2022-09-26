@@ -105,7 +105,7 @@ export let namemap = {
             actor.update( { ["system.attributes.inspiration"] : (value?.length > 0) })
         }
     },     
-    "PlayerName": { // readonly
+    "PlayerName": { // readonly, so no setValue function
         getValue(actor) {
             for (const [key, value] of Object.entries(actor.ownership)) {
                 if (value === CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER &&

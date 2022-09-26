@@ -2,6 +2,7 @@
 
 - Allow calculated fields to be configured for the spreadsheet. In the definition of the field define an object as the value for the object-field. The object should get a `getValue(actor)` function and an optional `setValue(actor,value)` function. If the setValue function is not present then the field will be made read-only.
 - Add additional fields to the dnd5e.mjs as a testing environment (including examples of calculated fields).
+- Provide a module option to store all the field information from the PDF in hidden fields on the Actor instead of updating normal Actor fields.
 
 ## 0.11.0
 

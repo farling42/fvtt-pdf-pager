@@ -30,8 +30,10 @@ export let PDFCONFIG = {
     ALWAYS_LOAD_PDF         : "alwaysLoadPdf",
     CREATE_PDF_LINK_ON_DROP : "dropPdfLink",
 	FORM_FILL_PDF           : "formFillPdf",
+	STORE_FIELDS_ON_ACTOR   : "storeOnActor",
     FLAG_OFFSET             : "pageOffset",
-    FLAG_CODE               : "code"
+    FLAG_CODE               : "code",
+	FLAG_FIELDTEXT          : "fieldText"
 };
 
 Hooks.once('init', () => {
@@ -64,6 +66,16 @@ Hooks.once('init', () => {
 		scope: "world",
 		type:  Boolean,
 		default: true,
+		config: true
+	});
+
+    param = PDFCONFIG.STORE_FIELDS_ON_ACTOR;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  Boolean,
+		default: false,
 		config: true
 	});
 

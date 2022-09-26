@@ -42,6 +42,9 @@ let actor2containermap = new Map();
  * @param {*} document 
  */
 function setValues(container, document) {
+    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.STORE_FIELDS_ON_ACTOR))
+        return setHiddenValues(container, document);
+
     console.debug(`${PDFCONFIG.MODULE_NAME}: setting values on '${container}' for '${document.name}'`)
     let inputs = container.querySelectorAll('input,textarea');
     for (let elem of inputs) {
@@ -71,6 +74,9 @@ function setValues(container, document) {
  * @param {*} value 
  */
 function updateDocument(document, inputid, inputname, value) {
+    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.STORE_FIELDS_ON_ACTOR))
+        return updateHiddenValues(document, inputid, inputname, value);
+
     let docfield = pdf2actormap[inputname.trim()] || pdf2actormap[inputid.trim()];
     if (!docfield)
         console.debug(`${PDFCONFIG.MODULE_NAME}: unmapped PDF field:\nID '${inputid}', NAME '${inputname}' = '${value}'`)
@@ -80,6 +86,30 @@ function updateDocument(document, inputid, inputname, value) {
     } else if (docfield.setValue) {
         console.debug(`${PDFCONFIG.MODULE_NAME}: '${document.name}':\n'calculated field = '${value}'`);
         docfield.setValue(document, value);
+    }
+}
+
+/*
+ * Functions when all the data is stored on hidden flags on the Actor, rather than in normal Actor fields.
+ */
+function updateHiddenValues(document, inputid, inputname, value) {
+    let values = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
+    if (!values || !(values instanceof Object)) values = {};
+    values[inputname] = value;
+    document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, values);
+}
+
+function setHiddenValues(container, document) {
+    console.debug(`${PDFCONFIG.MODULE_NAME}: setting values on '${container}' for '${document.name}'`)
+    let values = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
+    if (!values) values = {};
+
+    let inputs = container.querySelectorAll('input,textarea');
+    for (let elem of inputs) {
+        if (elem.type === 'checkbox')
+            elem.checked = values[elem.name] || false;
+        else
+            elem.value = values[elem.name] || "";
     }
 }
 
@@ -136,13 +166,15 @@ export async function initEditor(sheet, html, data) {
     const actor = game.actors.get(actorid);
     if (!actor) return;
 
-    // Load system JSON if not already done
-    if (!pdf2actormap) {
-        const module = await import(`../systems/${game.system.id}.mjs`)
-            .then(module => pdf2actormap = module.namemap)
-            .catch(error => console.warn(`${PDFCONFIG.MODULE_NAME}: Failed to find the PDF mapping file for 'systems/${game.system.id}.mjs'. Form-Filled PDFs will not work`))
+    // Load system JSON if not already done (but only if needing to update real Actor fields)
+    if (!game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.STORE_FIELDS_ON_ACTOR)) {
+        if (!pdf2actormap) {
+            const module = await import(`../systems/${game.system.id}.mjs`)
+                .then(module => pdf2actormap = module.namemap)
+                .catch(error => console.warn(`${PDFCONFIG.MODULE_NAME}: Failed to find the PDF mapping file for 'systems/${game.system.id}.mjs'. Form-Filled PDFs will not work`))
+        }
+        if (!pdf2actormap) return;
     }
-    if (!pdf2actormap) return;
 
     $('iframe').on('load', async (event) => {
         console.debug(`${PDFCONFIG.MODULE_NAME}: PDF frame loaded for '${sheet.object.name}': event '${event}'`);
@@ -168,7 +200,7 @@ export async function initEditor(sheet, html, data) {
                 setListeners(container, actor);
                 clearInterval(myInterval);
             }
-        }, 500);
+        }, 1000);
     })
 }
 
