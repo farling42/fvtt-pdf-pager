@@ -31,6 +31,7 @@
     ]
   },
   "esmodules": [
+    "scripts/pdf-editable.mjs",
     "scripts/pdf-config.mjs",
     "scripts/pdf-linker.mjs",
     "scripts/pdf-pager.mjs",

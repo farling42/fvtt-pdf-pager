@@ -1,3 +1,7 @@
+## 0.10.0
+
+- Provide support for Form-Fillable PDFs as Journal PDF Pages which are linked to an Actor through the PDF Page's Code field.
+
 ## 0.9.0
 
 - Provide a configuration option to automatically create a @PDF link when dropping a PDF page into another document being edited.

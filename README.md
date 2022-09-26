@@ -75,6 +75,34 @@ NEW: `@UUID[full-uid-to-pdf-page#page=xxx]{label}`
 ui.pdfpager.replacePDFlinks()
 ```
 
+### Form Fillable PDFs
+
+In order to use a Form Fillable PDF, either a mapping file must be provided in this module's systems folder, or the function `ui.pdfpager.registerActorMapping` is called with an object identifying the list of PDF-fields to Actor-fields.
+
+To use Form Fillable PDFs, a PDF page should be set up in a Journal, and the "PDF Code" in the PDF Editor should be set to the ID of the associated Actor. (The ID can be copied by clicking on the ID icon next to the name in the window title of the Actor sheet.)
+
+An example of using registerActorMapping to provide a mapping from PDF-field name to Actor field name.
+
+```js
+  ui.pdfpager.registerActorMapping({
+     "CharacterName": "name",
+     "STR": "system.abilities.str.value",
+     "DEX": "system.abilities.dex.value",
+     "CON": "system.abilities.con.value",
+     "INT": "system.abilities.int.value",
+     "WIS": "system.abilities.wis.value",
+     "CHA": "system.abilities.cha.value",
+     "STRmod": "system.abilities.str.mod",
+     "DEXmod": "system.abilities.dex.mod",
+     "CONmod": "system.abilities.con.mod",
+     "INTmod": "system.abilities.int.mod",
+     "WISmod": "system.abilities.wis.mod",
+     "CHamod": "system.abilities.cha.mod"
+  })
+```
+
+Feel free to forward me any system-specific .mjs files which you've created for inclusion in the systems folder.
+
 ### Translations
 
 Feel free to submit a pull request or an issue containing translations for the entries in the en.json file.

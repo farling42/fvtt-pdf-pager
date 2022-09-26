@@ -51,14 +51,14 @@ let pdfpagenumber=undefined;
 /**
  * Adds the "Page Offset" field to the JournalPDFPageSheet EDITOR window.
  * @param {*} wrapper from libWrapper
- * @param  {...any} args an array of 1 element, the first element being the same as the data passed to the render function
- * @returns 
+ * @param  {sheetData} args an array of 1 element, the first element being the same as the data passed to the render function
+ * @returns {jQuery} html
  */
- async function my_render_inner(wrapper, ...args) {
-    let html = wrapper(...args);   // jQuery
+ async function my_render_inner(wrapper, sheetData) {
+    let html = await wrapper(sheetData);   // jQuery
+    const pagedoc = sheetData.document;
     if (this.isEditable) {
-        html = await html;  // resolve the Promise before using the value
-        const pagedoc = args[0].document;
+        // Editting, so add our own elements to the window
         const page_offset  = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
         const value_offset = page_offset ? ` value="${page_offset}"` : "";
         const label_offset = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.PageOffset.Label`);
@@ -69,11 +69,43 @@ let pdfpagenumber=undefined;
         const label_code  = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Code.Label`);
         const elem_code   = `<div class="form-group"><label>${label_code}</label><input class="pageCode" type="text" name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_CODE}"${value_code}/></div>`;
 
-        const elem_hook = html.find('div.picker');
-        $(elem_offset + elem_code).insertAfter(elem_hook);
+        html.find('div.picker').after(elem_offset + elem_code);
+    } else {
+        // Not editting, so maybe replace button
+        if (this.object._id !== pdfpageid)
+            pdfpagenumber = undefined;
+
+        if (pdfpagenumber || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
+            // Immediately do JournalPagePDFSheet#_onLoadPDF
+            const page_offset = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
+            const page_marker = pdfpagenumber ? `#page=${pdfpagenumber+(page_offset||0)}` : '';
+            pdfpagenumber = undefined;  // only use the buffered page number once
+
+            // Replace the "div.load-pdf" with an iframe element.
+            // I can't find a way to do it properly, since html is simply a jQuery of top-level elements.
+            //
+            // Ideally it would simply involve html.closest('div.load-pdf').replaceWith(frame);
+
+            let idx=-1;
+            for (let i=0; i<html.length; i++)
+                if (html[i].className == 'load-pdf') idx = i;
+            if (idx==-1) return html;
+
+            // as JournalPagePDFSheet#_onLoadPDF, but adding optional page-number
+            const frame = document.createElement("iframe");
+            frame.src = `scripts/pdfjs/web/viewer.html?${this._getViewerParams()}${page_marker}`;
+            html[idx] = frame;
+        }
     }
     return html;
 }
+
+
+Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
+    // Initialising the editor MUST be done after the button has been replaced by the IFRAME.
+    if (!sheet.isEditable && game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FORM_FILL_PDF) && ui.pdfpager.initEditor)
+        ui.pdfpager.initEditor(sheet, html, data);
+})
 
 /**
  * my_journal_render reads the page=xxx anchor from the original link, and stores it temporarily for use by renderJournalPDFPageSheet later
@@ -90,31 +122,6 @@ async function my_render(wrapper,force,options) {
     return result;
 }
 
-/**
- * Hook to replace "Load PDF" button with actual PDF document
- * @param {JournalPDFPageSheet} [sheet] Sheet for renderJournalSheet hooks
- * @param {jQuery}     [html]  HTML  for renderJournalSheet hooks
- * @param {Object}     [data]  Data (data.document = JournalEntryPage)
- */
-Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
-    // If editing the page, then don't try to press the button.
-    if (sheet.isEditable) return;
-
-    // Sanity check for using the correct pdfpage value.
-    if (sheet.object._id !== pdfpageid)
-        pdfpagenumber = undefined;
-
-    // html.find('div.load-pdf') doesn't work
-    if (pdfpagenumber || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
-        $("div.load-pdf").replaceWith ( (index,a) => {
-            // Immediately do JournalPagePDFSheet#_onLoadPDF
-            const page_offset = data.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
-            const page_marker = pdfpagenumber ? `#page=${pdfpagenumber+(page_offset||0)}` : '';
-            pdfpagenumber = undefined;  // only use the buffered page number once
-            return `<iframe src="scripts/pdfjs/web/viewer.html?${sheet._getViewerParams()}${page_marker}"/>`;
-	    });
-    }
-});
 
 
 let code_cache = new Map();

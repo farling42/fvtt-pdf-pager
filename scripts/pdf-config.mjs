@@ -23,11 +23,13 @@ SOFTWARE.
 
 import { openPDFByCode } from './pdf-pager.mjs';
 import { migratePDFoundry, replacePDFlinks } from './pdf-migrate.mjs';
+import { initEditor, registerActorMapping } from './pdf-editable.mjs';
 
 export let PDFCONFIG = {
     MODULE_NAME             : "pdf-pager",
     ALWAYS_LOAD_PDF         : "alwaysLoadPdf",
     CREATE_PDF_LINK_ON_DROP : "dropPdfLink",
+	FORM_FILL_PDF           : "formFillPdf",
     FLAG_OFFSET             : "pageOffset",
     FLAG_CODE               : "code"
 };
@@ -55,5 +57,15 @@ Hooks.once('init', () => {
 		config: true
 	});
 
-    if (!ui.pdfpager) ui.pdfpager = { openPDFByCode, migratePDFoundry, replacePDFlinks };
+    param = PDFCONFIG.FORM_FILL_PDF;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  Boolean,
+		default: true,
+		config: true
+	});
+
+    if (!ui.pdfpager) ui.pdfpager = { openPDFByCode, migratePDFoundry, replacePDFlinks, initEditor, registerActorMapping };
 });
