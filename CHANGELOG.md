@@ -1,3 +1,11 @@
+## 0.13.0
+
+- When handling PDF input fields, use the 'id' attribute if the 'name' attribute is not defined.
+- Don't listen to changes to disabled fields in PDFs.
+- Detect loading of page properly, to ensure all fields are populated correctly.
+- Ensure PDFs containing fields with "calculated values" have their values stored.
+- KNOWN BUG: PDF fields which are automatically calculated by the PDF are not being calculated when the PDF page is displayed.
+
 ## 0.12.0
 
 - Allow calculated fields to be configured for the spreadsheet. In the definition of the field define an object as the value for the object-field. The object should get a `getValue(actor)` function and an optional `setValue(actor,value)` function. If the setValue function is not present then the field will be made read-only.

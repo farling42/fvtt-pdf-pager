@@ -30,129 +30,111 @@ SOFTWARE.
 
 import { PDFCONFIG } from './pdf-config.mjs'
 
-// ???? - immediately copy changes from the Actor to the displayed sheet.
-
-let pdf2actormap;
-
-let actor2containermap = new Map();
+let pdf2actormap;                   // key = pdf field name, value = actor field name
+let actor2pdfviewer = new Map();    // key = actorid, value = container
 
 /**
  * Copy all the data from the specified document (Actor) to the fields on the PDF sheet (container)
- * @param {*} container 
- * @param {*} document 
+ * @param {PDFPageView} pdfpageview  
+ * @param {Actor} actor 
  */
-function setValues(container, document) {
-    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.STORE_FIELDS_ON_ACTOR))
-        return setHiddenValues(container, document);
+async function setFormFromActor(pdfpageview, actor) {
+    console.debug(`${PDFCONFIG.MODULE_NAME}: setting values for '${actor.name}'`)
+    let container = pdfpageview.div;
 
-    console.debug(`${PDFCONFIG.MODULE_NAME}: setting values on '${container}' for '${document.name}'`)
-    let inputs = container.querySelectorAll('input,textarea');
+    let flags = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.STORE_FIELDS_ON_ACTOR) 
+        ? ( actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {} )
+        : undefined;
+
+    const inputs = container.querySelectorAll('input,textarea');
+
+    // Set values from the module FLAG on the actor.
     for (let elem of inputs) {
-        let curvalue;
-        const docfield = pdf2actormap[elem.name.trim()];
-        if (docfield instanceof Object) {
-            curvalue = docfield.getValue(document);
-            if (!docfield.setValue) elem.readOnly = true;
-        } else if (docfield) {
-            curvalue = foundry.utils.getProperty(document, docfield);
-        }
-        if (curvalue!==undefined) {
-            if (elem.type === 'checkbox') {
-                elem.checked = curvalue;
-            } else {
-                elem.value = curvalue;
+        // don't modify disabled (readonly) fields
+        if (elem.disabled) continue; 
+
+        // Get required value, either from the FLAGS or from a field on the Actor
+        let value;
+        if (flags) {
+            value = (flags[elem.name] || flags[elem.id]);
+        } else {
+            const actorfield = pdf2actormap[(elem.name||elem.id).trim()];
+            if (actorfield instanceof Object) {
+                value = actorfield.getValue(actor);
+                if (!actorfield.setValue) elem.readOnly = true;
+            } else if (actorfield) {
+                value = foundry.utils.getProperty(actor, actorfield);
+                if (typeof value === 'number') value = '' + value;
             }
         }
+        //pdfpageview.annotationLayer.annotationStorage.setValue(elem.id, elem);
+        if (elem.type === 'checkbox') {
+            elem.checked = value || false;
+        } else {
+            elem.value = value || "";
+        }
+        // Try to trigger the Sandbox calculateNow() function for the field
+        /*pdfpageview.eventBus.dispatch("dispatcheventinsandbox", {
+            source: elem,
+            detail: {  // same as in "change" or "input" event
+                id: elem.id,
+                name: "Action",
+                value: elem.value,
+                target: elem,
+                bubbles: true
+            }
+        })*/
     }
+
+    /*
+    // Process calculated fields
+    const objects = await pdfpageview.annotationLayerFactory.pdfDocument.getFieldObjects();
+    for (const [key,value] of Object.entries(objects)) {
+        let entry = value[0];
+        if (entry?.actions?.Calculate) {
+            console.log(`Need to calculate value for ${key}`)
+        }
+    }*/
 }
 
 /**
  * Handle the event which fired when the user changed a value in a field.
- * @param {*} document 
+ * @param {*} actor 
  * @param {*} inputid 
  * @param {*} inputname 
  * @param {*} value 
  */
-function updateDocument(document, inputid, inputname, value) {
-    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.STORE_FIELDS_ON_ACTOR))
-        return updateHiddenValues(document, inputid, inputname, value);
-
-    let docfield = pdf2actormap[inputname.trim()] || pdf2actormap[inputid.trim()];
-    if (!docfield)
-        console.debug(`${PDFCONFIG.MODULE_NAME}: unmapped PDF field:\nID '${inputid}', NAME '${inputname}' = '${value}'`)
-    else if (typeof docfield === 'string') {
-        console.debug(`${PDFCONFIG.MODULE_NAME}: '${document.name}':\n'${docfield}' = '${value}'`);
-        document.update({ [docfield]: value });
-    } else if (docfield.setValue) {
-        console.debug(`${PDFCONFIG.MODULE_NAME}: '${document.name}':\n'calculated field = '${value}'`);
-        docfield.setValue(document, value);
+function modifyActor(actor, inputid, inputname, value) {
+    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.STORE_FIELDS_ON_ACTOR)) {
+        // Copy the modified field to the MODULE FLAG on the Actor
+        let values = actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
+        if (!values || !(values instanceof Object)) values = {};
+        values[inputname || inputid] = value;
+        console.debug(`${PDFCONFIG.MODULE_NAME}.flags for '${actor.name}':\n'${inputname || inputid}' = '${value}'`);
+        actor.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, values);    
+    } else {
+        // Copy the modified field to the corresponding field on the Actor
+        let docfield = pdf2actormap[inputname.trim()] || pdf2actormap[inputid.trim()];
+        if (!docfield)
+            console.debug(`${PDFCONFIG.MODULE_NAME}: unmapped PDF field:\nID '${inputid}', NAME '${inputname}' = '${value}'`)
+        else if (typeof docfield === 'string') {
+            console.debug(`${PDFCONFIG.MODULE_NAME}.string for '${actor.name}':\n'${docfield}' = '${value}'`);
+            actor.update({ [docfield]: value });
+        } else if (docfield.setValue) {
+            console.debug(`${PDFCONFIG.MODULE_NAME}.setValue for '${actor.name}':\n'calculated field = '${value}'`);
+            docfield.setValue(actor, value);
+        }
     }
-}
-
-/*
- * Functions when all the data is stored on hidden flags on the Actor, rather than in normal Actor fields.
- */
-function updateHiddenValues(document, inputid, inputname, value) {
-    let values = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
-    if (!values || !(values instanceof Object)) values = {};
-    values[inputname] = value;
-    document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, values);
-}
-
-function setHiddenValues(container, document) {
-    console.debug(`${PDFCONFIG.MODULE_NAME}: setting values on '${container}' for '${document.name}'`)
-    let values = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
-    if (!values) values = {};
-
-    let inputs = container.querySelectorAll('input,textarea');
-    for (let elem of inputs) {
-        if (elem.type === 'checkbox')
-            elem.checked = values[elem.name] || false;
-        else
-            elem.value = values[elem.name] || "";
-    }
-}
-
-/**
- * Hook a 'change' listener onto each <input> or <textarea> element in the container.
- * @param {*} container 
- * @param {*} document 
- */
-
-function setListeners(container, document) {
-    console.debug(`${PDFCONFIG.MODULE_NAME}: setting listeners on '${container}' for '${document.name}'`)
-
-    // Set listener to update modified value
-    let inputs = container.querySelectorAll('input,textarea');
-    for (let elem of inputs) {
-        //console.log(`Attaching to data field '${elem.name}'`);
-        elem.addEventListener('change', (event) => { 
-            let value = (event.target.type === 'checkbox') ? event.target.checked : event.target.value;
-            //console.log(`change: type = '${event.type}', value = '${value}'`)
-            updateDocument(document, elem.id, elem.name, value);
-        })
-    }
-    // Keep ACTOR->container mapping only while the window is open
-    actor2containermap.set(document.id, container);
-    let topwin = container.ownerDocument.defaultView;
-    if (topwin)
-        topwin.addEventListener('unload', (event) => {
-            actor2containermap.delete(document.id);
-        })
-    else
-        console.error(`${PDFCONFIG.MODULE_NAME}: Failed to find window for PDF page of ${document.id}`);
 }
 
 /**
  * Handle updates to actors which are present in one of the open PDF sheets.
  */
 Hooks.on('updateActor', async function(actordoc, change, options, userId) {
-    let container = actor2containermap.get(actordoc.id);
-    if (!container) return;
-    // We can't rely on change, since that only identifies the values that were directly changed,
-    // it does not include the list of derived fields which might also have changed value.
-    console.log(`${PDFCONFIG.MODULE_NAME}: Update of actor ${actordoc.name} for changes ${change}`);
-    setValues(container, actordoc);
+    let pdfviewer = actor2pdfviewer.get(actordoc.id);
+    if (!pdfviewer) return;
+    console.log(`${PDFCONFIG.MODULE_NAME}: Update of actor ${actordoc.name}`);
+    setFormFromActor(pdfviewer, actordoc);
 })
 
 /**
@@ -176,31 +158,36 @@ export async function initEditor(sheet, html, data) {
         if (!pdf2actormap) return;
     }
 
+    // Wait for the IFRAME to appear in the window before any further initialisation
     $('iframe').on('load', async (event) => {
         console.debug(`${PDFCONFIG.MODULE_NAME}: PDF frame loaded for '${sheet.object.name}': event '${event}'`);
 
         // Wait for the PDFViewer to be fully initialized
-        let pdfviewer = event.target.contentWindow.PDFViewerApplication;
-        await pdfviewer.initializedPromise;
+        const contentWindow = event.target.contentWindow;
+        // Keep ACTOR->container mapping only while the window is open
+        contentWindow.addEventListener('unload', (event) => {
+            actor2pdfviewer.delete(actorid);
+        })
+
+        const pdfviewerapp = contentWindow.PDFViewerApplication;
+        await pdfviewerapp.initializedPromise;
         console.debug(`${PDFCONFIG.MODULE_NAME}: PDFJS initialized`);  // but document still NOT loaded
 
-        // Now wait for the container to get completely populated
-        let container = pdfviewer.appConfig.viewerContainer;
-
-        // Check every 2 seconds to see if the child count has changed.
-        let childCount = container.children.length;
-        let myInterval = setInterval(() => {
-            var newChildCount = container.children.length;
-            if(childCount < newChildCount ) {
-                console.debug(`${PDFCONFIG.MODULE_NAME}: child added - still waiting`);
-                childCount = newChildCount;
-            } else {
-                console.debug(`${PDFCONFIG.MODULE_NAME}: no new children - attaching listeners`);
-                setValues(container, actor);
-                setListeners(container, actor);
-                clearInterval(myInterval);
+        // "change" events are NOT sent for fields which have JS Actions attached to them,
+        // so we have to attach to the PDF viewer's dispatcheventinsandbox events.
+        pdfviewerapp.eventBus.on('dispatcheventinsandbox', (event) => {
+            if (event.detail.willCommit) {
+                console.log(`dispatcheventinsandbox: id = '${event.detail.id}', name = '${event.source.data.fieldName}', value = '${event.detail.value}'`);
+                modifyActor(actor, event.detail.id, event.source.data.fieldName, event.detail.value);
             }
-        }, 1000);
+        })
+    
+        // Wait for the AnnotationLayer to get drawn before populating all the fields with data from the actor.
+        pdfviewerapp.eventBus.on('annotationlayerrendered', (event) => {   // from PdfPageView
+            console.log(`annotationlayerrendered ${event.pageNumber}`);
+            setFormFromActor(event.source, actor);
+            if (!actor2pdfviewer.has(actorid)) actor2pdfviewer.set(actorid, event.source);
+        })
     })
 }
 
