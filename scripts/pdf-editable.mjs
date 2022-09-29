@@ -25,6 +25,7 @@ SOFTWARE.
 // and find each <input> or <textarea> element. The "name" field will specify the specific data element,
 // such as "Might" or "Type_Focus_or_Other".
 // Some <input> will have "type=checkbox", so then the "checked" attribute needs setting.
+// TODO : support <select> fields.
 // 
 // We need to map the PDF Name field to the Actor data field.
 
@@ -175,8 +176,10 @@ export async function initEditor(sheet, html, data) {
 
         // "change" events are NOT sent for fields which have JS Actions attached to them,
         // so we have to attach to the PDF viewer's dispatcheventinsandbox events.
+        // 'Action' is for checkboxes
+        // 'willCommit' is for text fields
         pdfviewerapp.eventBus.on('dispatcheventinsandbox', (event) => {
-            if (event.detail.willCommit) {
+            if (event.detail.name == 'Action' || event.detail.willCommit) {
                 console.log(`dispatcheventinsandbox: id = '${event.detail.id}', name = '${event.source.data.fieldName}', value = '${event.detail.value}'`);
                 modifyActor(actor, event.detail.id, event.source.data.fieldName, event.detail.value);
             }
@@ -185,8 +188,8 @@ export async function initEditor(sheet, html, data) {
         // Wait for the AnnotationLayer to get drawn before populating all the fields with data from the actor.
         pdfviewerapp.eventBus.on('annotationlayerrendered', (event) => {   // from PdfPageView
             console.log(`annotationlayerrendered ${event.pageNumber}`);
-            setFormFromActor(event.source, actor);
             if (!actor2pdfviewer.has(actorid)) actor2pdfviewer.set(actorid, event.source);
+            setFormFromActor(event.source, actor);
         })
     })
 }
