@@ -27,10 +27,13 @@ import { initEditor, registerActorMapping } from './pdf-editable.mjs';
 
 export let PDFCONFIG = {
     MODULE_NAME             : "pdf-pager",
+	// World config flags
     ALWAYS_LOAD_PDF         : "alwaysLoadPdf",
     CREATE_PDF_LINK_ON_DROP : "dropPdfLink",
 	FORM_FILL_PDF           : "formFillPdf",
 	STORE_FIELDS_ON_ACTOR   : "storeOnActor",
+	ACTOR_CONFIG            : "actorConfig",
+	// Flags on an Actor
     FLAG_OFFSET             : "pageOffset",
     FLAG_CODE               : "code",
 	FLAG_FIELDTEXT          : "fieldText"
@@ -76,6 +79,16 @@ Hooks.once('init', () => {
 		scope: "world",
 		type:  Boolean,
 		default: false,
+		config: true
+	});
+
+    param = PDFCONFIG.ACTOR_CONFIG;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  String,
+		default: "",
 		config: true
 	});
 

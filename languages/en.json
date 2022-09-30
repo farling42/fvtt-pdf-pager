@@ -10,5 +10,7 @@
     "pdf-pager.formFillPdf.Name" : "Support Form-Fillable PDFs",
     "pdf-pager.formFillPdf.Hint" : "Enable the use of Form-Fillable PDFs as an alternative to Actor sheets",
     "pdf-pager.storeOnActor.Name" : "Store ALL fields on Actor",
-    "pdf-pager.storeOnActor.Hint" : "Store all the data from Form Fillable PDFs as hidden fields on the associated actor"
+    "pdf-pager.storeOnActor.Hint" : "Store all the data from Form Fillable PDFs as hidden fields on the associated actor",
+    "pdf-pager.actorConfig.Name" : "Field Mappings from Actor",
+    "pdf-pager.actorConfig.Hint" : "Define a JSON object that contains a mapping between PDF field and ACTOR field, such as: { \"Character_Name\" : \"name\", \"health\" : \"system.health.hp\" }"
 }

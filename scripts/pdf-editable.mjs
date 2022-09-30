@@ -34,6 +34,25 @@ import { PDFCONFIG } from './pdf-config.mjs'
 let pdf2actormap;                   // key = pdf field name, value = actor field name
 let actor2pdfviewer = new Map();    // key = actorid, value = container
 
+// Function to convert Object into a string whilst keeping the functions
+function Obj2String(obj) {
+    let ret = "{";
+    for (let k in obj) {
+        let v = obj[k];
+        if (typeof v === "function") {
+            ret += v.toString() + ',';
+        } else if (v instanceof Array) {
+            ret += `"${k}": ${JSON.stringify(v)},` ;
+        } else if (typeof v === "object") {
+            ret += `"${k}": ${Obj2String(v)},`;
+        } else {
+            ret += `"${k}": "${v}",`;
+        }
+    }
+    ret += "}";  
+    return ret;
+}
+
 /**
  * Copy all the data from the specified document (Actor) to the fields on the PDF sheet (container)
  * @param {PDFPageView} pdfpageview  
@@ -52,50 +71,34 @@ async function setFormFromActor(pdfpageview, actor) {
     // Set values from the module FLAG on the actor.
     for (let elem of inputs) {
         // don't modify disabled (readonly) fields
-        if (elem.disabled) continue; 
+        if (elem.disabled) continue; // DISABLED
 
         // Get required value, either from the FLAGS or from a field on the Actor
         let value;
         if (flags) {
-            value = (flags[elem.name] || flags[elem.id]);
+            value = flags[elem.name];
+            if (value === undefined) value = flags[elem.id];
         } else {
             const actorfield = pdf2actormap[(elem.name||elem.id).trim()];
-            if (actorfield instanceof Object) {
+            if (actorfield instanceof Object && actorfield.getValue) {
                 value = actorfield.getValue(actor);
                 if (!actorfield.setValue) elem.readOnly = true;
-            } else if (actorfield) {
+            } else if (typeof actorfield === 'string') {
                 value = foundry.utils.getProperty(actor, actorfield);
                 if (typeof value === 'number') value = '' + value;
             }
         }
         //pdfpageview.annotationLayer.annotationStorage.setValue(elem.id, elem);
         if (elem.type === 'checkbox') {
-            elem.checked = value || false;
+            let newchecked = value || false;
+            if (elem.checked == newchecked) continue;
+            elem.checked = newchecked;
         } else {
-            elem.value = value || "";
+            let newvalue = value || "";
+            if (elem.value === newvalue) continue;
+            elem.value = newvalue;
         }
-        // Try to trigger the Sandbox calculateNow() function for the field
-        /*pdfpageview.eventBus.dispatch("dispatcheventinsandbox", {
-            source: elem,
-            detail: {  // same as in "change" or "input" event
-                id: elem.id,
-                name: "Action",
-                value: elem.value,
-                target: elem,
-                bubbles: true
-            }
-        })*/
     }
-
-    /*
-    // Process calculated fields
-    const objects = await pdfpageview.annotationLayerFactory.pdfDocument.getFieldObjects();
-    for (const [key,value] of Object.entries(objects)) {
-        let entry = value[0];
-        if (entry?.actions?.Calculate) {
-            console.log(`Need to calculate value for ${key}`)
-        }
-    }*/
 }
 
 /**
@@ -108,21 +111,23 @@ async function setFormFromActor(pdfpageview, actor) {
 function modifyActor(actor, inputid, inputname, value) {
     if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.STORE_FIELDS_ON_ACTOR)) {
         // Copy the modified field to the MODULE FLAG on the Actor
-        let values = actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
-        if (!values || !(values instanceof Object)) values = {};
-        values[inputname || inputid] = value;
-        console.debug(`${PDFCONFIG.MODULE_NAME}.flags for '${actor.name}':\n'${inputname || inputid}' = '${value}'`);
-        actor.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, values);    
+        let flags = actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
+        if (!flags || !(flags instanceof Object)) flags = {};
+        let docfield = inputname || inputid;
+        if (flags[docfield] === value) return;
+        flags[docfield] = value;
+        console.debug(`FLAGS for '${actor.name}': '${inputname || inputid}' = '${value}'`);
+        actor.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, flags);
     } else {
         // Copy the modified field to the corresponding field on the Actor
         let docfield = pdf2actormap[inputname.trim()] || pdf2actormap[inputid.trim()];
         if (!docfield)
             console.debug(`${PDFCONFIG.MODULE_NAME}: unmapped PDF field:\nID '${inputid}', NAME '${inputname}' = '${value}'`)
         else if (typeof docfield === 'string') {
-            console.debug(`${PDFCONFIG.MODULE_NAME}.string for '${actor.name}':\n'${docfield}' = '${value}'`);
+            console.debug(`STRING for '${actor.name}': '${docfield}' = '${value}'`);
             actor.update({ [docfield]: value });
         } else if (docfield.setValue) {
-            console.debug(`${PDFCONFIG.MODULE_NAME}.setValue for '${actor.name}':\n'calculated field = '${value}'`);
+            console.debug(`SETVALUE for '${actor.name}': 'calculated field = '${value}'`);
             docfield.setValue(actor, value);
         }
     }
@@ -151,9 +156,17 @@ export async function initEditor(sheet, html, data) {
 
     // Load system JSON if not already done (but only if needing to update real Actor fields)
     if (!game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.STORE_FIELDS_ON_ACTOR)) {
+        // Always reload the MAP on opening the window (in case it has changed since last time)
+        let flag = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ACTOR_CONFIG);
+        if (flag) pdf2actormap = eval(`(${flag})`);
+
         if (!pdf2actormap) {
             const module = await import(`../systems/${game.system.id}.mjs`)
-                .then(module => pdf2actormap = module.namemap)
+                .then(module => {
+                    pdf2actormap = module.namemap;
+                    let mapping = Obj2String(pdf2actormap);
+                    game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ACTOR_CONFIG, mapping);
+                })
                 .catch(error => console.warn(`${PDFCONFIG.MODULE_NAME}: Failed to find the PDF mapping file for 'systems/${game.system.id}.mjs'. Form-Filled PDFs will not work`))
         }
         if (!pdf2actormap) return;
@@ -161,7 +174,7 @@ export async function initEditor(sheet, html, data) {
 
     // Wait for the IFRAME to appear in the window before any further initialisation
     $('iframe').on('load', async (event) => {
-        console.debug(`${PDFCONFIG.MODULE_NAME}: PDF frame loaded for '${sheet.object.name}': event '${event}'`);
+        console.debug(`${PDFCONFIG.MODULE_NAME}: PDF frame loaded for '${sheet.object.name}'`);
 
         // Wait for the PDFViewer to be fully initialized
         const contentWindow = event.target.contentWindow;
@@ -180,15 +193,16 @@ export async function initEditor(sheet, html, data) {
         // 'willCommit' is for text fields
         pdfviewerapp.eventBus.on('dispatcheventinsandbox', (event) => {
             if (event.detail.name == 'Action' || event.detail.willCommit) {
-                console.log(`dispatcheventinsandbox: id = '${event.detail.id}', name = '${event.source.data.fieldName}', value = '${event.detail.value}'`);
-                modifyActor(actor, event.detail.id, event.source.data.fieldName, event.detail.value);
+                console.log(`dispatcheventinsandbox: id = '${event.detail.id}', field = '${event.source.data.fieldName}', value = '${event.detail.value}'`);
+                modifyActor(actor, event.detail.id, event.source?.data.fieldName, event.detail.value);
             }
         })
-    
+
         // Wait for the AnnotationLayer to get drawn before populating all the fields with data from the actor.
         pdfviewerapp.eventBus.on('annotationlayerrendered', (event) => {   // from PdfPageView
             console.log(`annotationlayerrendered ${event.pageNumber}`);
             if (!actor2pdfviewer.has(actorid)) actor2pdfviewer.set(actorid, event.source);
+            // Page has been rendered, so load the fields on the form with data from the Actor.
             setFormFromActor(event.source, actor);
         })
     })
@@ -218,4 +232,5 @@ export async function initEditor(sheet, html, data) {
  */
 export function registerActorMapping(mapping) {
     pdf2actormap = mapping;
+    game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ACTOR_CONFIG, Obj2String(pdf2actormap));
 }

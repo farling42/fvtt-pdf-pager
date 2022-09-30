@@ -4,6 +4,7 @@
 - Don't listen to changes to disabled fields in PDFs.
 - Detect loading of page properly, to ensure all fields are populated correctly.
 - Ensure PDFs containing fields with "calculated values" have their values stored.
+- Provide an Additional configuration parameter "Field Mappings from Actor" which can be used instead of calling `registerActorMapping`.
 - KNOWN BUG: PDF fields which are automatically calculated by the PDF are not being calculated when the PDF page is displayed.
 
 ## 0.12.0
