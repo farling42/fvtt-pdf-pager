@@ -82,6 +82,13 @@ Hooks.once('init', () => {
 		config: true
 	});
 
+	// Ideally ACTOR_CONFIG would use a TextArea.
+	// We can't simply patch the SettingsConfig.prototype._renderInner to swap "<input" for "<textarea" because
+	// the value is stored differently (and so would have to be retrieved in a different manner):
+	// <input type="text" value="actorConfig"/>
+	// <textarea name="pdf-pager.actorConfig" rows="4"> has the text between <textarea>actorConfig</textarea>
+	//
+	// (both would also have attributes:  name="pdf-pager.actorConfig" data-dtype="String"
     param = PDFCONFIG.ACTOR_CONFIG;
     game.settings.register(name, param, {
 		name: game.i18n.localize(`${name}.${param}.Name`),
