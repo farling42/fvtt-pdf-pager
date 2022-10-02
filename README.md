@@ -77,22 +77,28 @@ ui.pdfpager.replacePDFlinks()
 
 ### Form Fillable PDFs
 
-To use Form Fillable PDFs, a PDF page should be set up in a Journal, and the "PDF Code" in the PDF Editor should be set to the ID of the associated Actor. (The ID can be copied by clicking on the ID icon next to the name in the window title of the Actor sheet.)
+To use Form Fillable PDFs, a PDF page should be set up in a Journal, and the "PDF Code" in the PDF Editor should be set to the ID of the associated Actor or Item. For ease of use, dragging an Actor or Item onto the "PDF Code" page will insert the UUID for that document.
 
-#### Storing PDF fields as hidden fields on Actor
+The module settings window allows you to set up manual mappings between a PDF field and a field in the linked Actor/Item. Any field which is not mapped to a specific field will be stored in the Actor/Item in a hidden field.
 
-There is a module configuration option (default: disabled) to simply store all the entered PDF field data as hidden data on the associated Actor. This avoids the need to set up a mapping table, but means that the data is not accessible by other parts of Foundry/your game system.
+#### Accessing data stored in hidden fields
 
 If you want to access the 'hidden' fields in macros or other modules, each field is stored on the Actor as `flags['pdf-pager'].fieldText['nameoffield']`  (where 'nameoffield' is the name of the field in the PDF (if the PDF field has no name, then it's id will be used instead).
 
-#### Mapping fields to real Actor fields
+#### Setting up the Mapping to existing Actor/Item fields
 
-In order to use a Form Fillable PDF, either a mapping file must be provided in this module's systems folder, via the module configuration settings window (the 'FIeld Mappings from Actor' field) or the function `ui.pdfpager.registerActorMapping` is called with an object identifying the list of PDF-fields to Actor-fields.
+There are two methods of configuring the mapping between Actor/Item fields and the PDF fields:
+
+- a preconfigured file supplied by the module in the module/pdf-pager/systems folder (an example for the dnd5e game system is provided).
+- a manual create Javascript object entered into the Field Mappins for Actors/Items field of the Module Settings window within Foundry.
+- call one of both of the functions from a macro which will define the relevant mapping: `ui.pdfpager.registerActorMapping` or `ui.pdfpager.registerItemMapping`
+
+#### Format of the mapping object
 
 An example of using registerActorMapping to provide a mapping from PDF-field name to Actor field name.
 
 ```js
-  ui.pdfpager.registerActorMapping({
+  {
      "CharacterName": "name",
      "STR": "system.abilities.str.value",
      "DEX": "system.abilities.dex.value",
