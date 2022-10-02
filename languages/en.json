@@ -12,5 +12,5 @@
     "pdf-pager.storeOnActor.Name" : "Store ALL fields on Actor",
     "pdf-pager.storeOnActor.Hint" : "Store all the data from Form Fillable PDFs as hidden fields on the associated actor",
     "pdf-pager.actorConfig.Name" : "Field Mappings from Actor",
-    "pdf-pager.actorConfig.Hint" : "Define a JSON object that contains a mapping between PDF field and ACTOR field, such as: { \"Character_Name\" : \"name\", \"health\" : \"system.health.hp\" }"
+    "pdf-pager.actorConfig.Hint" : "Define a Javascript object that contains a mapping between PDF field and ACTOR field, such as: { \"Character_Name\" : \"name\", \"health\" : \"system.health.hp\" }"
 }
