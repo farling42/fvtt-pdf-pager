@@ -87,7 +87,7 @@ If you want to access the 'hidden' fields in macros or other modules, each field
 
 #### Mapping fields to real Actor fields
 
-In order to use a Form Fillable PDF, either a mapping file must be provided in this module's systems folder, or the function `ui.pdfpager.registerActorMapping` is called with an object identifying the list of PDF-fields to Actor-fields.
+In order to use a Form Fillable PDF, either a mapping file must be provided in this module's systems folder, via the module configuration settings window (the 'FIeld Mappings from Actor' field) or the function `ui.pdfpager.registerActorMapping` is called with an object identifying the list of PDF-fields to Actor-fields.
 
 An example of using registerActorMapping to provide a mapping from PDF-field name to Actor field name.
 
