@@ -83,6 +83,8 @@ To use Form Fillable PDFs, a PDF page should be set up in a Journal, and the "PD
 
 There is a module configuration option (default: disabled) to simply store all the entered PDF field data as hidden data on the associated Actor. This avoids the need to set up a mapping table, but means that the data is not accessible by other parts of Foundry/your game system.
 
+If you want to access the 'hidden' fields in macros or other modules, each field is stored on the Actor as `flags['pdf-pager'].fieldText['nameoffield']`  (where 'nameoffield' is the name of the field in the PDF (if the PDF field has no name, then it's id will be used instead).
+
 #### Mapping fields to real Actor fields
 
 In order to use a Form Fillable PDF, either a mapping file must be provided in this module's systems folder, or the function `ui.pdfpager.registerActorMapping` is called with an object identifying the list of PDF-fields to Actor-fields.
