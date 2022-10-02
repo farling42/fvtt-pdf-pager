@@ -123,7 +123,7 @@ If there is a complex mapping for a field in the PDF, then the entry in the mapp
 A simple example to convert a Boolean stored in the Actor record into a string ("Y") displayed in the PDF field.
 
 ```js
-export let namemap = {
+export let actormap = {
     "Inspiration": { // "system.attributes.inspiration"
         getValue(actor) {
             return actor.system.attributes.inspiration ? "Y" : "";
