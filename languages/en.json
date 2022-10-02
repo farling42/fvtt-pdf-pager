@@ -9,8 +9,8 @@
     "pdf-pager.dropPdfLink.Hint" : "When a journal PDF page is dropped into another document, create a @PDF[journalname#pagename|page=1]{pagename} link instead of a @UUID link",
     "pdf-pager.formFillPdf.Name" : "Support Form-Fillable PDFs",
     "pdf-pager.formFillPdf.Hint" : "Enable the use of Form-Fillable PDFs as an alternative to Actor sheets",
-    "pdf-pager.storeOnActor.Name" : "Store ALL fields on Actor",
-    "pdf-pager.storeOnActor.Hint" : "Store all the data from Form Fillable PDFs as hidden fields on the associated actor",
-    "pdf-pager.actorConfig.Name" : "Field Mappings from Actor",
-    "pdf-pager.actorConfig.Hint" : "Define a Javascript object that contains a mapping between PDF field and ACTOR field, such as: { \"Character_Name\" : \"name\", \"health\" : \"system.health.hp\" }"
+    "pdf-pager.actorConfig.Name" : "Field Mappings for Actors",
+    "pdf-pager.actorConfig.Hint" : "Define a Javascript object that contains a mapping between PDF field and ACTOR field, such as: { \"Character_Name\" : \"name\", \"health\" : \"system.health.hp\" }",
+    "pdf-pager.itemConfig.Name" : "Field Mappings for Items",
+    "pdf-pager.itemConfig.Hint" : "Define a Javascript object that contains a mapping between PDF field and ITEM field, such as: { \"Name\" : \"name\", \"health\" : \"system.health.hp\" }"
 }

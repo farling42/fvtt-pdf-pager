@@ -1,4 +1,5 @@
-export let namemap = {
+// Map PDF Field Name to Actor data field
+export let actormap = {
     // 5E_CharacterSheet_Fillable.pdf
     "CharacterName": "name",
     "CharacterName 2": "name",
@@ -32,7 +33,7 @@ export let namemap = {
     "ST Charisma":     "system.abilities.cha.save",
     "Check Box 22":    "system.abilities.cha.proficient",
     "Initiative":      "system.attributes.init.total",
-    "PersonalityTraits": "system.details.trait",
+    "PersonalityTraits ": "system.details.trait",
     "Ideals":            "system.details.ideal",
     "Bonds":             "system.details.bond",
     "Flaws":             "system.details.flaw",
@@ -116,4 +117,8 @@ export let namemap = {
             }
         },
     },
+}
+
+// Map PDF field name to Item data field
+export let itemmap = {
 }

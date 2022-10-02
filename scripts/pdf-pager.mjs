@@ -70,6 +70,16 @@ let pdfpagenumber=undefined;
         const elem_code   = `<div class="form-group"><label>${label_code}</label><input class="pageCode" type="text" name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_CODE}"${value_code}/></div>`;
 
         html.find('div.picker').after(elem_offset + elem_code);
+        // Add hook to allow drop of Actor or Item into the 'PDF Code' field
+        html.find('.pageCode').on('dragover', false).on('drop', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            // TextEditor.getDragEventData requires event.dataTransfer to exist.
+            const data = TextEditor.getDragEventData(event.originalEvent);
+            console.log(`Dropped onto pagecode: ${data}`)
+            if (!data) return;
+            if (data.type === 'Actor' || data.type === 'Item') this.value = data.uuid;
+        })
     } else {
         // Not editting, so maybe replace button
         if (this.object._id !== pdfpageid)

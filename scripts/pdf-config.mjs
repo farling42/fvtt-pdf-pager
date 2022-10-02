@@ -23,7 +23,7 @@ SOFTWARE.
 
 import { openPDFByCode } from './pdf-pager.mjs';
 import { migratePDFoundry, replacePDFlinks } from './pdf-migrate.mjs';
-import { initEditor, registerActorMapping } from './pdf-editable.mjs';
+import { initEditor, registerActorMapping, registerItemMapping } from './pdf-editable.mjs';
 
 export let PDFCONFIG = {
     MODULE_NAME             : "pdf-pager",
@@ -31,8 +31,8 @@ export let PDFCONFIG = {
     ALWAYS_LOAD_PDF         : "alwaysLoadPdf",
     CREATE_PDF_LINK_ON_DROP : "dropPdfLink",
 	FORM_FILL_PDF           : "formFillPdf",
-	STORE_FIELDS_ON_ACTOR   : "storeOnActor",
 	ACTOR_CONFIG            : "actorConfig",
+	ITEM_CONFIG             : "itemConfig",
 	// Flags on an Actor
     FLAG_OFFSET             : "pageOffset",
     FLAG_CODE               : "code",
@@ -72,17 +72,7 @@ Hooks.once('init', () => {
 		config: true
 	});
 
-    param = PDFCONFIG.STORE_FIELDS_ON_ACTOR;
-    game.settings.register(name, param, {
-		name: game.i18n.localize(`${name}.${param}.Name`),
-		hint: game.i18n.localize(`${name}.${param}.Hint`),
-		scope: "world",
-		type:  Boolean,
-		default: false,
-		config: true
-	});
-
-	// Ideally ACTOR_CONFIG would use a TextArea.
+	// Ideally ACTOR_CONFIG and ITEM_CONFIG would use a TextArea.
 	// We can't simply patch the SettingsConfig.prototype._renderInner to swap "<input" for "<textarea" because
 	// the value is stored differently (and so would have to be retrieved in a different manner):
 	// <input type="text" value="actorConfig"/>
@@ -99,5 +89,15 @@ Hooks.once('init', () => {
 		config: true
 	});
 
-    if (!ui.pdfpager) ui.pdfpager = { openPDFByCode, migratePDFoundry, replacePDFlinks, initEditor, registerActorMapping };
+    param = PDFCONFIG.ITEM_CONFIG;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  String,
+		default: "",
+		config: true
+	});
+
+    if (!ui.pdfpager) ui.pdfpager = { openPDFByCode, migratePDFoundry, replacePDFlinks, initEditor, registerActorMapping, registerItemMapping };
 });

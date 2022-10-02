@@ -1,3 +1,12 @@
+## 0.14.0
+
+- Remove option to save field as hidden flags and do this automatically for any field which isn't mapped to a field on the Actor.
+- Allow dragging of Actor or Item into the 'PDF Code' field of the PDF page editor.
+- Allow a PDF page to be used for a specific Item (as an alternative to a specific Actor).
+- README updated with information about how to access the hidden fields.
+- Module Settings window hint changed to indicate that a Javascript object is being read from the Field Mappings, not a JSON object (since getValue and setValue functions can be defined in the object).
+- Ensure deletion of an Actor or Item linked to a visible PDF Page is handled gracefully.
+
 ## 0.13.0
 
 - When handling PDF input fields, use the 'id' attribute if the 'name' attribute is not defined.
