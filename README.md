@@ -45,7 +45,7 @@ A new function is available for modules to use which will open a PDF using a sho
 ```js
 ui.pdfpager.openPDFByCode("PHB")
 ui.pdfpager.openPDFByCode("DMG", { page : 30 } )
-ui.pdfpager.openPDFByCode("DMG", { uuid: 'Actor.CY4zUd7qYUeer3d4' } )
+ui.pdfpager.openPDFByCode("SHEET", { uuid: 'Actor.CY4zUd7qYUeer3d4' } )
 ```
 
 ## Migrating from PDFoundry
@@ -84,6 +84,10 @@ ui.pdfpager.replacePDFlinks()
 To use Form Fillable PDFs, a PDF page should be set up in a Journal, and the "PDF Code" in the PDF Editor should be set to the ID of the associated Actor or Item. For ease of use, dragging an Actor or Item onto the "PDF Code" page will insert the UUID for that document.
 
 The module settings window allows you to set up manual mappings between a PDF field and a field in the linked Actor/Item. Any field which is not mapped to a specific field will be stored in the Actor/Item in a hidden field.
+
+#### Opening an Actor or Item in a predefined PDF
+
+In the module settings, it is possible to set up a PDF Code for each type of Actor and Item, this will then present an additional entry in the context menu when selecting an Actor or Item in the sidebar. This additional entry will open the selected Actor/Item in the PDF document which has the configured PDF Code.
 
 #### Accessing data stored in hidden fields
 

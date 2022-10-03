@@ -24,6 +24,7 @@ SOFTWARE.
 import { openPDFByCode } from './pdf-pager.mjs';
 import { migratePDFoundry, replacePDFlinks } from './pdf-migrate.mjs';
 import { registerActorMapping, registerItemMapping } from './pdf-editable.mjs';
+import { configureMenuSettings } from './pdf-menu.mjs';
 
 export let PDFCONFIG = {
     MODULE_NAME             : "pdf-pager",
@@ -39,7 +40,7 @@ export let PDFCONFIG = {
 	FLAG_FIELDTEXT          : "fieldText"
 };
 
-Hooks.once('init', () => {
+Hooks.once('ready', () => {
     // Set up module settings
     let name  = PDFCONFIG.MODULE_NAME;
     let param = PDFCONFIG.ALWAYS_LOAD_PDF;
@@ -98,6 +99,8 @@ Hooks.once('init', () => {
 		default: "",
 		config: true
 	});
+
+	configureMenuSettings();
 
     if (!ui.pdfpager) ui.pdfpager = { openPDFByCode, migratePDFoundry, replacePDFlinks, registerActorMapping, registerItemMapping };
 });

@@ -119,7 +119,7 @@ Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
     if (!sheet.isEditable && game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FORM_FILL_PDF)) {
         const uuid = cached_display_uuid || sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
         if (uuid) initEditor(sheet, html, data, uuid);
-        if (cached_display_uuid) cached_display_uuid=undefined;
+        cached_display_uuid=undefined;
     }
 })
 
@@ -148,6 +148,8 @@ let code_cache = new Map();
  * @param {*} options Can include {page: <number>}  and/or { pdfcode: <code> }
  */
  export function openPDFByCode(pdfcode, options={}) {
+    console.log(`openPDFByCode('${pdfcode}', '${JSON.stringify(options)}'`);
+
     let page_uuid = code_cache.get(pdfcode);
     // Check cache value is still valid
     if (page_uuid) {

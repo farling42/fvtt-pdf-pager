@@ -108,11 +108,13 @@ export let actormap = {
     },     
     "PlayerName": { // readonly, so no setValue function
         getValue(actor) {
+            let user;
             for (const [key, value] of Object.entries(actor.ownership)) {
                 if (value === CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER &&
-                    game.users.get(key).role != CONST.USER_ROLES.GAMEMASTER)
+                    (user = game.users.get(key)) &&
+                    user.role != CONST.USER_ROLES.GAMEMASTER)
                 {
-                    return game.users.get(key).name;
+                    return user.name;
                 } 
             }
         },

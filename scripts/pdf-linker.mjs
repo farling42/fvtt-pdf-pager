@@ -45,8 +45,8 @@ import { PDFCONFIG } from './pdf-config.mjs'
 
  Hooks.once('ready', () => {
     // Fields on Actors and Items call enrichHTML with async=false
-	libWrapper.register('pdf-pager', 'TextEditor.enrichHTML', _myenrichHTML, 'WRAPPER');
-	libWrapper.register('pdf-pager', 'JournalEntryPage.prototype._createDocumentLink', _mycreateDocumentLink, 'MIXED');
+	libWrapper.register(PDFCONFIG.MODULE_NAME, 'TextEditor.enrichHTML', _myenrichHTML, libWrapper.WRAPPER);
+	libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._createDocumentLink', _mycreateDocumentLink, libWrapper.MIXED);
 
     // The TextEditor.encrichers only works when enrichHTML is called with async=true
     CONFIG.TextEditor.enrichers.push({pattern, enricher});

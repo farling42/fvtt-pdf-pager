@@ -6,6 +6,7 @@
 - Fix bug where using a raw ID of an item in the PDF CODE would not work (but using 'Item.id' would work).
 - Display UI notification warning if an Actor/Item displayed in an open PDF Page gets deleted.
 - Add another optional field to openPDFByCode, specifying {pdfcode:'uuid'} will open the PDF document to show the thing referenced by id (for use with Form Fillable PDFs)
+- Add an entry to the Actor and Item context menus in the Sidebar. The module settings allows you to set the 'PDF Code' to be used for each type of Actor and Item (the menu won't appear unless the corresponding document type has a PDF Code configured for it).
 
 ## 0.14.0
 
