@@ -23,7 +23,7 @@ SOFTWARE.
 
 import { openPDFByCode } from './pdf-pager.mjs';
 import { migratePDFoundry, replacePDFlinks } from './pdf-migrate.mjs';
-import { initEditor, registerActorMapping, registerItemMapping } from './pdf-editable.mjs';
+import { registerActorMapping, registerItemMapping } from './pdf-editable.mjs';
 
 export let PDFCONFIG = {
     MODULE_NAME             : "pdf-pager",
@@ -99,5 +99,5 @@ Hooks.once('init', () => {
 		config: true
 	});
 
-    if (!ui.pdfpager) ui.pdfpager = { openPDFByCode, migratePDFoundry, replacePDFlinks, initEditor, registerActorMapping, registerItemMapping };
+    if (!ui.pdfpager) ui.pdfpager = { openPDFByCode, migratePDFoundry, replacePDFlinks, registerActorMapping, registerItemMapping };
 });

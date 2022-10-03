@@ -147,7 +147,7 @@ async function delete_document(document, options, userId) {
     console.log(`Item ${document.uuid} was deleted`)
     let pdfviewer = document2pdfviewer.get(document.uuid);
     if (!pdfviewer) return;
-    ui.notifications.warn(game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.thingDeleted`).replace('%1', document.name));
+    ui.notifications.warn(game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Warning.ThingDeleted`).replace('%1', document.name));
     document2pdfviewer.delete(document.uuid);
 }
 Hooks.on('deleteActor', delete_document)
@@ -158,10 +158,8 @@ Hooks.on('deleteItem',  delete_document)
  * Called from renderJournalPDFPageSheet
  * @inheritData renderJournalPDFPageSheet
  */
-export async function initEditor(sheet, html, data) {
+export async function initEditor(sheet, html, data, pdfcode) {
 
-    const pdfcode = sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
-    if (!pdfcode) return;
     const document = (pdfcode.includes('.') && await fromUuid(pdfcode)) || game.actors.get(pdfcode) || game.items.get(pdfcode);
     if (!document) return;
 
@@ -186,8 +184,8 @@ export async function initEditor(sheet, html, data) {
         if (!map_pdf2item)  map_pdf2item  = {};
     }
 
-    // Wait for the IFRAME to appear in the window before any further initialisation
-    $('iframe').on('load', async (event) => {
+    // Wait for the IFRAME to appear in the window before any further initialisation (html = iframe)
+    html.on('load', async (event) => {
         //console.debug(`${PDFCONFIG.MODULE_NAME}: PDF frame loaded for '${sheet.object.name}'`);
 
         // Wait for the PDFViewer to be fully initialized

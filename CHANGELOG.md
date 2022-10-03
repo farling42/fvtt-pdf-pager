@@ -5,6 +5,7 @@
 - Make a tiny change so that the Form Fillable support also works with links to Compendium entries.
 - Fix bug where using a raw ID of an item in the PDF CODE would not work (but using 'Item.id' would work).
 - Display UI notification warning if an Actor/Item displayed in an open PDF Page gets deleted.
+- Add another optional field to openPDFByCode, specifying {pdfcode:'uuid'} will open the PDF document to show the thing referenced by id (for use with Form Fillable PDFs)
 
 ## 0.14.0
 

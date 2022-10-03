@@ -21,7 +21,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { PDFCONFIG } from './pdf-config.mjs'
+import { PDFCONFIG } from './pdf-config.mjs';
+import { initEditor } from './pdf-editable.mjs';
+import { migratePDFoundry } from './pdf-migrate.mjs';
 
 /**
  * @UUID{JournalEntry.T29aMDmLCPYybApI.JournalEntryPage.iYV6uMnFwdgZORxi#page=10}
@@ -41,12 +43,13 @@ Hooks.once('ready', async () => {
     // Need to capture the PDF page number
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner', my_render_inner, libWrapper.WRAPPER);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render', my_render, libWrapper.WRAPPER);
-    await ui.pdfpager.migratePDFoundry({onlyIfEmpty:true});
+    await migratePDFoundry({onlyIfEmpty:true});
 });
 
 // Ugly hack to get the PAGE number from the JournalSheet#render down to the JournalPDFPageSheet#render
-let pdfpageid=undefined;
-let pdfpagenumber=undefined;
+let cached_pdfpageid=undefined;
+let cached_pdfpagenumber=undefined;
+let cached_pdfcode=undefined;
 
 /**
  * Adds the "Page Offset" field to the JournalPDFPageSheet EDITOR window.
@@ -82,14 +85,14 @@ let pdfpagenumber=undefined;
         })
     } else {
         // Not editting, so maybe replace button
-        if (this.object._id !== pdfpageid)
-            pdfpagenumber = undefined;
+        if (this.object._id !== cached_pdfpageid)
+            cached_pdfpagenumber = undefined;
 
-        if (pdfpagenumber || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
+        if (cached_pdfpagenumber || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
             // Immediately do JournalPagePDFSheet#_onLoadPDF
             const page_offset = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
-            const page_marker = pdfpagenumber ? `#page=${pdfpagenumber+(page_offset||0)}` : '';
-            pdfpagenumber = undefined;  // only use the buffered page number once
+            const page_marker = cached_pdfpagenumber ? `#page=${cached_pdfpagenumber+(page_offset||0)}` : '';
+            cached_pdfpagenumber = undefined;  // only use the buffered page number once
 
             // Replace the "div.load-pdf" with an iframe element.
             // I can't find a way to do it properly, since html is simply a jQuery of top-level elements.
@@ -113,8 +116,11 @@ let pdfpagenumber=undefined;
 
 Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
     // Initialising the editor MUST be done after the button has been replaced by the IFRAME.
-    if (!sheet.isEditable && game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FORM_FILL_PDF) && ui.pdfpager.initEditor)
-        ui.pdfpager.initEditor(sheet, html, data);
+    if (!sheet.isEditable && game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FORM_FILL_PDF)) {
+        const pdfcode = cached_pdfcode || sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
+        if (pdfcode) initEditor(sheet, html, data, pdfcode);
+        if (cached_pdfcode) cached_pdfcode=undefined;
+    }
 })
 
 /**
@@ -123,12 +129,12 @@ Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
  */
 async function my_render(wrapper,force,options) {
     if (options.anchor?.startsWith('page=')) {
-        pdfpageid     = options.pageId;
-        pdfpagenumber = +options.anchor.slice(5);
+        cached_pdfpageid     = options.pageId;
+        cached_pdfpagenumber = +options.anchor.slice(5);
         delete options.anchor;   // we don't want the wrapper trying to set the anchor
     }
     let result = await wrapper(force,options);
-    pdfpagenumber = undefined;  // in case renderJournalPDFPageSheet didn't get called
+    cached_pdfpagenumber = undefined;  // in case renderJournalPDFPageSheet didn't get called
     return result;
 }
 
@@ -139,9 +145,9 @@ let code_cache = new Map();
 /**
  * 
  * @param {*} pdfcode The short code of the PDF page to be displayed
- * @param {*} options Can include {page: <number>}
+ * @param {*} options Can include {page: <number>}  and/or { pdfcode: <code> }
  */
-export function openPDFByCode(pdfcode, options={}) {
+ export function openPDFByCode(pdfcode, options={}) {
     let uuid = code_cache.get(pdfcode);
     // Check cache value is still valid
     if (uuid) {
@@ -181,6 +187,7 @@ export function openPDFByCode(pdfcode, options={}) {
     }
     let pageoptions = { pageId: pagedoc.id };
     if (options?.page) pageoptions.anchor = `page=${options.page}`;
+    cached_pdfcode = options.pdfcode;
 
     // Render journal entry showing the appropriate page (JOurnalEntryPage#_onClickDocumentLink)
     pagedoc.parent.sheet.render(true, pageoptions);
