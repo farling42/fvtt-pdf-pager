@@ -1,6 +1,7 @@
 ## 0.15.0
 
 - Make a tiny change so that the Form Fillable support also works with links to Compendium entries.
+- Fix bug where using a raw ID of an item in the PDF CODE would not work (but using 'Item.id' would work).
 
 ## 0.14.0
 
