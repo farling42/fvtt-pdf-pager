@@ -37,11 +37,15 @@ https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json
 
 ## Utility Function
 
-A new function is available for modules to use which will open a PDF using a short-code defined for that specific PDF (e.g. "DMG" or "PHB"), optionally specifying a specific page number to open, such as:
+A new function is available for modules to use which will open a PDF using a short-code defined for that specific PDF (e.g. "DMG" or "PHB"). There are two optional parameters:
+
+- Specify a specific page within the PDF to open
+- Specify the UUID of an Actor or Item to display in the Form Fillable PDF
 
 ```js
 ui.pdfpager.openPDFByCode("PHB")
 ui.pdfpager.openPDFByCode("DMG", { page : 30 } )
+ui.pdfpager.openPDFByCode("DMG", { uuid: 'Actor.CY4zUd7qYUeer3d4' } )
 ```
 
 ## Migrating from PDFoundry

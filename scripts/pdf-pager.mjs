@@ -49,7 +49,7 @@ Hooks.once('ready', async () => {
 // Ugly hack to get the PAGE number from the JournalSheet#render down to the JournalPDFPageSheet#render
 let cached_pdfpageid=undefined;
 let cached_pdfpagenumber=undefined;
-let cached_pdfcode=undefined;
+let cached_display_uuid=undefined;
 
 /**
  * Adds the "Page Offset" field to the JournalPDFPageSheet EDITOR window.
@@ -117,9 +117,9 @@ let cached_pdfcode=undefined;
 Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
     // Initialising the editor MUST be done after the button has been replaced by the IFRAME.
     if (!sheet.isEditable && game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FORM_FILL_PDF)) {
-        const pdfcode = cached_pdfcode || sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
-        if (pdfcode) initEditor(sheet, html, data, pdfcode);
-        if (cached_pdfcode) cached_pdfcode=undefined;
+        const uuid = cached_display_uuid || sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
+        if (uuid) initEditor(sheet, html, data, uuid);
+        if (cached_display_uuid) cached_display_uuid=undefined;
     }
 })
 
@@ -148,46 +148,46 @@ let code_cache = new Map();
  * @param {*} options Can include {page: <number>}  and/or { pdfcode: <code> }
  */
  export function openPDFByCode(pdfcode, options={}) {
-    let uuid = code_cache.get(pdfcode);
+    let page_uuid = code_cache.get(pdfcode);
     // Check cache value is still valid
-    if (uuid) {
-        let code = fromUuidSync(uuid)?.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
+    if (page_uuid) {
+        let code = fromUuidSync(page_uuid)?.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
         if (!code) {
             // CODE no longer matches, so remove from cache
             code_cache.delete(pdfcode);
-            uuid = null;
+            page_uuid = null;
         }
     }
     // Not in cache, so find an entry and add it to the cache
-    if (!uuid) {
+    if (!page_uuid) {
         for (const journal of game.journal) {
             for (const page of journal.pages) {
                 if (page.type === 'pdf' &&
                     page.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE) == pdfcode) {
-                    uuid = page.uuid;
-                    code_cache.set(pdfcode, uuid);
+                    page_uuid = page.uuid;
+                    code_cache.set(pdfcode, page_uuid);
                     break;
                 }
             }
-            if (uuid) break;
+            if (page_uuid) break;
         }
     }
-
     // Now request that the corresponding page be loaded.
-    if (!uuid) {
+    if (!page_uuid) {
         console.error(`openPdfByCode: unable to find PDF with code '${pdfcode}'`)
         ui.notifications.error(game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Error.NoPDFWithCode`))
         return;
     }
-    let pagedoc = fromUuidSync(uuid);
+    let pagedoc = fromUuidSync(page_uuid);
     if (!pagedoc) {
-        console.error(`openPdfByCode failed to retrieve document uuid '${uuid}`)
+        console.error(`openPdfByCode failed to retrieve document uuid '${page_uuid}`)
         ui.notifications.error(game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Error.FailedLoadPage`))
         return;
     }
     let pageoptions = { pageId: pagedoc.id };
     if (options?.page) pageoptions.anchor = `page=${options.page}`;
-    cached_pdfcode = options.pdfcode;
+    // Maybe options contains { uuid: 'Actor.xyz' }
+    cached_display_uuid = options.uuid;
 
     // Render journal entry showing the appropriate page (JOurnalEntryPage#_onClickDocumentLink)
     pagedoc.parent.sheet.render(true, pageoptions);

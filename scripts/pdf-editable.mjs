@@ -158,9 +158,9 @@ Hooks.on('deleteItem',  delete_document)
  * Called from renderJournalPDFPageSheet
  * @inheritData renderJournalPDFPageSheet
  */
-export async function initEditor(sheet, html, data, pdfcode) {
+export async function initEditor(sheet, html, data, id_to_display) {
 
-    const document = (pdfcode.includes('.') && await fromUuid(pdfcode)) || game.actors.get(pdfcode) || game.items.get(pdfcode);
+    const document = (id_to_display.includes('.') && await fromUuid(id_to_display)) || game.actors.get(id_to_display) || game.items.get(id_to_display);
     if (!document) return;
 
     // Always reload the MAP on opening the window (in case it has changed since last time)
