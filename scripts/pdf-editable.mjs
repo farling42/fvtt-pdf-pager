@@ -147,6 +147,7 @@ async function delete_document(document, options, userId) {
     console.log(`Item ${document.uuid} was deleted`)
     let pdfviewer = document2pdfviewer.get(document.uuid);
     if (!pdfviewer) return;
+    ui.notifications.warn(game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.thingDeleted`).replace('%1', document.name));
     document2pdfviewer.delete(document.uuid);
 }
 Hooks.on('deleteActor', delete_document)
