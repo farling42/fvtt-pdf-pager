@@ -161,7 +161,7 @@ export async function initEditor(sheet, html, data) {
 
     const pdfcode = sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
     if (!pdfcode) return;
-    const document = (pdfcode.includes('.') && await fromUuid(pdfcode)) || game.actors.get(pdfcode) || game.actors.get(pdfcode);
+    const document = (pdfcode.includes('.') && await fromUuid(pdfcode)) || game.actors.get(pdfcode) || game.items.get(pdfcode);
     if (!document) return;
 
     // Always reload the MAP on opening the window (in case it has changed since last time)
