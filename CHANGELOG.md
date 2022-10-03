@@ -1,3 +1,7 @@
+## 0.15.0
+
+- Make a tiny change so that the Form Fillable support also works with links to Compendium entries.
+
 ## 0.14.0
 
 - Remove option to save field as hidden flags and do this automatically for any field which isn't mapped to a field on the Actor.

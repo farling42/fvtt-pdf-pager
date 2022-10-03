@@ -54,8 +54,6 @@ function Obj2String(obj) {
     return ret;
 }
 
-// fromUuidSync(id) - needs to be prefixed with "Actor." or "Item."
-
 /**
  * Copy all the data from the specified Document (Actor/Item) to the fields on the PDF sheet (container)
  * @param {PDFPageView} pdfpageview  
@@ -163,7 +161,7 @@ export async function initEditor(sheet, html, data) {
 
     const pdfcode = sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
     if (!pdfcode) return;
-    const document = fromUuidSync(pdfcode) || game.actors.get(pdfcode) || game.actors.get(pdfcode);
+    const document = (pdfcode.includes('.') && await fromUuid(pdfcode)) || game.actors.get(pdfcode) || game.actors.get(pdfcode);
     if (!document) return;
 
     // Always reload the MAP on opening the window (in case it has changed since last time)
