@@ -1,3 +1,5 @@
+# CHANGELOG
+
 ## 0.15.0
 
 - Make a tiny change so that the Form Fillable support also works with links to Compendium entries.
