@@ -16,6 +16,7 @@ This module provides the following:
 - Provide additional syntax of `@PDF[journalname#pagename|page=xx]{label}` to allow PDFs to be displayed in a page whose name does not match the journal name.
 - Automatically migrates PDFoundry PDF information to new PDF pages in journals (if the journal does not have any other pages already in it).
 - An option to automatically create a `@PDF[journalname#pagename|page=xx]{pagename}` link when dropping a journal PDF page into another document.
+- Provide an Actor sheet called 'PDF Sheet' which can be used to replace the existing Actor sheet with a PDF document.
 
 ## Example
 
@@ -84,6 +85,8 @@ ui.pdfpager.replacePDFlinks()
 To use Form Fillable PDFs, a PDF page should be set up in a Journal, and the "PDF Code" in the PDF Editor should be set to the ID of the associated Actor or Item. For ease of use, dragging an Actor or Item onto the "PDF Code" page will insert the UUID for that document.
 
 The module settings window allows you to set up manual mappings between a PDF field and a field in the linked Actor/Item. Any field which is not mapped to a specific field will be stored in the Actor/Item in a hidden field.
+
+The "PDF Sheet" can be chosen for an Actor to show a PDF instead of the system's default character sheet. The specific PDF document for each actor type can be configured in the module settings. The storage of information from that PDF will be processed in the same way as for Journal PDF Pages.
 
 #### Opening an Actor or Item in a predefined PDF
 

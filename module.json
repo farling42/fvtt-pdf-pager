@@ -30,6 +30,7 @@
     ]
   },
   "esmodules": [
+    "scripts/pdf-actorsheet.mjs",
     "scripts/pdf-editable.mjs",
     "scripts/pdf-config.mjs",
     "scripts/pdf-linker.mjs",

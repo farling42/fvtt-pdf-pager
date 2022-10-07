@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.16.0
+
+- Provide the ability to use a PDF as an Actor sheet. In the Module settings you can configure which PDF will be used for each type of Actor. The same behaviour will occur as for Journal PDF Pages for where the data is stored.
+
 ## 0.15.0
 
 - Make a tiny change so that the Form Fillable support also works with links to Compendium entries.

@@ -118,7 +118,7 @@ Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
     // Initialising the editor MUST be done after the button has been replaced by the IFRAME.
     if (!sheet.isEditable && game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FORM_FILL_PDF)) {
         const uuid = cached_display_uuid || sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
-        if (uuid) initEditor(sheet, html, data, uuid);
+        if (uuid) initEditor(html, uuid);
         cached_display_uuid=undefined;
     }
 })

@@ -156,13 +156,11 @@ Hooks.on('deleteItem',  delete_document)
 
 /**
  * Called from renderJournalPDFPageSheet
- * @param {JournalPDFPageSheet} sheet
  * @param {jQuery} html The iframe for the PDF Page
- * @param {Object} data The information from sheet.getData()
  * @param {String} id_to_display The UUID of the Actor or Item to be displayed in the Form Fillable PDF
  * @inheritData renderJournalPDFPageSheet
  */
-export async function initEditor(sheet, html, data, id_to_display) {
+export async function initEditor(html, id_to_display) {
 
     const document = (id_to_display.includes('.') && await fromUuid(id_to_display)) || game.actors.get(id_to_display) || game.items.get(id_to_display);
     if (!document) return;
