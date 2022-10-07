@@ -57,6 +57,8 @@ Function are available which can be called directly from a macro script or from 
 
 This function creates a page in each journal entry containing the information previously configured using PDFoundry for each PDF.
 
+This function also automatically migrates FormData which might have been present on Actors used with the PDFoundry module.
+
 It takes a single optional parameter which is an object that can contain the single boolean field 'onlyIfEmpty', which if set will only migrate PDFoundry journal entries which currently have no pages.
 
 ```js

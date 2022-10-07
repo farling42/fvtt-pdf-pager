@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## 0.16.0
+## 0.16.2
+
+- For the "PDF Sheet" Actor sheet, automatically migrate FormData information from PDFoundry to where it is stored with PDF Pager (assuming the same PDF is being used by both modules).
+
+## 0.16.1
 
 - Provide the ability to use a PDF as an Actor sheet. In the Module settings you can configure which PDF will be used for each type of Actor. The same behaviour will occur as for Journal PDF Pages for where the data is stored.
 

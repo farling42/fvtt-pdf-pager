@@ -49,6 +49,13 @@ export async function migratePDFoundry(options={}) {
     for (const entry of game.journal) {
         await migrateOne(entry, options);
     }
+    for (const actor of game.actors) {
+        if (!actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT)) {
+            let pdfdata = actor.flags?.pdfoundry?.FormData;
+            if (pdfdata) 
+                actor.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, pdfdata);
+        }
+    }
     for (const pack of game.packs) {
         if (pack.locked || pack.metadata.type != 'JournalEntry') continue;
         console.log(`Checking JournalEntry compendium '${pack.metadata.label}'`)
