@@ -71,7 +71,7 @@ export function configureActorSettings() {
 		  hint: basehint.replace('%1',type),
 		  scope: "world",
 		  type:  String,
-		  default: 'userdata/5E_CharacterSheet_Fillable.pdf',
+		  default: "",
       filePicker: true,
 		  config: true
 	  });
