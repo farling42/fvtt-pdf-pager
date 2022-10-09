@@ -43,7 +43,7 @@ Hooks.once('ready', async () => {
     // Need to capture the PDF page number
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner', my_render_inner, libWrapper.WRAPPER);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render', my_render, libWrapper.WRAPPER);
-    await migratePDFoundry({onlyIfEmpty:true});
+    if (game.user.isGM) await migratePDFoundry({onlyIfEmpty:true});
 });
 
 // Ugly hack to get the PAGE number from the JournalSheet#render down to the JournalPDFPageSheet#render
