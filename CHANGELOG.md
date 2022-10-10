@@ -3,6 +3,7 @@
 ## 0.18.0
 
 - Provide a module configuration setting to remove the light-blue background from editable fields in fillable PDFs.
+- Provide basic support for managing ownership so that all editable fields are disabled if the user is not the owner of the displayed Document (a change of ownership requires manual reopening of the PDF window).
 
 ## 0.17.0
 

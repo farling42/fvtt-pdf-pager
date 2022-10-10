@@ -58,8 +58,9 @@ function Obj2String(obj) {
  * Copy all the data from the specified Document (Actor/Item) to the fields on the PDF sheet (container)
  * @param {PDFPageView} pdfpageview  
  * @param {Document} document An Actor or Item
+ * @param {Object} options  Can contain either or both of { disabled : true , hidebg : true }
  */
-async function setFormFromDocument(pdfpageview, document) {
+async function setFormFromDocument(pdfpageview, document, options={}) {
     //console.debug(`${PDFCONFIG.MODULE_NAME}: setting values for '${document.name}'`)
     let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {};
 
@@ -67,11 +68,11 @@ async function setFormFromDocument(pdfpageview, document) {
     const inputs = pdfpageview.div.querySelectorAll('input,select,textarea');
     const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
     for (let elem of inputs) {
-        if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG))
-            elem.style.setProperty('background-image', 'none');
+        if (options.hidebg)   elem.style.setProperty('background-image', 'none');
+        if (options.disabled) elem.disabled = true;
 
         // don't modify disabled (readonly) fields
-        if (elem.disabled) continue; // DISABLED
+        //if (elem.disabled) continue; // DISABLED
 
         // Get required value, either from the FLAGS or from a field on the Actor
         const docfield = mapping && (mapping[elem.name] || mapping[elem.id]);
@@ -195,6 +196,7 @@ export async function initEditor(html, id_to_display) {
     // Wait for the IFRAME to appear in the window before any further initialisation (html = iframe)
     html.on('load', async (event) => {
         //console.debug(`${PDFCONFIG.MODULE_NAME}: PDF frame loaded for '${sheet.object.name}'`);
+        let editable = document.canUserModify(game.user, "update");
 
         // Wait for the PDFViewer to be fully initialized
         const contentWindow = event.target.contentWindow;
@@ -211,25 +213,33 @@ export async function initEditor(html, id_to_display) {
         // so we have to attach to the PDF viewer's dispatcheventinsandbox events.
         // 'Action' is for checkboxes
         // 'willCommit' is for text fields
-        pdfviewerapp.eventBus.on('dispatcheventinsandbox', event => {
-            if (event.detail.value !== undefined && (event.detail.name == 'Action' || event.detail.willCommit)) {
-                //console.debug(`dispatcheventinsandbox: field='${event.source.data.fieldName}', id='${event.detail.id}', value = '${event.detail.value}'`);
-                modifyDocument(document, event.detail.id, event.source?.data.fieldName, event.detail.value);
-            }
-        })
+
+        if (editable) {
+            pdfviewerapp.eventBus.on('dispatcheventinsandbox', event => {
+                if (event.detail.value !== undefined && (event.detail.name == 'Action' || event.detail.willCommit)) {
+                    //console.debug(`dispatcheventinsandbox: field='${event.source.data.fieldName}', id='${event.detail.id}', value = '${event.detail.value}'`);
+                    modifyDocument(document, event.detail.id, event.source?.data.fieldName, event.detail.value);
+                }
+            })
+        }
 
         // Wait for the AnnotationLayer to get drawn before populating all the fields with data from the Document.
         pdfviewerapp.eventBus.on('annotationlayerrendered', (event) => {   // from PdfPageView
             if (!document2pdfviewer.has(document.uuid)) document2pdfviewer.set(document.uuid, event.source);
-            setFormFromDocument(event.source, document);
+            let options = {};
+            if (!editable) options.disabled=true;
+            if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG)) options.hidebg = true;
+            setFormFromDocument(event.source, document, options);
 
             // Some documents do NOT generate events that are captured by 'dispatcheventinsandbox',
             // so we need to attach here too.
-            event.source.div.querySelector('div.annotationLayer').addEventListener('change', changeevent => {
-                let newvalue = (changeevent.target.type === 'checkbox') ? changeevent.target.checked : changeevent.target.value;
-                //console.debug(`eventListener(change): field='${changeevent.target.name}', id='${changeevent.target.id}', value = '${newvalue}'`);
-                modifyDocument(document, changeevent.target.id, changeevent.target.name, newvalue);
-            })
+            if (editable) {
+                event.source.div.querySelector('div.annotationLayer').addEventListener('change', changeevent => {
+                    let newvalue = (changeevent.target.type === 'checkbox') ? changeevent.target.checked : changeevent.target.value;
+                    //console.debug(`eventListener(change): field='${changeevent.target.name}', id='${changeevent.target.id}', value = '${newvalue}'`);
+                    modifyDocument(document, changeevent.target.id, changeevent.target.name, newvalue);
+                })
+            }
         })
     })
 }
