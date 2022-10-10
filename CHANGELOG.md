@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.18.0
+
+- Fix an issue with edit not working on PDFs that aren't configured with special event handling.
+- Ensure that 'select' fields (drop-down menus) are initialised to their stored values.
+
+## 0.17.0
+
+- Only call migratePDFoundry at startup if the user is a GM.
+
 ## 0.16.2
 
 - For the "PDF Sheet" Actor sheet, automatically migrate FormData information from PDFoundry to where it is stored with PDF Pager (assuming the same PDF is being used by both modules).

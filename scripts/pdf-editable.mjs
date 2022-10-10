@@ -64,7 +64,7 @@ async function setFormFromDocument(pdfpageview, document) {
     let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {};
 
     // Set values from the module FLAG on the Document.
-    const inputs = pdfpageview.div.querySelectorAll('input,textarea');
+    const inputs = pdfpageview.div.querySelectorAll('input,select,textarea');
     const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
     for (let elem of inputs) {
         // don't modify disabled (readonly) fields
@@ -110,18 +110,21 @@ function modifyDocument(document, inputid, inputname, value) {
     const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
     let docfield = mapping && (mapping[inputname] || mapping[inputid]);
     if (!docfield) {
-        console.debug(`${PDFCONFIG.MODULE_NAME}: unmapped PDF field: NAME '${inputname}' ID '${inputid}', = '${value}'`);
+        console.debug(`${PDFCONFIG.MODULE_NAME}: unmapped PDF field: name='${inputname}', id='${inputid}', value='${value}'`);
         // Copy the modified field to the MODULE FLAG in the Document
         let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
         if (!flags || !(flags instanceof Object)) flags = {};
         let docfield = inputname || inputid;
         if (flags[docfield] === value) return;
         flags[docfield] = value;
-        console.debug(`Storing hidden value on '${document.name}': '${docfield}' = '${value}'`);
+        console.debug(`Storing hidden value on '${document.name}': ['${docfield}'] = '${value}'`);
         document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, flags);        
     } else if (typeof docfield === 'string') {
-        console.debug(`Updating '${document.name}'['${docfield}'] = '${value}'`);
         if (getProperty(document, docfield) === value) return;
+        console.debug(`Updating '${document.name}'['${docfield}'] = '${value}'`);
+        // It doesn't seem like we can prevent calling document.update twice
+        // when the change is received by both 'dispatcheventinsandbox' and the 'change' event handler.
+        // calling setProperty(document,docfield,value) doesn't retain the value.
         document.update({ [docfield]: value });
     } else if (docfield.setValue) {
         console.debug(`Calling setValue on field for '${document.name}' with '${value}'`);
@@ -205,9 +208,9 @@ export async function initEditor(html, id_to_display) {
         // so we have to attach to the PDF viewer's dispatcheventinsandbox events.
         // 'Action' is for checkboxes
         // 'willCommit' is for text fields
-        pdfviewerapp.eventBus.on('dispatcheventinsandbox', (event) => {
-            if (event.detail.name == 'Action' || event.detail.willCommit) {
-                //console.log(`dispatcheventinsandbox: id = '${event.detail.id}', field = '${event.source.data.fieldName}', value = '${event.detail.value}'`);
+        pdfviewerapp.eventBus.on('dispatcheventinsandbox', event => {
+            if (event.detail.value !== undefined && (event.detail.name == 'Action' || event.detail.willCommit)) {
+                //console.debug(`dispatcheventinsandbox: field='${event.source.data.fieldName}', id='${event.detail.id}', value = '${event.detail.value}'`);
                 modifyDocument(document, event.detail.id, event.source?.data.fieldName, event.detail.value);
             }
         })
@@ -216,6 +219,14 @@ export async function initEditor(html, id_to_display) {
         pdfviewerapp.eventBus.on('annotationlayerrendered', (event) => {   // from PdfPageView
             if (!document2pdfviewer.has(document.uuid)) document2pdfviewer.set(document.uuid, event.source);
             setFormFromDocument(event.source, document);
+
+            // Some documents do NOT generate events that are captured by 'dispatcheventinsandbox',
+            // so we need to attach here too.
+            event.source.div.querySelector('div.annotationLayer').addEventListener('change', changeevent => {
+                let newvalue = (changeevent.target.type === 'checkbox') ? changeevent.target.checked : changeevent.target.value;
+                //console.debug(`eventListener(change): field='${changeevent.target.name}', id='${changeevent.target.id}', value = '${newvalue}'`);
+                modifyDocument(document, changeevent.target.id, changeevent.target.name, newvalue);
+            })
         })
     })
 }
