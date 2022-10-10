@@ -35,6 +35,7 @@ export let PDFCONFIG = {
 	FORM_FILL_PDF           : "formFillPdf",
 	ACTOR_CONFIG            : "actorConfig",
 	ITEM_CONFIG             : "itemConfig",
+	HIDE_EDITABLE_BG        : "hideFieldBg",
 	// Flags on an Actor
     FLAG_OFFSET             : "pageOffset",
     FLAG_CODE               : "code",
@@ -71,6 +72,16 @@ Hooks.once('ready', () => {
 		scope: "world",
 		type:  Boolean,
 		default: true,
+		config: true
+	});
+
+    param = PDFCONFIG.HIDE_EDITABLE_BG;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  Boolean,
+		default: false,
 		config: true
 	});
 

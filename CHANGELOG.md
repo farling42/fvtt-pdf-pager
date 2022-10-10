@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.18.0
+
+- Provide a module configuration setting to remove the light-blue background from editable fields in fillable PDFs.
+
 ## 0.17.0
 
 - Fix an issue with edit not working on PDFs that aren't configured with special event handling.

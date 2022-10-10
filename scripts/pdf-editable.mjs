@@ -67,6 +67,9 @@ async function setFormFromDocument(pdfpageview, document) {
     const inputs = pdfpageview.div.querySelectorAll('input,select,textarea');
     const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
     for (let elem of inputs) {
+        if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG))
+            elem.style.setProperty('background-image', 'none');
+
         // don't modify disabled (readonly) fields
         if (elem.disabled) continue; // DISABLED
 
