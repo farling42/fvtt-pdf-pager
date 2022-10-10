@@ -1,12 +1,9 @@
 # CHANGELOG
 
-## 0.18.0
+## 0.17.0
 
 - Fix an issue with edit not working on PDFs that aren't configured with special event handling.
 - Ensure that 'select' fields (drop-down menus) are initialised to their stored values.
-
-## 0.17.0
-
 - Only call migratePDFoundry at startup if the user is a GM.
 
 ## 0.16.2
