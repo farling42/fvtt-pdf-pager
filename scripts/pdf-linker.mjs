@@ -86,7 +86,7 @@ function getAnchor(match) {
  */
 function _myenrichHTML(wrapped, content, options) {
     let text = content;
-    if (!options.async && text.includes('@PDF[')) {
+    if (!options.async && text?.length && text.includes('@PDF[')) {
         text = text.replaceAll(pattern, (match, p1, p2, /*p3*/pagenum, /*p4*/label, options, groups) => {
             const anchor = getAnchor([match, p1, p2, pagenum, label]);
             return anchor ? anchor.outerHTML : label;

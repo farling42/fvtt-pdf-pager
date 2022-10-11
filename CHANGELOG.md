@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.19.1
+
+- Fix problem when SWADE tries to call TextEditor.enrichHTML with source that is not a string.
+
 ## 0.19.0
 
 - If a player doesn't have OWNER rights, then fields are marked as readOnly not disabled.
