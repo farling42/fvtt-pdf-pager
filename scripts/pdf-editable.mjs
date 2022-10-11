@@ -61,7 +61,7 @@ function Obj2String(obj) {
  * @param {Object} options  Can contain either or both of { disabled : true , hidebg : true }
  */
 async function setFormFromDocument(pdfpageview, document, options={}) {
-    //console.debug(`${PDFCONFIG.MODULE_NAME}: setting values for '${document.name}'`)
+    console.debug(`${PDFCONFIG.MODULE_NAME}: setting values for '${document.name}'`)
     let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {};
 
     //let fields = await pdfpageview.pdfPage._transport.getFieldObjects()

@@ -4,6 +4,7 @@
 
 - If a player doesn't have OWNER rights, then fields are marked as readOnly not disabled.
 - Improve the detection of changes to field values.
+- When a PDF is configured to be used as the Actor sheet, do not redraw the entire window on each Actor update.
 
 ## 0.18.0
 

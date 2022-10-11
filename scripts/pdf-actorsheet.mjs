@@ -47,7 +47,13 @@ export class PDFActorSheet extends ActorSheet {
   activateListeners(html) {
     super.activateListeners(html);      
     initEditor(html.find('iframe'), this.object.uuid);
-  }      
+  }
+
+  // Only actually call the render function if the window is not currently rendered,
+  // since the `initEditor` call will otherwise handle changes to actor field data.
+  render(force=false, context={}) {
+    if (!this.rendered) super.render(force,context);
+  }
 }
 
 
