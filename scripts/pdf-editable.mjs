@@ -64,15 +64,19 @@ async function setFormFromDocument(pdfpageview, document, options={}) {
     //console.debug(`${PDFCONFIG.MODULE_NAME}: setting values for '${document.name}'`)
     let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {};
 
+    //let fields = await pdfpageview.pdfPage._transport.getFieldObjects()
+    //console.log(fields);
+
     // Set values from the module FLAG on the Document.
     const inputs = pdfpageview.div.querySelectorAll('input,select,textarea');
     const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
+    const storage = pdfpageview.annotationLayer.annotationStorage;
     for (let elem of inputs) {
         if (options.hidebg)   elem.style.setProperty('background-image', 'none');
-        if (options.disabled) elem.disabled = true;
+        if (options.disabled) elem.readOnly = true;
 
         // don't modify disabled (readonly) fields
-        //if (elem.disabled) continue; // DISABLED
+        if (elem.disabled) continue; // DISABLED
 
         // Get required value, either from the FLAGS or from a field on the Actor
         const docfield = mapping && (mapping[elem.name] || mapping[elem.id]);
@@ -89,15 +93,17 @@ async function setFormFromDocument(pdfpageview, document, options={}) {
                 if (typeof value === 'number') value = '' + value;
             }
         }
-        //pdfpageview.annotationLayer.annotationStorage.setValue(elem.id, elem);
+        // Set required value on the HTML element        
         if (elem.type === 'checkbox') {
             let newchecked = value || false;
-            if (elem.checked == newchecked) continue;
-            elem.checked = newchecked;
+            if (elem.checked  == newchecked) continue;
+            elem.checked  = newchecked;
+            //storage.setValue(elem.id, { value : elem.checked });
         } else {
             let newvalue = value || "";
             if (elem.value === newvalue) continue;
             elem.value = newvalue;
+            //storage.setValue(elem.id, { value : elem.value });
         }
     }
 }
@@ -105,23 +111,21 @@ async function setFormFromDocument(pdfpageview, document, options={}) {
 /**
  * Handle the event which fired when the user changed a value in a field.
  * @param {Document} document An Actor or Item
- * @param {string} inputid The PDF ID of the field
- * @param {string} inputname  The PDF NAME of the field
+ * @param {string} inputfield  The PDF NAME of the field
  * @param {string} value The value to be stored in the document
  */
-function modifyDocument(document, inputid, inputname, value) {
+function modifyDocument(document, inputfield, value) {
     // Copy the modified field to the corresponding field in the Document
     const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
-    let docfield = mapping && (mapping[inputname] || mapping[inputid]);
+    let docfield = mapping?.[inputfield];
     if (!docfield) {
-        console.debug(`${PDFCONFIG.MODULE_NAME}: unmapped PDF field: name='${inputname}', id='${inputid}', value='${value}'`);
+        //console.debug(`${PDFCONFIG.MODULE_NAME}: unmapped PDF field: name='${inputname}', value='${value}'`);
         // Copy the modified field to the MODULE FLAG in the Document
         let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
         if (!flags || !(flags instanceof Object)) flags = {};
-        let docfield = inputname || inputid;
-        if (flags[docfield] === value) return;
-        flags[docfield] = value;
-        console.debug(`Storing hidden value on '${document.name}': ['${docfield}'] = '${value}'`);
+        if (flags[inputfield] === value) return;
+        console.debug(`Hiding value '${document.name}'['${inputfield}'] = '${value}'`);
+        flags[inputfield] = value;
         document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, flags);        
     } else if (typeof docfield === 'string') {
         if (getProperty(document, docfield) === value) return;
@@ -205,40 +209,43 @@ export async function initEditor(html, id_to_display) {
             document2pdfviewer.delete(document.uuid);
         })
 
+        // Wait for PDF to initialise before attaching to event bus.
         const pdfviewerapp = contentWindow.PDFViewerApplication;
         await pdfviewerapp.initializedPromise;
-        //console.debug(`${PDFCONFIG.MODULE_NAME}: PDFJS initialized`);  // but document still NOT loaded
-
-        // "change" events are NOT sent for fields which have JS Actions attached to them,
-        // so we have to attach to the PDF viewer's dispatcheventinsandbox events.
-        // 'Action' is for checkboxes
-        // 'willCommit' is for text fields
-
-        if (editable) {
-            pdfviewerapp.eventBus.on('dispatcheventinsandbox', event => {
-                if (event.detail.value !== undefined && (event.detail.name == 'Action' || event.detail.willCommit)) {
-                    //console.debug(`dispatcheventinsandbox: field='${event.source.data.fieldName}', id='${event.detail.id}', value = '${event.detail.value}'`);
-                    modifyDocument(document, event.detail.id, event.source?.data.fieldName, event.detail.value);
-                }
-            })
-        }
 
         // Wait for the AnnotationLayer to get drawn before populating all the fields with data from the Document.
-        pdfviewerapp.eventBus.on('annotationlayerrendered', (event) => {   // from PdfPageView
-            if (!document2pdfviewer.has(document.uuid)) document2pdfviewer.set(document.uuid, event.source);
+        pdfviewerapp.eventBus.on('annotationlayerrendered', layerevent => {   // from PdfPageView
+            let pdfpageview = layerevent.source;
+            if (!document2pdfviewer.has(document.uuid)) document2pdfviewer.set(document.uuid, pdfpageview);
             let options = {};
             if (!editable) options.disabled=true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG)) options.hidebg = true;
-            setFormFromDocument(event.source, document, options);
+            setFormFromDocument(pdfpageview, document, options);
 
             // Some documents do NOT generate events that are captured by 'dispatcheventinsandbox',
             // so we need to attach here too.
             if (editable) {
-                event.source.div.querySelector('div.annotationLayer').addEventListener('change', changeevent => {
-                    let newvalue = (changeevent.target.type === 'checkbox') ? changeevent.target.checked : changeevent.target.value;
-                    //console.debug(`eventListener(change): field='${changeevent.target.name}', id='${changeevent.target.id}', value = '${newvalue}'`);
-                    modifyDocument(document, changeevent.target.id, changeevent.target.name, newvalue);
-                })
+                const inputs = pdfpageview.div.querySelectorAll('input,select,textarea');
+                for (const element of inputs) {
+                    // disabled fields are presumably automatically calculated values, so don't listen for changes to them.
+                    if (!element.disabled) {
+                        if (element.type === 'checkbox') {
+                            element.addEventListener('click', event => {
+                                let newvalue = element.checked;
+                                console.debug(`click: field='${element.name}', value = '${newvalue}'`);
+                                modifyDocument(document, element.name, newvalue);    
+                            })
+                        } else {
+                            element.addEventListener('updatefromsandbox', event => {
+                                if (event.detail.formattedValue !== undefined) {
+                                    let newvalue = event.detail.value;
+                                    console.debug(`updatefromsandbox: field='${element.name}', value = '${newvalue}'`);
+                                    modifyDocument(document, element.name, newvalue);    
+                                }
+                            })
+                        }
+                    }
+                }
             }
         })
     })

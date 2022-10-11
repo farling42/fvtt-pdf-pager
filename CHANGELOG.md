@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.19.0
+
+- If a player doesn't have OWNER rights, then fields are marked as readOnly not disabled.
+- Improve the detection of changes to field values.
+
 ## 0.18.0
 
 - Provide a module configuration setting to remove the light-blue background from editable fields in fillable PDFs.
