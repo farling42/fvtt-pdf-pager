@@ -125,7 +125,7 @@ An example of using registerActorMapping to provide a mapping from PDF-field nam
      "INTmod": "system.abilities.int.mod",
      "WISmod": "system.abilities.wis.mod",
      "CHamod": "system.abilities.cha.mod"
-  })
+  }
 ```
 
 If there is a complex mapping for a field in the PDF, then the entry in the mapping can be defined as an object with the following functions:
