@@ -17,6 +17,7 @@ This module provides the following:
 - Automatically migrates PDFoundry PDF information to new PDF pages in journals (if the journal does not have any other pages already in it).
 - An option to automatically create a `@PDF[journalname#pagename|page=xx]{pagename}` link when dropping a journal PDF page into another document.
 - Provide an Actor sheet called 'PDF Sheet' which can be used to replace the existing Actor sheet with a PDF document.
+- Provide an option to load current values stored in a fillable PDF into an associated Actor/Item.
 
 ## Example
 
@@ -93,6 +94,12 @@ The "PDF Sheet" can be chosen for an Actor to show a PDF instead of the system's
 #### Opening an Actor or Item in a predefined PDF
 
 In the module settings, it is possible to set up a PDF Code for each type of Actor and Item, this will then present an additional entry in the context menu when selecting an Actor or Item in the sidebar. This additional entry will open the selected Actor/Item in the PDF document which has the configured PDF Code.
+
+### Loading an existing filled PDF into a Foundry Actor/Item
+
+There is a module option ("Read Fields from PDF") which can be enabled temporarily so that when a PDF file is opened then any filled fields within that PDF file will be transferred to the Actor/Item associated with that PDF within Foundry.
+
+Editing in the PDF window is disabled while this option is enabled, so that users don't mistakenly start making changes to an Actor/Item via this window, which will get overwritten the next time that the window is opened while this option is enabled.
 
 #### Accessing data stored in hidden fields
 

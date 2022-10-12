@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.20.0
+
+- Provide a new module configuration option, "Read Fields from PDF". When enabled, on loading a PDF file into a window then all the values currently stored in that PDF file will be transferred to the associated Actor/Item. Editing in the PDF window is disabled while the option is enabled, to ensure that the user is aware that this is a temporary state to quickly get PDF settings into Foundry.
+
 ## 0.19.1
 
 - Fix problem when SWADE tries to call TextEditor.enrichHTML with source that is not a string.

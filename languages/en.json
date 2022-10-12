@@ -16,6 +16,8 @@
     "pdf-pager.itemConfig.Hint"  : "Define a Javascript object that contains a mapping between PDF field and ITEM field, such as: { \"Name\" : \"name\", \"health\" : \"system.health.hp\" }",
     "pdf-pager.hideFieldBg.Name" : "Hide Editable Field BG",
     "pdf-pager.hideFieldBg.Hint" : "Disable the setting of an explicit background colour for editable fields (overrides a default PDFJS styling)",
+    "pdf-pager.readPdfFields.Name": "Read Fields from PDF",
+    "pdf-pager.readPdfFields.Hint": "When enabled, when a PDF is opened, any field data (annotations) within the loaded file are copied to the corresponding Actor field OVERWRITING any old values stored on the Actor (editing of the PDF is disabled while this option is enabled)",
     "pdf-pager.showInPDF"      :  "Open PDF",
     "pdf-pager.actorType.Name" : "Code for Actor '%1'",
     "pdf-pager.actorType.Hint" : "Define the PDF CODE of the PDF page to be used when selecting 'Show in PDF' from the Actor context menu",

@@ -60,7 +60,7 @@ function Obj2String(obj) {
  * @param {Document} document An Actor or Item
  * @param {Object} options  Can contain either or both of { disabled : true , hidebg : true }
  */
-async function setFormFromDocument(pdfpageview, document, options={}) {
+function setFormFromDocument(pdfpageview, document, options={}) {
     console.debug(`${PDFCONFIG.MODULE_NAME}: setting values for '${document.name}'`)
     let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {};
 
@@ -108,6 +108,21 @@ async function setFormFromDocument(pdfpageview, document, options={}) {
     }
 }
 
+
+function setDocumentFromForm(pdfpageview, document) {
+    const inputs = pdfpageview.div.querySelectorAll('input,select,textarea');
+    for (const element of inputs) {
+        if (element.disabled || element.readOnly) continue;
+        // Don't allow editing while the PDF is in this mode
+        element.readOnly = true;
+        if (element.type === 'checkbox')
+            modifyDocument(document, element.name, element.checked);
+        else if (element.value) // Don't write empty fields
+            modifyDocument(document, element.name, element.value);
+    }
+}
+
+
 /**
  * Handle the event which fired when the user changed a value in a field.
  * @param {Document} document An Actor or Item
@@ -128,14 +143,23 @@ function modifyDocument(document, inputfield, value) {
         flags[inputfield] = value;
         document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, flags);        
     } else if (typeof docfield === 'string') {
-        if (getProperty(document, docfield) === value) return;
+        let currentvalue = getProperty(document, docfield)
+        // Maybe convert PDF value into the correct Document type
+        if (typeof value !== typeof currentvalue) {
+            switch (typeof currentvalue) {
+                case 'number':  value = Number(value);  break;
+                case 'boolean': value = Boolean(value); break;
+                case 'string':  value = String(value);  break;
+            }
+        }
+        if (currentvalue === value) return;
         console.debug(`Updating '${document.name}'['${docfield}'] = '${value}'`);
         // It doesn't seem like we can prevent calling document.update twice
         // when the change is received by both 'dispatcheventinsandbox' and the 'change' event handler.
         // calling setProperty(document,docfield,value) doesn't retain the value.
         document.update({ [docfield]: value });
     } else if (docfield.setValue) {
-        console.debug(`Calling setValue on field for '${document.name}' with '${value}'`);
+        console.debug(`Calling setValue function for '${document.name}'['${inputfield}'] with '${value}'`);
         docfield.setValue(document, value);
     }
 }
@@ -146,7 +170,8 @@ function modifyDocument(document, inputfield, value) {
 async function update_document(document, change, options, userId) {
     let pdfviewer = document2pdfviewer.get(document.uuid);
     if (!pdfviewer) return;
-    setFormFromDocument(pdfviewer, document);
+    if (!game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF))
+        setFormFromDocument(pdfviewer, document);
 }
 Hooks.on('updateActor', update_document)
 Hooks.on('updateItem',  update_document)
@@ -220,7 +245,11 @@ export async function initEditor(html, id_to_display) {
             let options = {};
             if (!editable) options.disabled=true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG)) options.hidebg = true;
-            setFormFromDocument(pdfpageview, document, options);
+
+            if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF))
+                setDocumentFromForm(pdfpageview, document);
+            else
+                setFormFromDocument(pdfpageview, document, options);
 
             // Some documents do NOT generate events that are captured by 'dispatcheventinsandbox',
             // so we need to attach here too.
