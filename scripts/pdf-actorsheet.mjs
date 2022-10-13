@@ -39,8 +39,11 @@ export class PDFActorSheet extends ActorSheet {
   getData() {
     const context = super.getData();
     // Ensure we have the correct prefix (if any) on the file.
-    let file = game.settings.get(PDFCONFIG.MODULE_NAME, `${context.actor.type}Sheet`);
-    context.pdfFilename = foundry.utils.getRoute(file);
+    let pdffile = game.settings.get(PDFCONFIG.MODULE_NAME, `${context.actor.type}Sheet`);
+    // URL.parseSafe is to cope with where a user has specified a full URL for the PDF path
+    // instead of a file relative to the Foundry USERDATA area.
+    // (This would typically be an issue on The Forge hosting service.)
+    context.pdfFilename = URL.parseSafe(pdffile) ? pdffile : foundry.utils.getRoute(pdffile);
     return context;
   }
 

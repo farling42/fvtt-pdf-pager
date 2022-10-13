@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.20.1
+
+- Fix an issue where the PDF configured to use with an Actor sheet might be a web address instead of a file local to the Foundry userdata area.
+
 ## 0.20.0
 
 - Provide a new module configuration option, "Read Fields from PDF". When enabled, on loading a PDF file into a window then all the values currently stored in that PDF file will be transferred to the associated Actor/Item. Editing in the PDF window is disabled while the option is enabled, to ensure that the user is aware that this is a temporary state to quickly get PDF settings into Foundry.
