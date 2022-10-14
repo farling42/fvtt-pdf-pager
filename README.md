@@ -39,7 +39,7 @@ https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json
 
 ## Utility Function
 
-A new function is available for modules to use which will open a PDF using a short-code defined for that specific PDF (e.g. "DMG" or "PHB"). There are two optional parameters:
+A function is available for modules to use which will open a PDF using a short-code defined for that specific PDF (e.g. "DMG" or "PHB"). There are two optional parameters:
 
 - Specify a specific page within the PDF to open
 - Specify the UUID of an Actor or Item to display in the Form Fillable PDF
@@ -83,7 +83,7 @@ NEW: `@UUID[full-uid-to-pdf-page#page=xxx]{label}`
 ui.pdfpager.replacePDFlinks()
 ```
 
-### Form Fillable PDFs
+## Form Fillable PDFs
 
 To use Form Fillable PDFs, a PDF page should be set up in a Journal, and the "PDF Code" in the PDF Editor should be set to the ID of the associated Actor or Item. For ease of use, dragging an Actor or Item onto the "PDF Code" page will insert the UUID for that document.
 
@@ -91,7 +91,7 @@ The module settings window allows you to set up manual mappings between a PDF fi
 
 The "PDF Sheet" can be chosen for an Actor to show a PDF instead of the system's default character sheet. The specific PDF document for each actor type can be configured in the module settings. The storage of information from that PDF will be processed in the same way as for Journal PDF Pages.
 
-#### Opening an Actor or Item in a predefined PDF
+### Opening an Actor or Item in a predefined PDF
 
 In the module settings, it is possible to set up a PDF Code for each type of Actor and Item, this will then present an additional entry in the context menu when selecting an Actor or Item in the sidebar. This additional entry will open the selected Actor/Item in the PDF document which has the configured PDF Code.
 
