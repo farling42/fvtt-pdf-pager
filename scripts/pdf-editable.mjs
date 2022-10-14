@@ -317,7 +317,7 @@ export async function initEditor(html, id_to_display) {
                                 modifyDocument(document, target.name, newvalue);    
                             })
                         } else if (element.nodeName === 'SELECT') {
-                            // If this element has the ":before" computed style, then this option is enabled
+                            // select fields need to trigger as soon as a new selection is made
                             element.addEventListener('change', event => {
                                 let target = event.target;
                                 console.debug(`${event.type}: field='${target.name}', value = '${target.value}'`);
