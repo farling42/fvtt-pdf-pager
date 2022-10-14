@@ -24,10 +24,14 @@ SOFTWARE.
 // After a PDF has been rendered, find the div#viewer.pdfViewer element,
 // and find each <input> or <textarea> element. The "name" field will specify the specific data element,
 // such as "Might" or "Type_Focus_or_Other".
-// Some <input> will have "type=checkbox", so then the "checked" attribute needs setting.
+// Some <input> will have "type=checkbox" or "type=radio", so then the "checked" attribute needs setting.
 // TODO : support <select> fields.
 // 
 // We need to map the PDF Name field to the Actor data field.
+//
+// NOTES:
+// AnnotationStorage.setValue is called for each individual character change in a field.
+// let hasjsactions = await pdfviewerapp.pdfDocument.hasJSActions();
 
 import { PDFCONFIG } from './pdf-config.mjs'
 
@@ -54,23 +58,35 @@ function Obj2String(obj) {
     return ret;
 }
 
+
+async function getbuttonvalues(pdfviewer) {
+    let buttonvalues = new Map();
+    for (const pdfpageview of pdfviewer._pages) {
+        let annotations = await pdfpageview.pdfPage?.getAnnotations();
+        if (annotations) {
+            for (const annotation of annotations)
+                if (annotation.buttonValue) buttonvalues.set(annotation.id, annotation.buttonValue);
+        }
+    }
+    return buttonvalues;
+}
+
+
 /**
  * Copy all the data from the specified Document (Actor/Item) to the fields on the PDF sheet (container)
- * @param {PDFPageView} pdfpageview  
+ * @param {PDFViewer} pdfviewer  
  * @param {Document} document An Actor or Item
  * @param {Object} options  Can contain either or both of { disabled : true , hidebg : true }
  */
-function setFormFromDocument(pdfpageview, document, options={}) {
-    console.debug(`${PDFCONFIG.MODULE_NAME}: setting values for '${document.name}'`)
-    let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {};
-
-    //let fields = await pdfpageview.pdfPage._transport.getFieldObjects()
-    //console.log(fields);
+async function setFormFromDocument(pdfviewer, document, options={}) {
+    console.debug(`${PDFCONFIG.MODULE_NAME}: loading values from ${document.documentName}(${document.type}) '${document.name}' into PDF`);
+    let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {}
+    let buttonvalues;  // support for radio buttons
 
     // Set values from the module FLAG on the Document.
-    const inputs = pdfpageview.div.querySelectorAll('input,select,textarea');
+    const inputs = pdfviewer.viewer.querySelectorAll('input,select,textarea');
     const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
-    const storage = pdfpageview.annotationLayer.annotationStorage;
+    //const storage = pdfpageview.annotationLayer.annotationStorage;
     for (let elem of inputs) {
         if (options.hidebg)   elem.style.setProperty('background-image', 'none');
         if (options.disabled) elem.readOnly = true;
@@ -99,6 +115,15 @@ function setFormFromDocument(pdfpageview, document, options={}) {
             if (elem.checked  == newchecked) continue;
             elem.checked  = newchecked;
             //storage.setValue(elem.id, { value : elem.checked });
+        } else if (elem.type === 'radio') {
+            if (!buttonvalues) buttonvalues = await getbuttonvalues(pdfviewer);
+            let field = buttonvalues.get(elem.id);
+            let newvalue = (field === undefined) ? elem.id : field;
+
+            let newchecked = (value == newvalue);
+            if (elem.checked == newchecked) continue;
+            elem.checked  = newchecked;
+            //storage.setValue(elem.id, { value : elem.checked });
         } else {
             let newvalue = value || "";
             if (elem.value === newvalue) continue;
@@ -109,15 +134,25 @@ function setFormFromDocument(pdfpageview, document, options={}) {
 }
 
 
-function setDocumentFromForm(pdfpageview, document) {
-    const inputs = pdfpageview.div.querySelectorAll('input,select,textarea');
+async function setDocumentFromForm(pdfviewer, document) {
+    console.debug(`${PDFCONFIG.MODULE_NAME}: transferring loaded values from PDF into ${document.documentName}(${document.type}) '${document.name}'`);
+    const inputs = pdfviewer.viewer.querySelectorAll('input,select,textarea');
+    let buttonvalues; // support for radio buttons
+
     for (const element of inputs) {
         if (element.disabled || element.readOnly) continue;
         // Don't allow editing while the PDF is in this mode
         element.readOnly = true;
         if (element.type === 'checkbox')
             modifyDocument(document, element.name, element.checked);
-        else if (element.value) // Don't write empty fields
+        else if (element.type === 'radio') {
+            // ID of element is stored for the selected RADIO button
+            if (!buttonvalues) buttonvalues = await getbuttonvalues(pdfviewer);
+            if (element.checked) {
+                let newvalue = buttonvalues.get(element.id);
+                modifyDocument(document, element.name, (newvalue === undefined) ? element.id : newvalue);
+            }
+        } else if (element.value) // Don't write empty fields
             modifyDocument(document, element.name, element.value);
     }
 }
@@ -137,7 +172,7 @@ function modifyDocument(document, inputfield, value) {
         //console.debug(`${PDFCONFIG.MODULE_NAME}: unmapped PDF field: name='${inputname}', value='${value}'`);
         // Copy the modified field to the MODULE FLAG in the Document
         let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
-        if (!flags || !(flags instanceof Object)) flags = {};
+        if (!(flags instanceof Object)) flags = {};
         if (flags[inputfield] === value) return;
         console.debug(`Hiding value '${document.name}'['${inputfield}'] = '${value}'`);
         flags[inputfield] = value;
@@ -153,7 +188,7 @@ function modifyDocument(document, inputfield, value) {
             }
         }
         if (currentvalue === value) return;
-        console.debug(`Updating '${document.name}'['${docfield}'] = '${value}'`);
+        console.debug(`Setting '${document.name}'['${docfield}'] = '${value}'`);
         // It doesn't seem like we can prevent calling document.update twice
         // when the change is received by both 'dispatcheventinsandbox' and the 'change' event handler.
         // calling setProperty(document,docfield,value) doesn't retain the value.
@@ -239,38 +274,67 @@ export async function initEditor(html, id_to_display) {
         await pdfviewerapp.initializedPromise;
 
         // Wait for the AnnotationLayer to get drawn before populating all the fields with data from the Document.
+        // TODO - how to only do these ONCE for each page (or ONCE for the whole document).
+        //        Resizing the window causes this to be called again for each page!
         pdfviewerapp.eventBus.on('annotationlayerrendered', layerevent => {   // from PdfPageView
+
+            console.log(`Loaded page ${layerevent.pageNumber} for ${document.name}`);
             let pdfpageview = layerevent.source;
-            if (!document2pdfviewer.has(document.uuid)) document2pdfviewer.set(document.uuid, pdfpageview);
+            if (!document2pdfviewer.has(document.uuid)) document2pdfviewer.set(document.uuid, pdfviewerapp.pdfViewer);
             let options = {};
             if (!editable) options.disabled=true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG)) options.hidebg = true;
 
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF))
-                setDocumentFromForm(pdfpageview, document);
+                setDocumentFromForm(pdfviewerapp.pdfViewer, document);
             else
-                setFormFromDocument(pdfpageview, document, options);
-
+                setFormFromDocument(pdfviewerapp.pdfViewer, document, options);
+            
             // Some documents do NOT generate events that are captured by 'dispatcheventinsandbox',
             // so we need to attach here too.
-            if (editable) {
+            if (editable) {        
+                // Only the inputs on this page, rather than the entire form.
                 const inputs = pdfpageview.div.querySelectorAll('input,select,textarea');
                 for (const element of inputs) {
                     // disabled fields are presumably automatically calculated values, so don't listen for changes to them.
-                    if (!element.disabled) {
+                    if (!element.disabled && !element.getAttribute('pdfpager')) {
+                        element.setAttribute('pdfpager', id_to_display);
+
                         if (element.type === 'checkbox') {
                             element.addEventListener('click', event => {
-                                let newvalue = element.checked;
-                                console.debug(`click: field='${element.name}', value = '${newvalue}'`);
-                                modifyDocument(document, element.name, newvalue);    
+                                let target = event.target;
+                                console.debug(`${event.type}: field='${target.name}', value = '${target.checked}'`);
+                                modifyDocument(document, target.name, target.checked);    
+                            })
+                        } else if (element.type === 'radio') {
+                            // If this element has the ":before" computed style, then this option is enabled
+                            element.addEventListener('click', async event => {
+                                let target = event.target;
+                                let annotations = await pdfpageview.annotationLayer.pdfPage.getAnnotations();
+                                let field = annotations.find(annotation => annotation.id == target.id);
+                                let newvalue = field ? field.buttonValue : target.id;
+                                console.debug(`${event.type}: field='${target.name}', value = '${newvalue}'`);
+                                modifyDocument(document, target.name, newvalue);    
+                            })
+                        } else if (element.nodeName === 'SELECT') {
+                            // If this element has the ":before" computed style, then this option is enabled
+                            element.addEventListener('change', event => {
+                                let target = event.target;
+                                console.debug(`${event.type}: field='${target.name}', value = '${target.value}'`);
+                                modifyDocument(document, target.name, target.value);    
                             })
                         } else {
-                            element.addEventListener('updatefromsandbox', event => {
-                                if (event.detail.formattedValue !== undefined) {
-                                    let newvalue = event.detail.value;
-                                    console.debug(`updatefromsandbox: field='${element.name}', value = '${newvalue}'`);
-                                    modifyDocument(document, element.name, newvalue);    
-                                }
+                            // blur = lose focus
+                            // submit = press RETURN
+                            element.addEventListener('blur', event => {
+                                let target = event.target;
+                                console.debug(`${event.type}: field='${target.name}', value = '${target.value}'`);
+                                modifyDocument(document, target.name, target.value);    
+                            });
+                            element.addEventListener('submit', event => {
+                                let target = event.target;
+                                console.debug(`${event.type}: field='${target.name}', value = '${target.value}'`);
+                                modifyDocument(document, target.name, target.value);    
                             })
                         }
                     }

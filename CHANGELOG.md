@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.21.0
+
+- Rework how fillable data is handled with PDFs (since the old method didn't work for PDFs with no JSActions).
+- Support radio buttons in PDF documents (using the "buttonValue" of the PDF field as the value to be stored).
+
 ## 0.20.1
 
 - Fix an issue where the PDF configured to use with an Actor sheet might be a web address instead of a file local to the Foundry userdata area.
