@@ -60,17 +60,39 @@ export class PDFActorSheet extends ActorSheet {
 }
 
 
-Hooks.once('init', () => {
-    Actors.registerSheet(PDFCONFIG.MODULE_NAME, PDFActorSheet, {
-        types: game.template.Actor.types,
-        makeDefault: false,
-        label: "PDF Sheet"
-    } )
-});
 
+let defined_types = [];
 
 export function configureActorSettings() {
   const name  = PDFCONFIG.MODULE_NAME;
+
+  function updateSheets() {
+
+    let types = []
+    for (const type of game.template.Actor.types) {
+      let param = `${type}Sheet`;
+      if (game.settings.get(name, param)?.length) {
+        types.push(type);
+      }
+    }
+
+    // Remove any old registered sheets
+    if (types != defined_types) {
+      console.log(`Changing registered Actor sheets to ${JSON.stringify(types)}`)
+      defined_types = types;
+      Actors.unregisterSheet(PDFCONFIG.MODULE_NAME, PDFActorSheet);
+
+      // Add new list of registered sheets
+      if (types.length) {
+        Actors.registerSheet(PDFCONFIG.MODULE_NAME, PDFActorSheet, {
+          types,
+          makeDefault: false,
+          label: "PDF Sheet"
+        })
+      }
+    }
+  }
+
   for (let type of game.template.Actor.types) {
     let param = `${type}Sheet`;
     let basename = game.i18n.localize(`${name}.actorSheet.Name`);
@@ -82,7 +104,10 @@ export function configureActorSettings() {
 		  type:  String,
 		  default: "",
       filePicker: true,
+      onChange: value => { updateSheets() },
 		  config: true
 	  });
   }
+
+  updateSheets();
 }

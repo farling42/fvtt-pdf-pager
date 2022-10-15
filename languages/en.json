@@ -19,10 +19,10 @@
     "pdf-pager.readPdfFields.Name": "Read Fields from PDF",
     "pdf-pager.readPdfFields.Hint": "When enabled, when a PDF is opened, any field data (annotations) within the loaded file are copied to the corresponding Actor field OVERWRITING any old values stored on the Actor (editing of the PDF is disabled while this option is enabled)",
     "pdf-pager.showInPDF"      :  "Open PDF",
-    "pdf-pager.actorType.Name" : "Code for Actor '%1'",
+    "pdf-pager.actorType.Name" : "MENUS: Code for Actor '%1'",
     "pdf-pager.actorType.Hint" : "Define the PDF CODE of the PDF page to be used when selecting 'Show in PDF' from the Actor context menu",
-    "pdf-pager.itemType.Name"  : "Code for Item '%1'",
+    "pdf-pager.itemType.Name"  : "MENUS: Code for Item '%1'",
     "pdf-pager.itemType.Hint"  : "Define the PDF CODE of the PDF page to be used when selecting 'Show in PDF' from the Item context menu",
-    "pdf-pager.actorSheet.Name" : "PDF to use for Actor '%1'",
+    "pdf-pager.actorSheet.Name" : "SHEETS: PDF for '%1'",
     "pdf-pager.actorSheet.Hint" : "Choose the PDF file to be used for a '%1' Actor"
 }

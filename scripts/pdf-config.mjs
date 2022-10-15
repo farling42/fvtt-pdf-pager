@@ -123,8 +123,8 @@ Hooks.once('ready', () => {
 		config: true
 	});
 
-	configureMenuSettings();
 	configureActorSettings();
+	configureMenuSettings();
 
     if (!ui.pdfpager) ui.pdfpager = { openPDFByCode, migratePDFoundry, replacePDFlinks, registerActorMapping, registerItemMapping };
 });

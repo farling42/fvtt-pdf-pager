@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.22.0
+
+- Only present the "PDF Sheet" option in the Sheet Configuration window if a PDF has been defined in the module settings for that type of actor.
+- Move the SHEET settings above the MENUS settings in the module configuration window.
+
 ## 0.21.0
 
 - Rework how fillable data is handled with PDFs (since the old method didn't work for PDFs with no JSActions).
