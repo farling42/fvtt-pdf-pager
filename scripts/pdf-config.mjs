@@ -40,7 +40,8 @@ export let PDFCONFIG = {
 	// Flags on an Actor
     FLAG_OFFSET             : "pageOffset",
     FLAG_CODE               : "code",
-	FLAG_FIELDTEXT          : "fieldText"
+	FLAG_FIELDTEXT          : "fieldText",
+	FLAG_CUSTOM_PDF         : "customPDF",
 };
 
 Hooks.once('ready', () => {

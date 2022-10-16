@@ -95,6 +95,14 @@ The "PDF Sheet" can be chosen for an Actor to show a PDF instead of the system's
 
 In the module settings, it is possible to set up a PDF Code for each type of Actor and Item, this will then present an additional entry in the context menu when selecting an Actor or Item in the sidebar. This additional entry will open the selected Actor/Item in the PDF document which has the configured PDF Code.
 
+#### Configuring a specific PDF for a specific Actor
+
+Once a generic PDF has been defined for a type of Actor, then the window title of the "PDF Sheet" for the Actor will have an additional button, "Custom PDF". Using this button a specific PDF can be chosen to be used for this specific Actor instead of the generic PDF configured in the module settings.
+
+The "custom PDF" can be removed by erasing the filename specified in the Custom PDF dialog. This will revert the Actor to using the generic PDF.
+
+The Actor sheet has to be manually closed and reopened in order to see the new PDF.
+
 ### Loading an existing filled PDF into a Foundry Actor/Item
 
 There is a module option ("Read Fields from PDF") which can be enabled temporarily so that when a PDF file is opened then any filled fields within that PDF file will be transferred to the Actor/Item associated with that PDF within Foundry.

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.23.0
+
+- When a generic PDF has been configured for a particular type of Actor, opening an Actor's sheet will present an additional button in the title bar "Custom PDF". Selecting this button will let you configure a specific PDF to be used for this particular Actor, superceding the generic PDF configured in the module settings. Deleting the specific PDF from this window will restore the Actor sheet to the generic PDF configured in the module settings. The user has to close the window and reopen it for the new PDF to be shown.
+
 ## 0.22.0
 
 - Only present the "PDF Sheet" option in the Sheet Configuration window if a PDF has been defined in the module settings for that type of actor.

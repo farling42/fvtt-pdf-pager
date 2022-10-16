@@ -1,0 +1,17 @@
+<form class="{{cssClass}} flexcol" autocomplete="off">
+    <div class="form-group">
+    <label>Custom PDF:</label>
+    <div class="form-fields">
+    <button type="button" class="file-picker" data-type="any" data-target="filename" title="Browse Files" tabIndex="-1">
+        <i class="fas fa-file-import fa-fw">
+        </i>
+    </button>
+    <input type="text" name="filename" value="{{filename}}" data-dtype="String">
+    </div>
+    <p class="notes">Choose the PDF to be used for this specific Actor</p>
+    </div>
+    <button type="submit">
+        <i class=""fas fa-save"></i>
+        Save Custom PDF
+    </button>
+</form>

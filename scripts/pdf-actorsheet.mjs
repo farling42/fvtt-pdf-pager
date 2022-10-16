@@ -30,6 +30,46 @@ SOFTWARE.
 import { PDFCONFIG } from './pdf-config.mjs';
 import { initEditor } from './pdf-editable.mjs';
 
+
+export class PDFActorSheetConfig extends FormApplication {
+  // this.object = PDFActorSheet
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      width: 600,
+    })
+  }
+  get template() {
+    return `modules/${PDFCONFIG.MODULE_NAME}/templates/actor-choose-pdf.hbs`;
+  }
+  get title() {
+    const actor = this.object.document;
+    return `Choose PDF for '${actor.name}'`
+  }
+  getData() {
+    const actor = this.object.document;
+    return {
+      filename: actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
+    }
+  }
+  async _updateObject(event, formData) {
+    event.preventDefault();
+    const actor = this.object.document;
+    const oldflag = actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF);
+    if (formData.filename == oldflag) return;
+
+    if (formData.filename) {
+      console.log(`Configuring Actor '${actor.name}' to use PDF sheet '${formData.filename}'`)
+      actor.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF, formData.filename)
+    } else {
+      console.log(`Removing custom PDF sheet for Actor '${actor.name}'`)
+      actor.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
+    }
+    // Regenerate the PDFActorSheet with the new PDF
+    this.object.render(true);
+  }
+}
+
+
 export class PDFActorSheet extends ActorSheet {    
 
   get template() {
@@ -39,7 +79,9 @@ export class PDFActorSheet extends ActorSheet {
   getData() {
     const context = super.getData();
     // Ensure we have the correct prefix (if any) on the file.
-    let pdffile = game.settings.get(PDFCONFIG.MODULE_NAME, `${context.actor.type}Sheet`);
+    const actor = this.document;
+    // Check for a custom PDF local to the Actor before using the generic sheet.
+    let pdffile = actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF) || game.settings.get(PDFCONFIG.MODULE_NAME, `${context.actor.type}Sheet`);
     // URL.parseSafe is to cope with where a user has specified a full URL for the PDF path
     // instead of a file relative to the Foundry USERDATA area.
     // (This would typically be an issue on The Forge hosting service.)
@@ -51,6 +93,38 @@ export class PDFActorSheet extends ActorSheet {
     super.activateListeners(html);      
     initEditor(html.find('iframe'), this.object.uuid);
   }
+
+  _onChoosePdf(event) {
+    event.preventDefault();
+    new PDFActorSheetConfig(this, {
+      top: this.position.top + 40,
+      left: this.position.left + ((this.position.width - PDFActorSheetConfig.defaultOptions.width) / 2)
+    }).render(true);
+    console.log('choose a custom PDF')
+  }
+
+  _getHeaderButtons() {
+    let buttons = super._getHeaderButtons();
+    buttons.unshift({
+      label: "Custom PDF",
+      class: "configure-custom-pdf",
+      icon:  "fas fa-file-pdf",
+      onclick: event => {
+        this._onChoosePdf(event);
+      }
+    })
+    return buttons;
+  }
+
+  /*
+  async _renderInner(data) {
+    // Add a button in the title bar
+    let html = await super._renderInner(data);
+    console.log('renderInner');
+    let button = `<a class="header-button configure-pdf"><i class="fas fa-file-pdf">::before</i></a>`;
+    html.find('a.configure-sheet').before(button);
+    return html;
+  }*/
 
   // Only actually call the render function if the window is not currently rendered,
   // since the `initEditor` call will otherwise handle changes to actor field data.
