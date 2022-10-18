@@ -246,19 +246,18 @@ export async function initEditor(html, id_to_display) {
     if (mapping) map_pdf2item = eval(`(${mapping})`);
 
     const systemfile = `/systems/${game.system.id}.mjs`;
-    if (!map_pdf2actor && await srcExists(`modules/${PDFCONFIG.MODULE_NAME}${systemfile}`)) {
-        const module = await import(`..${systemfile}`)
+    if (!map_pdf2actor) {
+        await import(`..${systemfile}`)
             .then(module => {
                 map_pdf2actor = module.actormap;
                 map_pdf2item  = module.itemmap;
                 game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ACTOR_CONFIG, Obj2String(map_pdf2actor));
                 game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ITEM_CONFIG,  Obj2String(map_pdf2item));
             })
-            .catch(error => console.warn(`${PDFCONFIG.MODULE_NAME}: Failed to find the PDF mapping file for 'systems/${game.system.id}.mjs'.`))
-    } else {
-        if (!map_pdf2actor) map_pdf2actor = {};
-        if (!map_pdf2item)  map_pdf2item  = {};
+            .catch(error => null)  // Don't worry if the file can't be laoded
     }
+    if (!map_pdf2actor) map_pdf2actor = {};
+    if (!map_pdf2item)  map_pdf2item  = {};
 
     // Wait for the IFRAME to appear in the window before any further initialisation (html = iframe)
     html.on('load', async (event) => {
