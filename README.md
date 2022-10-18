@@ -165,6 +165,10 @@ export let actormap = {
 
 Feel free to forward me any system-specific .mjs files which you've created for inclusion in the systems folder.
 
+#### Inspect Data option for Actor sheet
+
+The Data Inspector window from PDFoundry is available from the PDF Actor Sheet for those wanting to modify their own PDFs to use the data fields present in the Actor records. This window was taken directly from the PDFoundry module available for Foundry V9 and earlier at [PDFoundry](https://github.com/Djphoenix719/PDFoundry).
+
 ### Translations
 
 Feel free to submit a pull request or an issue containing translations for the entries in the en.json file.
