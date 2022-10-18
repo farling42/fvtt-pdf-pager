@@ -1,9 +1,14 @@
 # CHANGELOG
 
+## 0.25.0
+
+- Support PDFs which have pre-computed fields.  There is a slight delay after opening an Actor PDF sheet before the fields are displayed, so that the PDF scripting engine will be fully initialised.
+
 ## 0.24.0
 
 - If no explicit mapping is given for a PDF field, then see if the "name" of the PDF field matches a field in the Actor/Item being edited. This should add support for PDFs which were generated for use with PDFoundry.
 - Do not use the "id" of a PDF field as the key for hiding the value on the Actor/Item (Adding data to a PDF outside of Foundry and then saving the filled PDF changes the ID of the fields!)
+- Provide the "Inspect Data" button and window from [PDFoundry](https://github.com/Djphoenix719/PDFoundry)
 
 ## 0.23.0
 
