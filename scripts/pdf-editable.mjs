@@ -110,12 +110,11 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             }
         }
 
-        // Set required value on the HTML element        
+        // Set required value on the HTML element
         if (elem.type === 'checkbox') {
             let newchecked = value || false;
             if (elem.checked  == newchecked) continue;
             elem.checked  = newchecked;
-            //storage.setValue(elem.id, { value : elem.checked });
         } else if (elem.type === 'radio') {
             if (!buttonvalues) buttonvalues = await getbuttonvalues(pdfviewer);
             let field = buttonvalues.get(elem.id);
@@ -124,13 +123,13 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             let newchecked = (value == newvalue);
             if (elem.checked == newchecked) continue;
             elem.checked  = newchecked;
-            //storage.setValue(elem.id, { value : elem.checked });
         } else {
             let newvalue = value || "";
             if (elem.value === newvalue) continue;
             elem.value = newvalue;
-            //storage.setValue(elem.id, { value : elem.value });
         }
+        // Force any calculations that might be set in the PDF
+        elem.dispatchEvent(new KeyboardEvent("keydown", {key: 'Tab'}));   // Escape | Enter | Tab
     }
 }
 
@@ -275,27 +274,42 @@ export async function initEditor(html, id_to_display) {
         const pdfviewerapp = contentWindow.PDFViewerApplication;
         await pdfviewerapp.initializedPromise;
 
+        let timeout=false;
+
         // Wait for the AnnotationLayer to get drawn before populating all the fields with data from the Document.
         // TODO - how to only do these ONCE for each page (or ONCE for the whole document).
         //        Resizing the window causes this to be called again for each page!
         pdfviewerapp.eventBus.on('annotationlayerrendered', layerevent => {   // from PdfPageView
 
             console.log(`Loaded page ${layerevent.pageNumber} for ${document.name}`);
-            let pdfpageview = layerevent.source;
             if (!document2pdfviewer.has(document.uuid)) document2pdfviewer.set(document.uuid, pdfviewerapp.pdfViewer);
             let options = {};
             if (!editable) options.disabled=true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG)) options.hidebg = true;
 
+            let pdfviewer = pdfviewerapp.pdfViewer;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF))
-                setDocumentFromForm(pdfviewerapp.pdfViewer, document);
-            else
-                setFormFromDocument(pdfviewerapp.pdfViewer, document, options);
+                setDocumentFromForm(pdfviewer, document);
+            else {
+                function load() {
+                    setFormFromDocument(pdfviewer, document, options)
+                    timeout=undefined;
+                }
+                if (timeout) clearTimeout(timeout);
+                if (!pdfviewer.enableScripting || pdfviewer._scriptingManager.ready) {
+                    console.log(`calling setFormFromDocument immediately`);
+                    load();
+                } else {
+                    console.log(`deferring setFormFromDocument`);
+                    timeout = setTimeout(load, 1000);
+                }
+            }
             
             // Some documents do NOT generate events that are captured by 'dispatcheventinsandbox',
             // so we need to attach here too.
             if (editable) {        
                 // Only the inputs on this page, rather than the entire form.
+                let pdfpageview = layerevent.source;
                 const inputs = pdfpageview.div.querySelectorAll('input,select,textarea');
                 for (const element of inputs) {
                     // disabled fields are presumably automatically calculated values, so don't listen for changes to them.
