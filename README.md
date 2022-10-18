@@ -9,6 +9,7 @@
 
 This module provides the following:
 
+- Provide an Actor sheet called 'PDF Sheet' which can be used to replace the existing Actor sheet with a PDF document.
 - Configuration option to automatically load a PDF into a page as soon as the page is displayed.
 - Include `#page=xxx` as a suffix on the document link to open a PDF document at the requested page.
 - Include a page offset in the PDF document definition, so that `page=xxx` can reference the book's page numbering (some PDFs have extra pages before page 1).
@@ -16,7 +17,6 @@ This module provides the following:
 - Provide additional syntax of `@PDF[journalname#pagename|page=xx]{label}` to allow PDFs to be displayed in a page whose name does not match the journal name.
 - Automatically migrates PDFoundry PDF information to new PDF pages in journals (if the journal does not have any other pages already in it).
 - An option to automatically create a `@PDF[journalname#pagename|page=xx]{pagename}` link when dropping a journal PDF page into another document.
-- Provide an Actor sheet called 'PDF Sheet' which can be used to replace the existing Actor sheet with a PDF document.
 - Provide an option to load current values stored in a fillable PDF into an associated Actor/Item.
 
 ## Example
@@ -164,6 +164,28 @@ export let actormap = {
 ```
 
 Feel free to forward me any system-specific .mjs files which you've created for inclusion in the systems folder.
+
+#### Get/Set PDF Value
+
+Two helper functions are provided to allow module developers to get or modify the value of a PDF field stored on an Actor.
+
+```js
+/**
+ * 
+ * @param {Document} document   e.g. an Actor
+ * @param {String}   fieldname The name of the PDF field whose value is being change.
+ * @param {String}   value     The value to store in the field.
+ */
+export function setPDFValue(document, fieldname, value)
+
+/**
+ * 
+ * @param {Document} document   The Actor whose data is being read.
+ * @param {String}   fieldname The name of the field whose value is required.
+ * @returns The value of the named PDF field (or undefined).
+ */
+export function getPDFValue(document, fieldname)
+```
 
 #### Inspect Data option for Actor sheet
 

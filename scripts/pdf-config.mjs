@@ -23,7 +23,7 @@ SOFTWARE.
 
 import { openPDFByCode } from './pdf-pager.mjs';
 import { migratePDFoundry, replacePDFlinks } from './pdf-migrate.mjs';
-import { registerActorMapping, registerItemMapping } from './pdf-editable.mjs';
+import { registerActorMapping, registerItemMapping, getPDFValue, setPDFValue } from './pdf-editable.mjs';
 import { configureMenuSettings } from './pdf-menu.mjs';
 import { configureActorSettings } from './pdf-actorsheet.mjs';
 
@@ -127,5 +127,8 @@ Hooks.once('ready', () => {
 	configureActorSettings();
 	configureMenuSettings();
 
-    if (!ui.pdfpager) ui.pdfpager = { openPDFByCode, migratePDFoundry, replacePDFlinks, registerActorMapping, registerItemMapping };
+    if (!ui.pdfpager) {
+		ui.pdfpager = { openPDFByCode, migratePDFoundry, replacePDFlinks, 
+			registerActorMapping, registerItemMapping, getPDFValue, setPDFValue };
+	}
 });

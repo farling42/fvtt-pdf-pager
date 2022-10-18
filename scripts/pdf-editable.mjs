@@ -391,3 +391,26 @@ export function registerItemMapping(mapping) {
     map_pdf2item = mapping;
     game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ACTOR_CONFIG, Obj2String(map_pdf2item));
 }
+
+/**
+ * 
+ * @param {Document} document   e.g. an Actor
+ * @param {String}   fieldname The name of the PDF field whose value is being change.
+ * @param {String}   value     The value to store in the field.
+ */
+export function setPDFValue(document, fieldname, value) {
+    let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {}
+    flags[fieldname] = value;
+    document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, flags);
+}
+
+/**
+ * 
+ * @param {Document} document   The Actor whose data is being read.
+ * @param {String}   fieldname The name of the field whose value is required.
+ * @returns The value of the named PDF field (or undefined).
+ */
+export function getPDFValue(document, fieldname) {
+    let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {}
+    return flags[fieldname];
+}
