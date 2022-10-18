@@ -95,20 +95,21 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
         if (elem.disabled) continue; // DISABLED
 
         // Get required value, either from the FLAGS or from a field on the Actor
-        const docfield = mapping && (mapping[elem.name] || mapping[elem.id]);
+        let docfield = mapping && (mapping[elem.name]);
+        if (!docfield && getProperty(document, elem.name) !== undefined) docfield = elem.name;
         let value;
         if (!docfield) {
             value = flags[elem.name];
-            if (value === undefined) value = flags[elem.id];
         } else {
             if (docfield instanceof Object && docfield.getValue) {
                 value = docfield.getValue(document);
                 if (!docfield.setValue) elem.readOnly = true;
             } else if (typeof docfield === 'string') {
-                value = foundry.utils.getProperty(document, docfield);
+                value = getProperty(document, docfield);
                 if (typeof value === 'number') value = '' + value;
             }
         }
+
         // Set required value on the HTML element        
         if (elem.type === 'checkbox') {
             let newchecked = value || false;
@@ -161,22 +162,24 @@ async function setDocumentFromForm(pdfviewer, document) {
 /**
  * Handle the event which fired when the user changed a value in a field.
  * @param {Document} document An Actor or Item
- * @param {string} inputfield  The PDF NAME of the field
- * @param {string} value The value to be stored in the document
+ * @param {string} fieldname  The PDF NAME of the field
+ * @param {string} value      The value to be stored in the document
  */
-function modifyDocument(document, inputfield, value) {
+function modifyDocument(document, fieldname, value) {
     // Copy the modified field to the corresponding field in the Document
+    let docfield;
     const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
-    let docfield = mapping?.[inputfield];
+    docfield = mapping?.[fieldname];
+    if (!docfield && getProperty(document, fieldname) !== undefined) docfield = fieldname;
+
     if (!docfield) {
-        //console.debug(`${PDFCONFIG.MODULE_NAME}: unmapped PDF field: name='${inputname}', value='${value}'`);
         // Copy the modified field to the MODULE FLAG in the Document
         let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
         if (!(flags instanceof Object)) flags = {};
-        if (flags[inputfield] === value) return;
-        console.debug(`Hiding value '${document.name}'['${inputfield}'] = '${value}'`);
-        flags[inputfield] = value;
-        document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, flags);        
+        if (flags[fieldname] === value) return;
+        console.debug(`Hiding value '${document.name}'['${fieldname}'] = '${value}'`);
+        flags[fieldname] = value;
+        document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, flags);
     } else if (typeof docfield === 'string') {
         let currentvalue = getProperty(document, docfield)
         // Maybe convert PDF value into the correct Document type
@@ -194,7 +197,7 @@ function modifyDocument(document, inputfield, value) {
         // calling setProperty(document,docfield,value) doesn't retain the value.
         document.update({ [docfield]: value });
     } else if (docfield.setValue) {
-        console.debug(`Calling setValue function for '${document.name}'['${inputfield}'] with '${value}'`);
+        console.debug(`Calling setValue function for '${document.name}'['${fieldname}'] with '${value}'`);
         docfield.setValue(document, value);
     }
 }

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.24.0
+
+- If no explicit mapping is given for a PDF field, then see if the "name" of the PDF field matches a field in the Actor/Item being edited. This should add support for PDFs which were generated for use with PDFoundry.
+- Do not use the "id" of a PDF field as the key for hiding the value on the Actor/Item (Adding data to a PDF outside of Foundry and then saving the filled PDF changes the ID of the fields!)
+
 ## 0.23.0
 
 - When a generic PDF has been configured for a particular type of Actor, opening an Actor's sheet will present an additional button in the title bar "Custom PDF". Selecting this button will let you configure a specific PDF to be used for this particular Actor, superceding the generic PDF configured in the module settings. Deleting the specific PDF from this window will restore the Actor sheet to the generic PDF configured in the module settings. The user has to close the window and reopen it for the new PDF to be shown.

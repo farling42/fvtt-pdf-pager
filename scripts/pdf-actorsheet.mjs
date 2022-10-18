@@ -29,7 +29,7 @@ SOFTWARE.
 
 import { PDFCONFIG } from './pdf-config.mjs';
 import { initEditor } from './pdf-editable.mjs';
-
+import { PDFActorDataBrowser } from './pdf-actorbrowser.mjs';
 
 export class PDFActorSheetConfig extends FormApplication {
   // this.object = PDFActorSheet
@@ -113,6 +113,15 @@ export class PDFActorSheet extends ActorSheet {
         this._onChoosePdf(event);
       }
     })
+
+    buttons.unshift({
+      icon: 'fas fa-search',
+      class: 'pdf-browse-data',
+      label: 'Inspect Data',
+      onclick: () => {
+          new PDFActorDataBrowser(this.document).render(true);
+      },
+    });
     return buttons;
   }
 
