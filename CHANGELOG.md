@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.26.0
+
+- Add two new functions to assist module/macro developers in accessing PDF field values.  `ui.pdfpager.getPDFValue(actor,fieldname)` will return the value stored for the named field.  `ui.pdfpager.setPDFValue(actor,fieldname,value)` will set the named field to the specified value (string).
+
 ## 0.25.0
 
 - Support PDFs which have pre-computed fields.  There is a slight delay after opening an Actor PDF sheet before the fields are displayed, so that the PDF scripting engine will be fully initialised.
