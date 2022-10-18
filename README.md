@@ -118,7 +118,7 @@ If you want to access the 'hidden' fields in macros or other modules, each field
 There are two methods of configuring the mapping between Actor/Item fields and the PDF fields:
 
 - a preconfigured file supplied by the module in the module/pdf-pager/systems folder (an example for the dnd5e game system is provided).
-- a manual create Javascript object entered into the Field Mappins for Actors/Items field of the Module Settings window within Foundry.
+- a manual create Javascript object entered into the Field Mappings for Actors/Items field of the Module Settings window within Foundry.
 - call one of both of the functions from a macro which will define the relevant mapping: `ui.pdfpager.registerActorMapping` or `ui.pdfpager.registerItemMapping`
 
 #### Format of the mapping object
