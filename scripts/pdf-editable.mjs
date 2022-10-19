@@ -79,7 +79,7 @@ async function getbuttonvalues(pdfviewer) {
  * @param {Object} options  Can contain either or both of { disabled : true , hidebg : true }
  */
 async function setFormFromDocument(pdfviewer, document, options={}) {
-    console.debug(`${PDFCONFIG.MODULE_NAME}: loading values from ${document.documentName}(${document.type}) '${document.name}' into PDF`);
+    console.debug(`Loading PDF from ${document.documentName} '${document.name}'`);
     let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {}
     let buttonvalues;  // support for radio buttons
 
@@ -135,7 +135,7 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
 
 
 async function setDocumentFromForm(pdfviewer, document) {
-    console.debug(`${PDFCONFIG.MODULE_NAME}: transferring loaded values from PDF into ${document.documentName}(${document.type}) '${document.name}'`);
+    console.debug(`Setting ${document.documentName} '${document.name}' from PDF fields`);
     const inputs = pdfviewer.viewer.querySelectorAll('input,select,textarea');
     let buttonvalues; // support for radio buttons
 
@@ -260,13 +260,13 @@ export async function initEditor(html, id_to_display) {
 
     // Wait for the IFRAME to appear in the window before any further initialisation (html = iframe)
     html.on('load', async (event) => {
-        //console.debug(`${PDFCONFIG.MODULE_NAME}: PDF frame loaded for '${sheet.object.name}'`);
+        console.debug(`PDF frame loaded for '${document.name}'`);
         let editable = document.canUserModify(game.user, "update");
 
         // Wait for the PDFViewer to be fully initialized
         const contentWindow = event.target.contentWindow;
         // Keep DOCUMENT->container mapping only while the window is open
-        contentWindow.addEventListener('unload', (event) => {
+        contentWindow.addEventListener('unload', event => {
             document2pdfviewer.delete(document.uuid);
         })
 
@@ -276,37 +276,44 @@ export async function initEditor(html, id_to_display) {
 
         let timeout=false;
 
+        pdfviewerapp.pdfViewer.viewer.addEventListener('annotationlayerrendered', event => {
+            console.log(event);
+        })
+
         // Wait for the AnnotationLayer to get drawn before populating all the fields with data from the Document.
         // TODO - how to only do these ONCE for each page (or ONCE for the whole document).
         //        Resizing the window causes this to be called again for each page!
         pdfviewerapp.eventBus.on('annotationlayerrendered', layerevent => {   // from PdfPageView
 
-            console.log(`Loaded page ${layerevent.pageNumber} for ${document.name}`);
+            console.log(`Loaded page ${layerevent.pageNumber} for '${document.name}'`);
             if (!document2pdfviewer.has(document.uuid)) document2pdfviewer.set(document.uuid, pdfviewerapp.pdfViewer);
             let options = {};
             if (!editable) options.disabled=true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG)) options.hidebg = true;
 
-            let pdfviewer = pdfviewerapp.pdfViewer;
-            if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF))
-                setDocumentFromForm(pdfviewer, document);
-            else {
-                function load() {
-                    setFormFromDocument(pdfviewer, document, options)
-                    timeout=undefined;
-                }
-                if (timeout) clearTimeout(timeout);
-                if (!pdfviewer.enableScripting || pdfviewer._scriptingManager.ready) {
-                    console.log(`calling setFormFromDocument immediately`);
-                    load();
+            // Wait until the scripting engine is ready before doing either setDocumentFromForm or setFormFromDocument
+            if (timeout) {
+                console.log(`disabling previous load timeout`);
+                clearTimeout(timeout);
+                timeout=undefined;
+            }
+            function load() {
+                timeout=undefined;
+                let pdfviewer = pdfviewerapp.pdfViewer;
+                if (pdfviewer.enableScripting && !pdfviewer._scriptingManager.ready) {
+                    // Defer a short while until ready flag is set
+                    timeout=setTimeout(load, 100);
                 } else {
-                    console.log(`deferring setFormFromDocument`);
-                    timeout = setTimeout(load, 1000);
+                    // Scripting engine is ready (or not available), so do the thing now
+                    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF))
+                        setDocumentFromForm(pdfviewer, document);
+                    else
+                        setFormFromDocument(pdfviewer, document, options)
                 }
             }
-            
-            // Some documents do NOT generate events that are captured by 'dispatcheventinsandbox',
-            // so we need to attach here too.
+            load();
+
+            // Register listeners to all the editable fields
             if (editable) {        
                 // Only the inputs on this page, rather than the entire form.
                 let pdfpageview = layerevent.source;
