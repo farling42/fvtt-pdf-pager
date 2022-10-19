@@ -23,6 +23,10 @@ In the module configuration window the various "SHEETS: ..." options allow you s
 
 Once a sheet has been configured in the module configuration window, then open an Actor (of the corresponding type) and select use the "Sheet" button in the window's title bar to change the sheet (or default sheet) to "PDF Sheet". The window will then reopen to show the configured PDF document.
 
+### Different PDF for a specific Actor
+
+A generic PDF needs to be configured as above, but then in the Actor's title bar will be a new button, "Custom PDF", where a different PDF document can be selected for use by only this Actor.
+
 ### Mapping PDF fields to Actor fields
 
 Without setting up a mapping, any data entered into the sheet will be stored on the Actor in hidden fields (in the 'pdf-pager' flags).
@@ -39,10 +43,6 @@ To map the PDF fields to Actor fields (such as hit points or armour class), a ma
 The first string in each line should be the name of the PDF field, and the second string in each line should be the path within the Actor in which to store the data. (The full list of Actor fields can be found by using the "Inspect Data" button in the Actor window title bar.)
 
 More complicated attributes can be handled by defining setValue and getValue functions (see below).
-
-### Different PDF for a specific Actor
-
-A generic PDF needs to be configured as above, but then in the Actor's title bar will be a new button, "Custom PDF", where a different PDF document can be selected for use by only this Actor.
 
 ### Loading data from an already filled PDF
 
@@ -136,7 +136,7 @@ Two helper functions are provided to help access this information in a more eleg
 
 ```js
 ui.pdfpager.setPDFValue(actor, fieldname, value)
-let value ui.pdfpager.getPDFValue(actor, fieldname)
+let value = ui.pdfpager.getPDFValue(actor, fieldname)
 ```
 
 ### Setting up the Mapping to existing Actor/Item fields
@@ -165,11 +165,19 @@ An example of using registerActorMapping to provide a mapping from PDF-field nam
      "CONmod": "system.abilities.con.mod",
      "INTmod": "system.abilities.int.mod",
      "WISmod": "system.abilities.wis.mod",
-     "CHamod": "system.abilities.cha.mod"
+     "CHamod": "system.abilities.cha.mod",
+     "Inspiration": { // "system.attributes.inspiration"
+        getValue(actor) {
+            return actor.system.attributes.inspiration ? "Y" : "";
+        },
+        setValue(actor, value) {
+            actor.update( { ["system.attributes.inspiration"] : (value?.length > 0) })
+        }
+    },
   }
 ```
 
-If there is a complex mapping for a field in the PDF, then the entry in the mapping can be defined as an object with the following functions:
+If there is a complex mapping for a field in the PDF (such as "Inspiration" in the above example), then the entry in the mapping can be defined as an object with the following functions:
 
 - A `getValue(actor)` function that returns a string which will be the value put into the PDF field.
 - An optional `setValue(actor,value)` function which is called when the user changes a value in the field. `value` contains the value that the user entered, and the setValue function is responsible for calling `actor.update()` with the relevant updates.
