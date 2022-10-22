@@ -54,27 +54,26 @@ import { PDFCONFIG } from './pdf-config.mjs'
 
 function getAnchor(match) {
     // the pattern will put the page into p2 if only bookname is provided
-    const [ matches, journalname, bookname, pagenum, label] = match;
+    const [ matches, journalname, pagename=journalname, pagenum, label] = match;
 
     // Find the relevant PAGE in the relevant JOURNAL ENTRY
-    let journal = game.journal.getName(journalname);
-    if (!journal) {
-        console.debug(`PDF-PAGER: failed to find journal entry called '${journalname}'`)
-        return null;
+    for (const journal of game.journal.contents) {
+        if (journal.name === journalname) {
+            let page = journal.pages.find(page => page.type === 'pdf' && page.name === pagename);
+            if (page) {
+                let attrs = {draggable: true};
+                if (pagenum) attrs["data-hash"] = pagenum;
+                return page.toAnchor({
+                    classes: ["content-link"],
+                    attrs,
+                    name: label
+                });
+            }
+        }
     }
-    const pagename = bookname || journalname;
-    let page = journal.pages.find(page => page.type === 'pdf' && page.name === pagename);
-    if (!page) {
-        console.debug(`PDF-PAGER: failed to find page called '${pagename}' inside journal '${journalname}'`)
-        return null;
-    }
-    let attrs = {draggable: true};
-    if (pagenum) attrs["data-hash"] = pagenum;
-    return page.toAnchor({
-        classes: ["content-link"],
-        attrs,
-        name: label
-    });
+    // Failed to find a page within a journal with the given name.
+    console.debug(`PDF-PAGER: failed to find page called '${pagename}' inside journal '${journalname}'`)
+    return null;
 }
 
 /**
