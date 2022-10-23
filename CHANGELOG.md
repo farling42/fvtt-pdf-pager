@@ -3,6 +3,8 @@
 ## 0.27.0
 
 - Ensure that when checking for `@PDF` anchors, that we search all journals with the matching journal name.
+- Reduce the delay between a PDF opening and setting up the fillable fields.
+- Revamp the README to make it easier to understand the module.
 
 ## 0.26.0
 
