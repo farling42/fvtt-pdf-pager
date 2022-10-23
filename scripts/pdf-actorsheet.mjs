@@ -178,11 +178,11 @@ export function configureActorSettings() {
 
   for (let type of game.template.Actor.types) {
     let param = `${type}Sheet`;
-    let basename = game.i18n.localize(`${name}.actorSheet.Name`);
-    let basehint = game.i18n.localize(`${name}.actorSheet.Hint`)
+    let basename = game.i18n.format(`${name}.actorSheet.Name`, {name: type});
+    let basehint = game.i18n.format(`${name}.actorSheet.Hint`, {name: type});
     game.settings.register(name, param, {
-		  name: basename.replace('%1',type),
-		  hint: basehint.replace('%1',type),
+		  name: basename,
+		  hint: basehint,
 		  scope: "world",
 		  type:  String,
 		  default: "",
@@ -194,3 +194,15 @@ export function configureActorSettings() {
 
   updateSheets();
 }
+
+Hooks.on('renderSettingsConfig', (app, html, options) => {
+  const moduleTab = $(app.form).find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
+  moduleTab
+    .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${game.template.Actor.types[0]}Sheet]`)
+    .closest('div.form-group')
+    .before(
+      '<h2 class="setting-header">' +
+        game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleActorPDFs`) +
+        '</h2>'
+    )
+})

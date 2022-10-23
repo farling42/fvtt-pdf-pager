@@ -66,8 +66,8 @@ export function configureMenuSettings() {
 	// One entry for each Actor type
 	for (const [type,label] of Object.entries(CONFIG.Actor.typeLabels)) {
 		game.settings.register(MODULE, `${MENU_ACTOR_FLAG}.${type}`, {
-			name: game.i18n.localize(`${MODULE}.actorType.Name`).replace('%1',game.i18n.localize(label)),
-			hint: game.i18n.localize(`${MODULE}.actorType.Hint`),
+			name: game.i18n.format(`${MODULE}.actorType.Name`, {'name': game.i18n.localize(type) }),
+			hint: game.i18n.format(`${MODULE}.actorType.Hint`, {'name': game.i18n.localize(type) }),
 			scope: "world",
 			type:  String,
 			default: "",
@@ -77,8 +77,8 @@ export function configureMenuSettings() {
 	// One entry for each Item type
 	for (const [type,label] of Object.entries(CONFIG.Item.typeLabels)) {
 		game.settings.register(MODULE, `${MENU_ITEM_FLAG}.${type}`, {
-			name: game.i18n.localize(`${MODULE}.itemType.Name`).replace('%1',game.i18n.localize(label)),
-			hint: game.i18n.localize(`${MODULE}.itemType.Hint`),
+			name: game.i18n.format(`${MODULE}.itemType.Name`, {'name': game.i18n.localize(type) }),
+			hint: game.i18n.format(`${MODULE}.itemType.Hint`, {'name': game.i18n.localize(type) }),
 			scope: "world",
 			type:  String,
 			default: "",
@@ -86,3 +86,26 @@ export function configureMenuSettings() {
 		});	
 	}
 }
+
+Hooks.on('renderSettingsConfig', (app, html, options) => {
+    const actors = Object.entries(CONFIG.Actor.typeLabels);
+    const items  = Object.entries(CONFIG.Item.typeLabels);
+
+    const moduleTab = $(app.form).find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
+    moduleTab
+      .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${MENU_ACTOR_FLAG}\\.${actors[0][0]}]`)
+      .closest('div.form-group')
+      .before(
+        '<h2 class="setting-header">' +
+          game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleMenusActor`) +
+          '</h2>'
+      )
+      moduleTab
+      .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${MENU_ITEM_FLAG}\\.${items[0][0]}]`)
+      .closest('div.form-group')
+      .before(
+        '<h2 class="setting-header">' +
+          game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleMenusItem`) +
+          '</h2>'
+      )
+})
