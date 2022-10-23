@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.27.0
+
+- Ensure that when checking for `@PDF` anchors, that we search all journals with the matching journal name.
+
 ## 0.26.0
 
 - Add two new functions to assist module/macro developers in accessing PDF field values.  `ui.pdfpager.getPDFValue(actor,fieldname)` will return the value stored for the named field.  `ui.pdfpager.setPDFValue(actor,fieldname,value)` will set the named field to the specified value (string).
