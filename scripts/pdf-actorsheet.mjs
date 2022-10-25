@@ -125,16 +125,6 @@ export class PDFActorSheet extends ActorSheet {
     return buttons;
   }
 
-  /*
-  async _renderInner(data) {
-    // Add a button in the title bar
-    let html = await super._renderInner(data);
-    console.log('renderInner');
-    let button = `<a class="header-button configure-pdf"><i class="fas fa-file-pdf">::before</i></a>`;
-    html.find('a.configure-sheet').before(button);
-    return html;
-  }*/
-
   // Only actually call the render function if the window is not currently rendered,
   // since the `initEditor` call will otherwise handle changes to actor field data.
   render(force=false, context={}) {
