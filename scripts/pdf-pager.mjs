@@ -64,7 +64,6 @@ function my_onClickDocumentLink(wrapper, event) {
     //return this.sheet.render(true, {focus: true});
     let sheet = this.parent.sheet.getPageSheet(this.id)
     if (this.parent.sheet._state === Application.RENDER_STATES.RENDERED && sheet.pdfviewerapp) {
-        // TODO: sheet might NOT be rendered any more
         if (sheet.pdfviewerapp.pdfLinkService) {
             let anchor = event.currentTarget.getAttribute('data-hash');
             if (anchor.startsWith('page=')) {
@@ -90,7 +89,6 @@ function my_goToPage(wrapper, pageId, anchor) {
     let page = this._pages.find(page => page._id == pageId);
 
     if (page && page.type == 'pdf') {
-        //console.log(`GOTOPAGE ${anchor}`)
         const currentPageId = this._pages[this.pageIndex]?._id;
         if (currentPageId !== pageId || this._state !== Application.RENDER_STATES.RENDERED) {
             // switch to the relevant page with the relevant slug.
@@ -201,7 +199,7 @@ function buildOutline(inoutline) {
             // as JournalPagePDFSheet#_onLoadPDF, but adding optional page-number
             const frame = document.createElement("iframe");
             frame.src = `scripts/pdfjs/web/viewer.html?${this._getViewerParams()}${pdf_slug}`;
-            console.log(frame.src);
+            console.debug(frame.src);
             html[idx] = frame;
         }
     }
