@@ -259,17 +259,25 @@ Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
  * Wraps JournalSheet#_render
  */
 async function my_render(wrapper,force,options) {
-    if (options.anchor?.startsWith('page=')) {
+    let anchor = options.anchor;
+    if (anchor instanceof Array) {
+        if (anchor.length > 0) {
+            anchor = anchor[0];
+        } else {
+            anchor = "";
+        }
+    }
+    if (anchor?.startsWith('page=')) {
         cached_pdfpageid     = options.pageId;
-        cached_pdfpagenumber = +options.anchor.slice(5);
+        cached_pdfpagenumber = +anchor.slice(5);
         delete options.anchor;   // we don't want the wrapper trying to set the anchor
-    } else if (options.anchor?.startsWith("[{")) {
+    } else if (anchor?.startsWith("[{")) {
         cached_pdfpageid     = options.pageId;
-        cached_pdfpagenumber = encodeURIComponent(options.anchor);
+        cached_pdfpagenumber = encodeURIComponent(anchor);
         delete options.anchor;   // we don't want the wrapper trying to set the anchor
-    } else if (options.anchor?.startsWith("%5B%7B")) {
+    } else if (anchor?.startsWith("%5B%7B")) {
         cached_pdfpageid     = options.pageId;
-        cached_pdfpagenumber = options.anchor; // already encoded
+        cached_pdfpagenumber = anchor; // already encoded
         delete options.anchor;   // we don't want the wrapper trying to set the anchor
     }
     let result = await wrapper(force,options);
