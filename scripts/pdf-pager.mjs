@@ -41,8 +41,9 @@ import { migratePDFoundry } from './pdf-migrate.mjs';
 
 Hooks.once('ready', async () => {
     // Need to capture the PDF page number
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner', my_render_inner, libWrapper.WRAPPER);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render',     my_render, libWrapper.WRAPPER);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner',      my_render_inner,        libWrapper.WRAPPER);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._onClickDocumentLink', my_onClickDocumentLink, libWrapper.MIXED);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render',     my_render,  libWrapper.WRAPPER);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype.goToPage',    my_goToPage, libWrapper.MIXED);
 
     if (game.user.isGM) await migratePDFoundry({onlyIfEmpty:true});
@@ -54,27 +55,62 @@ let cached_pdfpagenumber=undefined;
 let cached_display_uuid=undefined;
 
 /**
+ * Don't rerender the PDF page if we can switch the displayed PDF internally to the correct page.
+ * @param {} wrapper 
+ * @param {*} event 
+ * @returns 
+ */
+function my_onClickDocumentLink(wrapper, event) {
+    //return this.sheet.render(true, {focus: true});
+    let sheet = this.parent.sheet.getPageSheet(this.id)
+    if (this.parent.sheet._state === Application.RENDER_STATES.RENDERED && sheet.pdfviewerapp) {
+        // TODO: sheet might NOT be rendered any more
+        if (sheet.pdfviewerapp.pdfLinkService) {
+            let anchor = event.currentTarget.getAttribute('data-hash');
+            if (anchor.startsWith('page=')) {
+                const page_offset = sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
+                const page_number = +anchor.slice(5) + (page_offset ?? 0);
+                console.debug(`Document link, moving to page ${page_number}`)
+                sheet.pdfviewerapp.pdfLinkService.goToPage(page_number);
+            } else {
+                const dest = JSON.parse(decodeURIComponent(anchor));
+                console.debug(`Document link, moving to anchor: ${dest}`)
+                sheet.pdfviewerapp.pdfLinkService.goToDestination(dest);
+            }
+        }
+    } else {
+        return wrapper(event);
+    }
+}
+
+/**
  * 
  */
 function my_goToPage(wrapper, pageId, anchor) {
     let page = this._pages.find(page => page._id == pageId);
 
     if (page && page.type == 'pdf') {
-        console.log(`GOTOPAGE ${anchor}`)
+        //console.log(`GOTOPAGE ${anchor}`)
         const currentPageId = this._pages[this.pageIndex]?._id;
-        if (currentPageId !== pageId) {
+        if (currentPageId !== pageId || this._state !== Application.RENDER_STATES.RENDERED) {
             // switch to the relevant page with the relevant slug.
             cached_pdfpageid=pageId;
             cached_pdfpagenumber=anchor;
-            return this.render(true, {pageId, anchor});
         } else {
             // Move within existing page
             let sheet = this.getPageSheet(pageId);
             if (sheet.pdfviewerapp.pdfLinkService) {
-                if (typeof anchor === 'number')
-                    sheet.pdfviewerapp.pdfLinkService.goToPage(anchor);
-                else
-                    sheet.pdfviewerapp.pdfLinkService.goToDestination(JSON.parse(anchor));
+                if (typeof anchor === 'number') {
+                    const page_offset = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
+                    const page_number = +anchor + (page_offset ?? 0);
+                    console.debug(`goToPage: moving PDF to ${page_number}`)
+                    sheet.pdfviewerapp.pdfLinkService.goToPage(page_number);
+                } else {
+                    const dest = JSON.parse(anchor);
+                    console.debug(`goToPage: moving PDF to anchor: ${anchor}`)
+                    sheet.pdfviewerapp.pdfLinkService.goToDestination(dest);
+                }
+                return;
             }
         }
     }
@@ -98,7 +134,6 @@ function buildOutline(inoutline) {
                 slug:  JSON.stringify(node.dest),
                 text:  node.title
             };
-
             // Add children after the parent
             if (node.items?.length) iterate(node.items, level+1);
         }
@@ -191,9 +226,9 @@ function buildOutline(inoutline) {
                 this.pdfviewerapp = pdfviewerapp;
                 if (outline) {
                     let oldflag = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
-                    let newflag = buildOutline(outline);
+                    let newflag = JSON.stringify(buildOutline(outline));
                     if (oldflag !== newflag)
-                        this.object.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC, JSON.stringify(result))
+                        this.object.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC, newflag)
                 } else {
                         this.object.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
                 }
