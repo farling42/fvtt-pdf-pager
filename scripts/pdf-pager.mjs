@@ -60,16 +60,23 @@ function my_goToPage(wrapper, pageId, anchor) {
     let page = this._pages.find(page => page._id == pageId);
 
     if (page && page.type == 'pdf') {
+        console.log(`GOTOPAGE ${anchor}`)
         const currentPageId = this._pages[this.pageIndex]?._id;
         if (currentPageId !== pageId) {
             // switch to the relevant page with the relevant slug.
+            cached_pdfpageid=pageId;
+            cached_pdfpagenumber=anchor;
+            return this.render(true, {pageId, anchor});
         } else {
             // Move within existing page
+            let sheet = this.getPageSheet(pageId);
+            if (sheet.pdfviewerapp.pdfLinkService) {
+                if (typeof anchor === 'number')
+                    sheet.pdfviewerapp.pdfLinkService.goToPage(anchor);
+                else
+                    sheet.pdfviewerapp.pdfLinkService.goToDestination(JSON.parse(anchor));
+            }
         }
-        console.log(`GOTOPAGE ${anchor}`)
-        cached_pdfpageid=pageId;
-        cached_pdfpagenumber=anchor;
-        return this.render(true, {pageId, anchor});
     }
     return wrapper(pageId, anchor);
 }
@@ -162,34 +169,38 @@ function buildOutline(inoutline) {
             console.log(frame.src);
             html[idx] = frame;
         }
-
-        // Register handler to generate the TOC after the PDF has been loaded.
-        html.on('load', async (event) => {
-            //console.debug(`PDF frame loaded for '${document.name}'`);
-    
-            // Wait for the PDFViewer to be fully initialized
-            const contentWindow = event.target.contentWindow;
-    
-            // Wait for PDF to initialise before attaching to event bus.
-            const pdfviewerapp = contentWindow.PDFViewerApplication;
-            await pdfviewerapp.initializedPromise;
-            // pdfviewerapp.pdfDocument isn't defined at this point
-
-            // Read the outline and generate a TOC object from it.
-            pdfviewerapp.eventBus.on('annotationlayerrendered', layerevent => {   // from PdfPageView
-                pdfviewerapp.pdfDocument.getOutline().then(outline => {
-                    // Store it as JournalPDFPageSheet.toc
-                    if (outline) {
-                        let result = buildOutline(outline);
-                        this.object.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC, JSON.stringify(result))
-                    } else {
-                        this.object.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
-                    }
-                })
-            })
-        })
     }
 
+    // Register handler to generate the TOC after the PDF has been loaded.
+    // (This is done in the editor too, so that the flag can be set as soon as a PDF is selected)
+    html.on('load', async (event) => {
+    //console.debug(`PDF frame loaded for '${document.name}'`);
+        
+        // Wait for the PDFViewer to be fully initialized
+        const contentWindow = event.target.contentWindow;
+        
+        // Wait for PDF to initialise before attaching to event bus.
+        const pdfviewerapp = contentWindow.PDFViewerApplication;
+        await pdfviewerapp.initializedPromise;
+        // pdfviewerapp.pdfDocument isn't defined at this point
+    
+        // Read the outline and generate a TOC object from it.
+        pdfviewerapp.eventBus.on('annotationlayerrendered', layerevent => {   // from PdfPageView
+            pdfviewerapp.pdfDocument.getOutline().then(outline => {
+                // Store it as JournalPDFPageSheet.toc
+                this.pdfviewerapp = pdfviewerapp;
+                if (outline) {
+                    let oldflag = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+                    let newflag = buildOutline(outline);
+                    if (oldflag !== newflag)
+                        this.object.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC, JSON.stringify(result))
+                } else {
+                        this.object.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+                }
+            })
+        })
+    })
+    
     // Emulate TextPageSheet._renderInner setting up the TOC
     let toc = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
     if (toc) 
