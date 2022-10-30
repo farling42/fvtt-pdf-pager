@@ -41,7 +41,7 @@ import { PDFCONFIG } from './pdf-config.mjs'
  * Enrich the generated HTML to show a link or just plain text
  */
 
- const pattern = /@PDF\[([^|#\]]+)(?:#([^\|\]]+))?(?:\|(page=\d+))?\]{([^}]*)}/g;
+ const pattern = /@PDF\[([^|#\]]+)(?:#([^\|\]]+))?(?:\|([^\]]+))?\]{([^}]*)}/g;
 
  Hooks.once('ready', () => {
     // Fields on Actors and Items call enrichHTML with async=false
@@ -114,22 +114,30 @@ async function enricher(match, options) {
  * @returns 
  */
 function _mycreateDocumentLink(wrapped, eventData, args) {
+    // Always convert slug for PDF into encoded-URI format
+    if (this.type === 'pdf' && eventData?.anchor?.slug)
+        eventData.anchor.slug = encodeURIComponent(eventData.anchor.slug);
+
     if (this.type !== 'pdf' || !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.CREATE_PDF_LINK_ON_DROP)) 
         return wrapped(eventData, args);
-    else
-    {
-        // this = JournalEntryPage
-        let pagenum=1;
-        let sheet = this.parent?.sheet;  // JournalEntry
-        if (sheet && sheet._pages[sheet.pageIndex]._id == this.id)
-        {
-            let iframe = sheet.element?.find('iframe');
-            if (iframe?.length>0) {
-                let pdfviewer = iframe[0].contentWindow.PDFViewerApplication;
-                const page_offset = this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) || 0;
-                pagenum = pdfviewer.page - page_offset;
+    else {
+        let slug = eventData?.anchor?.slug;
+        let name = slug ? eventData?.anchor?.name : this.name;
+        if (!slug) {
+            // this = JournalEntryPage
+            let pagenum=1;
+            let sheet = this.parent?.sheet;  // JournalEntry
+            if (sheet && sheet._pages[sheet.pageIndex]._id == this.id)
+            {
+                let iframe = sheet.element?.find('iframe');
+                if (iframe?.length>0) {
+                    let pdfviewer = iframe[0].contentWindow.PDFViewerApplication;
+                    const page_offset = this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) || 0;
+                    pagenum = pdfviewer.page - page_offset;
+                }
             }
+            slug = `page=${pagenum}`
         }
-        return `@PDF[${this.parent.name}#${this.name}|page=${pagenum}]{${this.name}}`;
+        return `@PDF[${this.parent.name}|${slug}]{${name}}`;
     }
 }

@@ -3,6 +3,8 @@
 ## 0.28.0
 
 - Create TOC in the Journal Sheet from the Outline (if any) stored within each PDF.
+- Dragging a page heading from the TOC to create a link will add "|page=x" as before.
+- Dragging a section heading from the TOC to create a link will create a slug in the link which will open the PDF at that specific section.
 
 ## 0.27.0
 

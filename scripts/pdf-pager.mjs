@@ -84,21 +84,16 @@ function buildOutline(inoutline) {
     function iterate(outline, level) {
         for (let node of outline) {
             // Create a JournalEntryPageHeading from the PDF node
-            let content = { 
-                children: [],
+            result[node.title.slugify()] = {
+                children: node.items.map(child => child.title.slugify()),
                 element: { dataset : { anchor: "" }},  // FOUNDRY does: element.dataset.anchor = slug;
                 level: level,
                 slug:  JSON.stringify(node.dest),
                 text:  node.title
             };
-            let slug = node.title.slugify();
-            // Parent has to come before children
-            result[slug] = content;
-            if (node.items?.length) {
-                iterate(node.items, level+1);
-                for (let child of node.items)
-                    result[slug].children.push(child.title.slugify())
-            }
+
+            // Add children after the parent
+            if (node.items?.length) iterate(node.items, level+1);
         }
     }
     iterate(inoutline, 1);
@@ -147,8 +142,6 @@ function buildOutline(inoutline) {
             if (typeof cached_pdfpagenumber == 'number') {
                 const page_offset = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
                 cached_pdfpagenumber = `page=${cached_pdfpagenumber+(page_offset||0)}`
-            } else if (cached_pdfpagenumber) {
-                cached_pdfpagenumber = encodeURIComponent(cached_pdfpagenumber)
             }
             const pdf_slug = cached_pdfpagenumber ? `#${cached_pdfpagenumber}` : '';
             cached_pdfpagenumber = undefined;  // only use the buffered page number once
@@ -228,7 +221,11 @@ async function my_render(wrapper,force,options) {
         delete options.anchor;   // we don't want the wrapper trying to set the anchor
     } else if (options.anchor?.startsWith("[{")) {
         cached_pdfpageid     = options.pageId;
-        cached_pdfpagenumber = options.anchor;
+        cached_pdfpagenumber = encodeURIComponent(options.anchor);
+        delete options.anchor;   // we don't want the wrapper trying to set the anchor
+    } else if (options.anchor?.startsWith("%5B%7B")) {
+        cached_pdfpageid     = options.pageId;
+        cached_pdfpagenumber = options.anchor; // already encoded
         delete options.anchor;   // we don't want the wrapper trying to set the anchor
     }
     let result = await wrapper(force,options);
