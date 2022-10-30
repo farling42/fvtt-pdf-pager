@@ -42,6 +42,7 @@ export let PDFCONFIG = {
     FLAG_CODE               : "code",
 	FLAG_FIELDTEXT          : "fieldText",
 	FLAG_CUSTOM_PDF         : "customPDF",
+	FLAG_TOC                : "toc"
 };
 
 Hooks.once('ready', () => {

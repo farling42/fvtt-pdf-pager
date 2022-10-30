@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.28.0
+
+- Create TOC in the Journal Sheet from the Outline (if any) stored within each PDF.
+
 ## 0.27.0
 
 - Ensure that when checking for `@PDF` anchors, that we search all journals with the matching journal name.

@@ -42,7 +42,9 @@ import { migratePDFoundry } from './pdf-migrate.mjs';
 Hooks.once('ready', async () => {
     // Need to capture the PDF page number
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner', my_render_inner, libWrapper.WRAPPER);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render', my_render, libWrapper.WRAPPER);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render',     my_render, libWrapper.WRAPPER);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype.goToPage',    my_goToPage, libWrapper.MIXED);
+
     if (game.user.isGM) await migratePDFoundry({onlyIfEmpty:true});
 });
 
@@ -50,6 +52,58 @@ Hooks.once('ready', async () => {
 let cached_pdfpageid=undefined;
 let cached_pdfpagenumber=undefined;
 let cached_display_uuid=undefined;
+
+/**
+ * 
+ */
+function my_goToPage(wrapper, pageId, anchor) {
+    let page = this._pages.find(page => page._id == pageId);
+
+    if (page && page.type == 'pdf') {
+        const currentPageId = this._pages[this.pageIndex]?._id;
+        if (currentPageId !== pageId) {
+            // switch to the relevant page with the relevant slug.
+        } else {
+            // Move within existing page
+        }
+        console.log(`GOTOPAGE ${anchor}`)
+        cached_pdfpageid=pageId;
+        cached_pdfpagenumber=anchor;
+        return this.render(true, {pageId, anchor});
+    }
+    return wrapper(pageId, anchor);
+}
+
+/**
+ * Convert PDF outline to Foundry TOC
+ * @returns {Object<JournalEntryPageHeading>}
+ */
+
+function buildOutline(inoutline) {
+    let result = {};
+    function iterate(outline, level) {
+        for (let node of outline) {
+            // Create a JournalEntryPageHeading from the PDF node
+            let content = { 
+                children: [],
+                element: { dataset : { anchor: "" }},  // FOUNDRY does: element.dataset.anchor = slug;
+                level: level,
+                slug:  JSON.stringify(node.dest),
+                text:  node.title
+            };
+            let slug = node.title.slugify();
+            // Parent has to come before children
+            result[slug] = content;
+            if (node.items?.length) {
+                iterate(node.items, level+1);
+                for (let child of node.items)
+                    result[slug].children.push(child.title.slugify())
+            }
+        }
+    }
+    iterate(inoutline, 1);
+    return result;
+}
 
 /**
  * Adds the "Page Offset" field to the JournalPDFPageSheet EDITOR window.
@@ -90,8 +144,13 @@ let cached_display_uuid=undefined;
 
         if (cached_pdfpagenumber || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
             // Immediately do JournalPagePDFSheet#_onLoadPDF
-            const page_offset = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
-            const page_marker = cached_pdfpagenumber ? `#page=${cached_pdfpagenumber+(page_offset||0)}` : '';
+            if (typeof cached_pdfpagenumber == 'number') {
+                const page_offset = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
+                cached_pdfpagenumber = `page=${cached_pdfpagenumber+(page_offset||0)}`
+            } else if (cached_pdfpagenumber) {
+                cached_pdfpagenumber = encodeURIComponent(cached_pdfpagenumber)
+            }
+            const pdf_slug = cached_pdfpagenumber ? `#${cached_pdfpagenumber}` : '';
             cached_pdfpagenumber = undefined;  // only use the buffered page number once
 
             // Replace the "div.load-pdf" with an iframe element.
@@ -106,10 +165,45 @@ let cached_display_uuid=undefined;
 
             // as JournalPagePDFSheet#_onLoadPDF, but adding optional page-number
             const frame = document.createElement("iframe");
-            frame.src = `scripts/pdfjs/web/viewer.html?${this._getViewerParams()}${page_marker}`;
+            frame.src = `scripts/pdfjs/web/viewer.html?${this._getViewerParams()}${pdf_slug}`;
+            console.log(frame.src);
             html[idx] = frame;
         }
+
+        // Register handler to generate the TOC after the PDF has been loaded.
+        html.on('load', async (event) => {
+            //console.debug(`PDF frame loaded for '${document.name}'`);
+    
+            // Wait for the PDFViewer to be fully initialized
+            const contentWindow = event.target.contentWindow;
+    
+            // Wait for PDF to initialise before attaching to event bus.
+            const pdfviewerapp = contentWindow.PDFViewerApplication;
+            await pdfviewerapp.initializedPromise;
+            // pdfviewerapp.pdfDocument isn't defined at this point
+
+            // Read the outline and generate a TOC object from it.
+            pdfviewerapp.eventBus.on('annotationlayerrendered', layerevent => {   // from PdfPageView
+                pdfviewerapp.pdfDocument.getOutline().then(outline => {
+                    // Store it as JournalPDFPageSheet.toc
+                    if (outline) {
+                        let result = buildOutline(outline);
+                        this.object.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC, JSON.stringify(result))
+                    } else {
+                        this.object.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+                    }
+                })
+            })
+        })
     }
+
+    // Emulate TextPageSheet._renderInner setting up the TOC
+    let toc = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+    if (toc) 
+        this.toc = JSON.parse(toc);
+    else   
+        delete this.toc;
+
     return html;
 }
 
@@ -131,6 +225,10 @@ async function my_render(wrapper,force,options) {
     if (options.anchor?.startsWith('page=')) {
         cached_pdfpageid     = options.pageId;
         cached_pdfpagenumber = +options.anchor.slice(5);
+        delete options.anchor;   // we don't want the wrapper trying to set the anchor
+    } else if (options.anchor?.startsWith("[{")) {
+        cached_pdfpageid     = options.pageId;
+        cached_pdfpagenumber = options.anchor;
         delete options.anchor;   // we don't want the wrapper trying to set the anchor
     }
     let result = await wrapper(force,options);
