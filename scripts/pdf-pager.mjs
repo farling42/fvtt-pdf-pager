@@ -41,10 +41,10 @@ import { migratePDFoundry } from './pdf-migrate.mjs';
 
 Hooks.once('ready', async () => {
     // Need to capture the PDF page number
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner',      my_render_inner,        libWrapper.WRAPPER);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._onClickDocumentLink', my_onClickDocumentLink, libWrapper.MIXED);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render',     my_render,  libWrapper.WRAPPER);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype.goToPage',    my_goToPage, libWrapper.MIXED);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner',      JournalPDFPageSheet_render_inner,     libWrapper.WRAPPER);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._onClickDocumentLink', JournalEntryPage_onClickDocumentLink, libWrapper.MIXED);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render',     JournalSheet_render,  libWrapper.WRAPPER);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype.goToPage',    JournalSheet_goToPage, libWrapper.MIXED);
 
     if (game.user.isGM) await migratePDFoundry({onlyIfEmpty:true});
 });
@@ -60,22 +60,22 @@ let cached_display_uuid=undefined;
  * @param {*} event 
  * @returns 
  */
-function my_onClickDocumentLink(wrapper, event) {
+function JournalEntryPage_onClickDocumentLink(wrapper, event) {
     //return this.sheet.render(true, {focus: true});
     let sheet = this.parent.sheet.getPageSheet(this.id)
-    if (this.parent.sheet._state === Application.RENDER_STATES.RENDERED && sheet.pdfviewerapp) {
-        if (sheet.pdfviewerapp.pdfLinkService) {
-            let anchor = event.currentTarget.getAttribute('data-hash');
-            if (anchor.startsWith('page=')) {
-                const page_offset = sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
-                const page_number = +anchor.slice(5) + (page_offset ?? 0);
-                console.debug(`Document link, moving to page ${page_number}`)
-                sheet.pdfviewerapp.pdfLinkService.goToPage(page_number);
-            } else {
-                const dest = JSON.parse(decodeURIComponent(anchor));
-                console.debug(`Document link, moving to anchor: ${dest}`)
-                sheet.pdfviewerapp.pdfLinkService.goToDestination(dest);
-            }
+    if (this.parent.sheet._state === Application.RENDER_STATES.RENDERED && sheet.pdfviewerapp?.pdfLinkService) {
+        let anchor = event.currentTarget.getAttribute('data-hash');
+        if (anchor.startsWith('page=')) {
+            const page_offset = sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
+            const page_number = +anchor.slice(5) + (page_offset ?? 0);
+            console.debug(`Document link, moving to page ${page_number}`)
+            sheet.pdfviewerapp.pdfLinkService.goToPage(page_number);
+        } else {
+            anchor = decodeURIComponent(anchor);
+            if (!anchor.startsWith('[{')) anchor = sheet.toc[anchor].pdfslug;
+            const dest = JSON.parse(anchor); // Convert back to object
+            console.debug(`Document link, moving to anchor: ${dest}`)
+            sheet.pdfviewerapp.pdfLinkService.goToDestination(dest);
         }
     } else {
         return wrapper(event);
@@ -85,7 +85,7 @@ function my_onClickDocumentLink(wrapper, event) {
 /**
  * 
  */
-function my_goToPage(wrapper, pageId, anchor) {
+function JournalSheet_goToPage(wrapper, pageId, anchor) {
     let page = this._pages.find(page => page._id == pageId);
 
     if (page && page.type == 'pdf') {
@@ -104,7 +104,7 @@ function my_goToPage(wrapper, pageId, anchor) {
                     console.debug(`goToPage: moving PDF to ${page_number}`)
                     sheet.pdfviewerapp.pdfLinkService.goToPage(page_number);
                 } else if (typeof anchor === 'string') {
-                    const dest = JSON.parse(anchor);
+                    const dest = JSON.parse(sheet.toc[anchor].pdfslug);
                     console.debug(`goToPage: moving PDF to anchor: ${anchor}`)
                     sheet.pdfviewerapp.pdfLinkService.goToDestination(dest);
                 }
@@ -125,11 +125,13 @@ function buildOutline(inoutline) {
     function iterate(outline, level) {
         for (let node of outline) {
             // Create a JournalEntryPageHeading from the PDF node
-            result[node.title.slugify()] = {
+            const slug = node.title.slugify();
+            result[slug] = {
                 children: node.items.map(child => child.title.slugify()),
-                element: { dataset : { anchor: "" }},  // FOUNDRY does: element.dataset.anchor = slug;
+                element: { dataset : { anchor: "" } },  // FOUNDRY does: element.dataset.anchor = slug;
                 level: level,
-                slug:  JSON.stringify(node.dest),
+                slug:  slug,
+                pdfslug:  JSON.stringify(node.dest),
                 text:  node.title
             };
             // Add children after the parent
@@ -146,7 +148,7 @@ function buildOutline(inoutline) {
  * @param  {sheetData} args an array of 1 element, the first element being the same as the data passed to the render function
  * @returns {jQuery} html
  */
- async function my_render_inner(wrapper, sheetData) {
+ async function JournalPDFPageSheet_render_inner(wrapper, sheetData) {
     let html = await wrapper(sheetData);   // jQuery
     const pagedoc = sheetData.document;
     if (this.isEditable) {
@@ -236,14 +238,21 @@ function buildOutline(inoutline) {
     
     // Emulate TextPageSheet._renderInner setting up the TOC
     let toc = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
-    if (toc) 
+    if (toc) {
         this.toc = JSON.parse(toc);
+        // Prevent error being reported by core Foundry when it tries to do:
+        // this.getPageSheet(pageId)?.toc[options.anchor]?.element.scrollIntoView();
+        for (let key in this.toc) {
+            this.toc[key].element.scrollIntoView = empty_function;
+        }
+    }
     else   
         delete this.toc;
 
     return html;
 }
 
+function empty_function() {};
 
 Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
     // Initialising the editor MUST be done after the button has been replaced by the IFRAME.
@@ -258,7 +267,7 @@ Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
  * my_journal_render reads the page=xxx anchor from the original link, and stores it temporarily for use by renderJournalPDFPageSheet later
  * Wraps JournalSheet#_render
  */
-async function my_render(wrapper,force,options) {
+async function JournalSheet_render(wrapper,force,options) {
     // Monk's Active Tile Triggers sets the anchor to an array, so we need to check for a string here.
     if (options.anchor && typeof options.anchor === 'string') {
         if (options.anchor?.startsWith('page=')) {
@@ -335,4 +344,16 @@ let code_cache = new Map();
 
     // Render journal entry showing the appropriate page (JOurnalEntryPage#_onClickDocumentLink)
     pagedoc.parent.sheet.render(true, pageoptions);
+}
+
+
+export function deleteOutlines() {
+    for (const journal of game.journal) {
+        for (const page of journal.pages) {
+            if (page.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC)) {
+                console.log(`Removed stored Outline for page ${page.name} in journal ${journal.name}`)
+                page.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+            }
+        }
+    }
 }

@@ -121,9 +121,11 @@ function _mycreateDocumentLink(wrapped, eventData, args) {
     if (this.type !== 'pdf' || !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.CREATE_PDF_LINK_ON_DROP)) 
         return wrapped(eventData, args);
     else {
-        let slug = eventData?.anchor?.slug;
-        let name = slug ? eventData?.anchor?.name : this.name;
-        if (!slug) {
+        let slug,name;
+        if (eventData?.anchor?.slug) {
+            name = eventData?.anchor?.name;
+            slug = name.slugify();
+        } else {
             // this = JournalEntryPage
             let pagenum=1;
             let sheet = this.parent?.sheet;  // JournalEntry
@@ -137,6 +139,7 @@ function _mycreateDocumentLink(wrapped, eventData, args) {
                 }
             }
             slug = `page=${pagenum}`
+            name = this.name;
         }
         return `@PDF[${this.parent.name}|${slug}]{${name}}`;
     }
