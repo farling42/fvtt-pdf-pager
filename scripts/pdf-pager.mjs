@@ -41,7 +41,7 @@ import { migratePDFoundry } from './pdf-migrate.mjs';
 
 Hooks.once('ready', async () => {
     // Need to capture the PDF page number
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner',      JournalPDFPageSheet_render_inner,     libWrapper.WRAPPER);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner',      JournalPDFPageSheet_renderInner,      libWrapper.WRAPPER);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._onClickDocumentLink', JournalEntryPage_onClickDocumentLink, libWrapper.MIXED);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render',     JournalSheet_render,  libWrapper.WRAPPER);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype.goToPage',    JournalSheet_goToPage, libWrapper.MIXED);
@@ -50,17 +50,17 @@ Hooks.once('ready', async () => {
 });
 
 // Ugly hack to get the PAGE number from the JournalSheet#render down to the JournalPDFPageSheet#render
-let cached_pdfpageid=undefined;
-let cached_pdfpagenumber=undefined;
-let cached_display_uuid=undefined;
+let cached_pdfpageid=undefined;       // pageId to which cached_pdfpageanchor refers
+let cached_pdfpageanchor=undefined;   // page number (if number) or TOC anchor (if string)
+let cached_display_uuid=undefined;    // The UUID of the Actor/Item to be displayed in the PDF being opened
 
 
-function updatePdfView(sheet, anchor) {
-    console.debug(`updateSheet(sheet='${sheet.name}', anchor='${anchor}')`);
+function updatePdfView(pdfsheet, anchor) {
+    console.debug(`updateSheet(sheet='${pdfsheet.name}', anchor='${anchor}')`);
     if (anchor.startsWith('page='))
-        sheet.pdfviewerapp.pdfLinkService.goToPage(+anchor.slice(5) + (sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0));
+        pdfsheet.pdfviewerapp.pdfLinkService.goToPage(+anchor.slice(5) + (pdfsheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0));
     else
-        sheet.pdfviewerapp.pdfLinkService.goToDestination(JSON.parse(sheet.toc[anchor].pdfslug));
+        pdfsheet.pdfviewerapp.pdfLinkService.goToDestination(JSON.parse(pdfsheet.toc[anchor].pdfslug));
 }
 
 /**
@@ -87,7 +87,7 @@ function JournalSheet_goToPage(wrapper, pageId, anchor) {
         if (this._pages[this.pageIndex]?._id !== pageId || this._state !== Application.RENDER_STATES.RENDERED) {
             // switch to the relevant page with the relevant slug.
             cached_pdfpageid=pageId;
-            cached_pdfpagenumber=anchor;
+            cached_pdfpageanchor=anchor;
         } else {
             // Move within existing page
             let sheet = this.getPageSheet(pageId);
@@ -138,9 +138,24 @@ function buildOutline(pdfoutline) {
  * @param  {sheetData} args an array of 1 element, the first element being the same as the data passed to the render function
  * @returns {jQuery} html
  */
- async function JournalPDFPageSheet_render_inner(wrapper, sheetData) {
+ async function JournalPDFPageSheet_renderInner(wrapper, sheetData) {
     let html = await wrapper(sheetData);   // jQuery
     const pagedoc = sheetData.document;
+
+    // Ensure we have a TOC on this sheet.
+    // Emulate TextPageSheet._renderInner setting up the TOC
+    let toc = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+    if (toc) {
+        this.toc = JSON.parse(toc);
+        // Prevent error being reported by core Foundry when it tries to do:
+        // this.getPageSheet(pageId)?.toc[options.anchor]?.element.scrollIntoView();
+        for (let key in this.toc) {
+            this.toc[key].element.scrollIntoView = empty_function;
+        }
+    }
+    else   
+        delete this.toc;
+
     if (this.isEditable) {
         // Editting, so add our own elements to the window
         const page_offset  = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
@@ -167,16 +182,18 @@ function buildOutline(pdfoutline) {
     } else {
         // Not editting, so maybe replace button
         if (this.object._id !== cached_pdfpageid)
-            cached_pdfpagenumber = undefined;
+            cached_pdfpageanchor = undefined;
 
-        if (cached_pdfpagenumber || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
+        if (cached_pdfpageanchor || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
             // Immediately do JournalPagePDFSheet#_onLoadPDF
-            if (typeof cached_pdfpagenumber == 'number') {
-                const page_offset = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
-                cached_pdfpagenumber = `page=${cached_pdfpagenumber+(page_offset||0)}`
+            if (typeof cached_pdfpageanchor === 'number') {
+                cached_pdfpageanchor = `page=${cached_pdfpageanchor + (pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}`
+            } else if (typeof cached_pdfpageanchor === 'string') {
+                // convert TOC entry to PDFSLUG
+                cached_pdfpageanchor = this.toc[cached_pdfpageanchor].pdfslug;
             }
-            const pdf_slug = cached_pdfpagenumber ? `#${cached_pdfpagenumber}` : '';
-            cached_pdfpagenumber = undefined;  // only use the buffered page number once
+            const pdf_slug = cached_pdfpageanchor ? `#${cached_pdfpageanchor}` : '';
+            cached_pdfpageanchor = undefined;  // only use the buffered page number once
 
             // Replace the "div.load-pdf" with an iframe element.
             // I can't find a way to do it properly, since html is simply a jQuery of top-level elements.
@@ -226,19 +243,6 @@ function buildOutline(pdfoutline) {
         })
     })
     
-    // Emulate TextPageSheet._renderInner setting up the TOC
-    let toc = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
-    if (toc) {
-        this.toc = JSON.parse(toc);
-        // Prevent error being reported by core Foundry when it tries to do:
-        // this.getPageSheet(pageId)?.toc[options.anchor]?.element.scrollIntoView();
-        for (let key in this.toc) {
-            this.toc[key].element.scrollIntoView = empty_function;
-        }
-    }
-    else   
-        delete this.toc;
-
     return html;
 }
 
@@ -261,13 +265,13 @@ async function JournalSheet_render(wrapper,force,options) {
     // Monk's Active Tile Triggers sets the anchor to an array, so we need to check for a string here.
     if (options.anchor && 
         typeof options.anchor === 'string' &&
-        options.anchor?.startsWith('page=')) {
+        this.object.pages.get(options.pageId)?.type === 'pdf') {
         cached_pdfpageid     = options.pageId;
-        cached_pdfpagenumber = +options.anchor.slice(5);
+        cached_pdfpageanchor = options.anchor?.startsWith('page=') ? +options.anchor.slice(5) : decodeURIComponent(options.anchor);
         delete options.anchor;   // we don't want the wrapper trying to set the anchor
     }
     let result = await wrapper(force,options);
-    cached_pdfpagenumber = undefined;  // in case renderJournalPDFPageSheet didn't get called
+    cached_pdfpageanchor = undefined;  // in case renderJournalPDFPageSheet didn't get called
     return result;
 }
 

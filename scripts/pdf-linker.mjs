@@ -134,9 +134,7 @@ function JournalEntryPage_createDocumentLink(wrapped, eventData, args) {
             {
                 let iframe = sheet.element?.find('iframe');
                 if (iframe?.length>0) {
-                    let pdfviewer = iframe[0].contentWindow.PDFViewerApplication;
-                    const page_offset = this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) || 0;
-                    pagenum = pdfviewer.page - page_offset;
+                    pagenum = iframe[0].contentWindow.PDFViewerApplication.page - (this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0);
                 }
             }
             slug = `page=${pagenum}`
