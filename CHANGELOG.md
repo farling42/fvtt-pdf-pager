@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.29.0
+
+- Change to PDF section links using the slug name of the section, rather than a complicated PDF Outline entry.
+
 ## 0.28.0
 
 - Create TOC in the Journal Sheet from the Outline (if any) stored within each PDF.

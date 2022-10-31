@@ -45,8 +45,8 @@ import { PDFCONFIG } from './pdf-config.mjs'
 
  Hooks.once('ready', () => {
     // Fields on Actors and Items call enrichHTML with async=false
-	libWrapper.register(PDFCONFIG.MODULE_NAME, 'TextEditor.enrichHTML', _myenrichHTML, libWrapper.WRAPPER);
-	libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._createDocumentLink', _mycreateDocumentLink, libWrapper.MIXED);
+	libWrapper.register(PDFCONFIG.MODULE_NAME, 'TextEditor.enrichHTML', TextEditor_enrichHTML, libWrapper.WRAPPER);
+	libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._createDocumentLink', JournalEntryPage_createDocumentLink, libWrapper.MIXED);
 
     // The TextEditor.encrichers only works when enrichHTML is called with async=true
     CONFIG.TextEditor.enrichers.push({pattern, enricher});
@@ -83,7 +83,7 @@ function getAnchor(match) {
  * @param {*} options 
  * @returns 
  */
-function _myenrichHTML(wrapped, content, options) {
+function TextEditor_enrichHTML(wrapped, content, options) {
     let text = content;
     if (!options.async && text?.length && text.includes('@PDF[')) {
         text = text.replaceAll(pattern, (match, p1, p2, /*p3*/pagenum, /*p4*/label, options, groups) => {
@@ -113,7 +113,7 @@ async function enricher(match, options) {
  * @param {Object} args second parameter for JournalEntryPage.prototype._createDocumentLink
  * @returns 
  */
-function _mycreateDocumentLink(wrapped, eventData, args) {
+function JournalEntryPage_createDocumentLink(wrapped, eventData, args) {
     // Always convert slug for PDF into encoded-URI format
     if (this.type === 'pdf' && eventData?.anchor?.slug)
         eventData.anchor.slug = encodeURIComponent(eventData.anchor.slug);
@@ -123,10 +123,11 @@ function _mycreateDocumentLink(wrapped, eventData, args) {
     else {
         let slug,name;
         if (eventData?.anchor?.slug) {
+            // Use slug of section name
             name = eventData?.anchor?.name;
             slug = name.slugify();
         } else {
-            // this = JournalEntryPage
+            // Use page=xxx as slug
             let pagenum=1;
             let sheet = this.parent?.sheet;  // JournalEntry
             if (sheet && sheet._pages[sheet.pageIndex]._id == this.id)

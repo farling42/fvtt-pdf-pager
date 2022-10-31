@@ -71,9 +71,8 @@ function JournalEntryPage_onClickDocumentLink(wrapper, event) {
             console.debug(`Document link, moving to page ${page_number}`)
             sheet.pdfviewerapp.pdfLinkService.goToPage(page_number);
         } else {
-            anchor = decodeURIComponent(anchor);
-            if (!anchor.startsWith('[{')) anchor = sheet.toc[anchor].pdfslug;
-            const dest = JSON.parse(anchor); // Convert back to object
+            // Convert section slug into PDF location
+            const dest = JSON.parse(sheet.toc[decodeURIComponent(anchor)].pdfslug);
             console.debug(`Document link, moving to anchor: ${dest}`)
             sheet.pdfviewerapp.pdfLinkService.goToDestination(dest);
         }
@@ -269,20 +268,12 @@ Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
  */
 async function JournalSheet_render(wrapper,force,options) {
     // Monk's Active Tile Triggers sets the anchor to an array, so we need to check for a string here.
-    if (options.anchor && typeof options.anchor === 'string') {
-        if (options.anchor?.startsWith('page=')) {
-            cached_pdfpageid     = options.pageId;
-            cached_pdfpagenumber = +options.anchor.slice(5);
-            delete options.anchor;   // we don't want the wrapper trying to set the anchor
-        } else if (options.anchor?.startsWith("[{")) {
-            cached_pdfpageid     = options.pageId;
-            cached_pdfpagenumber = encodeURIComponent(options.anchor);
-            delete options.anchor;   // we don't want the wrapper trying to set the anchor
-        } else if (options.anchor?.startsWith("%5B%7B")) {
-            cached_pdfpageid     = options.pageId;
-            cached_pdfpagenumber = options.anchor; // already encoded
-            delete options.anchor;   // we don't want the wrapper trying to set the anchor
-        }
+    if (options.anchor && 
+        typeof options.anchor === 'string' &&
+        options.anchor?.startsWith('page=')) {
+        cached_pdfpageid     = options.pageId;
+        cached_pdfpagenumber = +options.anchor.slice(5);
+        delete options.anchor;   // we don't want the wrapper trying to set the anchor
     }
     let result = await wrapper(force,options);
     cached_pdfpagenumber = undefined;  // in case renderJournalPDFPageSheet didn't get called
