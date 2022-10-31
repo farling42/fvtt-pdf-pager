@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.30.0
+
+- Ensure that TOC entries with the same text have different slugs (using `JournalEntryPage._flattenTOC`)
+- Ensure that `@PDF` links are created with `journal#page` if the page name is different from the journal name.
+- Ensure that dragging a PDF section title to another journal entry creates the correct `@PDF` slug.
+- Document the availability of the function `ui.pdfpager.deleteOutlines()` to delete all stored Outlines for PDFs in the Journal sidebar.
+
 ## 0.29.0
 
 - Change to PDF section links using the slug name of the section, rather than a complicated PDF Outline entry.

@@ -54,6 +54,15 @@ let cached_pdfpageid=undefined;
 let cached_pdfpagenumber=undefined;
 let cached_display_uuid=undefined;
 
+
+function updatePdfView(sheet, anchor) {
+    console.debug(`updateSheet(sheet='${sheet.name}', anchor='${anchor}')`);
+    if (anchor.startsWith('page='))
+        sheet.pdfviewerapp.pdfLinkService.goToPage(+anchor.slice(5) + (sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0));
+    else
+        sheet.pdfviewerapp.pdfLinkService.goToDestination(JSON.parse(sheet.toc[anchor].pdfslug));
+}
+
 /**
  * Don't rerender the PDF page if we can switch the displayed PDF internally to the correct page.
  * @param {} wrapper 
@@ -63,22 +72,10 @@ let cached_display_uuid=undefined;
 function JournalEntryPage_onClickDocumentLink(wrapper, event) {
     //return this.sheet.render(true, {focus: true});
     let sheet = this.parent.sheet.getPageSheet(this.id)
-    if (this.parent.sheet._state === Application.RENDER_STATES.RENDERED && sheet.pdfviewerapp?.pdfLinkService) {
-        let anchor = event.currentTarget.getAttribute('data-hash');
-        if (anchor.startsWith('page=')) {
-            const page_offset = sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
-            const page_number = +anchor.slice(5) + (page_offset ?? 0);
-            console.debug(`Document link, moving to page ${page_number}`)
-            sheet.pdfviewerapp.pdfLinkService.goToPage(page_number);
-        } else {
-            // Convert section slug into PDF location
-            const dest = JSON.parse(sheet.toc[decodeURIComponent(anchor)].pdfslug);
-            console.debug(`Document link, moving to anchor: ${dest}`)
-            sheet.pdfviewerapp.pdfLinkService.goToDestination(dest);
-        }
-    } else {
+    if (this.parent.sheet._state === Application.RENDER_STATES.RENDERED && sheet.pdfviewerapp?.pdfLinkService)
+        updatePdfView(sheet, decodeURIComponent(event.currentTarget.getAttribute('data-hash')));
+    else
         return wrapper(event);
-    }
 }
 
 /**
@@ -86,27 +83,16 @@ function JournalEntryPage_onClickDocumentLink(wrapper, event) {
  */
 function JournalSheet_goToPage(wrapper, pageId, anchor) {
     let page = this._pages.find(page => page._id == pageId);
-
     if (page && page.type == 'pdf') {
-        const currentPageId = this._pages[this.pageIndex]?._id;
-        if (currentPageId !== pageId || this._state !== Application.RENDER_STATES.RENDERED) {
+        if (this._pages[this.pageIndex]?._id !== pageId || this._state !== Application.RENDER_STATES.RENDERED) {
             // switch to the relevant page with the relevant slug.
             cached_pdfpageid=pageId;
             cached_pdfpagenumber=anchor;
         } else {
             // Move within existing page
             let sheet = this.getPageSheet(pageId);
-            if (sheet.pdfviewerapp.pdfLinkService) {
-                if (typeof anchor === 'number') {
-                    const page_offset = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
-                    const page_number = +anchor + (page_offset ?? 0);
-                    console.debug(`goToPage: moving PDF to ${page_number}`)
-                    sheet.pdfviewerapp.pdfLinkService.goToPage(page_number);
-                } else if (typeof anchor === 'string') {
-                    const dest = JSON.parse(sheet.toc[anchor].pdfslug);
-                    console.debug(`goToPage: moving PDF to anchor: ${anchor}`)
-                    sheet.pdfviewerapp.pdfLinkService.goToDestination(dest);
-                }
+            if (sheet?.pdfviewerapp.pdfLinkService) {
+                updatePdfView(sheet, anchor);
                 return;
             }
         }
@@ -115,30 +101,35 @@ function JournalSheet_goToPage(wrapper, pageId, anchor) {
 }
 
 /**
- * Convert PDF outline to Foundry TOC
+ * Convert PDF outline to Foundry TOC (see JournalEntryPage#buildTOC)
+ * @param {PDFOutline} pdfoutline
  * @returns {Object<JournalEntryPageHeading>}
  */
 
-function buildOutline(inoutline) {
-    let result = {};
-    function iterate(outline, level) {
-        for (let node of outline) {
-            // Create a JournalEntryPageHeading from the PDF node
-            const slug = node.title.slugify();
-            result[slug] = {
-                children: node.items.map(child => child.title.slugify()),
+function buildOutline(pdfoutline) {
+    let root = {level: 0, children: []};
+    function iterate(outline, parent) {
+        for (let outlineNode of outline) {
+            // Create a JournalEntryPageHeading from the PDF node:
+            // see Foundry: JournalEntryPage#_makeHeadingNode
+            //const slug = node.title.slugify();
+            const tocNode = {
+                text:  outlineNode.title,
+                level: parent.level+1,
+                slug:  JournalEntryPage.slugifyHeading(outlineNode.title),
+                children: [],
+                // Needed to avoid breaking Foundry code
                 element: { dataset : { anchor: "" } },  // FOUNDRY does: element.dataset.anchor = slug;
-                level: level,
-                slug:  slug,
-                pdfslug:  JSON.stringify(node.dest),
-                text:  node.title
+                // Our data below:
+                pdfslug:  JSON.stringify(outlineNode.dest)
             };
+            parent.children.push(tocNode);
             // Add children after the parent
-            if (node.items?.length) iterate(node.items, level+1);
+            if (outlineNode.items?.length) iterate(outlineNode.items, tocNode);
         }
     }
-    iterate(inoutline, 1);
-    return result;
+    iterate(pdfoutline, root);
+    return JournalEntryPage._flattenTOC(root.children);
 }
 
 /**

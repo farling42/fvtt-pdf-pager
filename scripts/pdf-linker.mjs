@@ -121,11 +121,11 @@ function JournalEntryPage_createDocumentLink(wrapped, eventData, args) {
     if (this.type !== 'pdf' || !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.CREATE_PDF_LINK_ON_DROP)) 
         return wrapped(eventData, args);
     else {
-        let slug,name;
+        let slug,label;
         if (eventData?.anchor?.slug) {
             // Use slug of section name
-            name = eventData?.anchor?.name;
-            slug = name.slugify();
+            label = eventData.anchor.name;
+            slug = eventData.anchor.slug;
         } else {
             // Use page=xxx as slug
             let pagenum=1;
@@ -140,8 +140,10 @@ function JournalEntryPage_createDocumentLink(wrapped, eventData, args) {
                 }
             }
             slug = `page=${pagenum}`
-            name = this.name;
+            label = this.name;
         }
-        return `@PDF[${this.parent.name}|${slug}]{${name}}`;
+        // If journal and page have same name, only put the name in once.
+        const fullname = (this.parent.name === this.name) ? this.name : `${this.parent.name}#${this.name}`;
+        return `@PDF[${fullname}|${slug}]{${label}}`;
     }
 }

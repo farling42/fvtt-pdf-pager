@@ -9,6 +9,8 @@
 
 This module augments the core PDF functionality by adding support for opening PDFs at a specific page, or using a PDF as an Actor sheet.
 
+It also generates reads the Outline from the PDF file to use as the Table of Contents in the page navigation panel.
+
 ## Automatically load PDF
 
 The module option "Immediately Display PDF" will remove the "Load PDF" button from the PDF pages of journal and will instead immediately load the PDF into the window.
@@ -73,6 +75,7 @@ As was available in PDFoundry (for Foundry V9 and earlier), a new link type can 
 @PDF[journalname|page=xxx]{label}
 @PDF[journalname#pagename]{label}
 @PDF[journalname#pagename|page=xxx]{label}
+@PDF[journalname#pagename|sectionslug]{label}
 ```
 
 Note the use of `#page=10` with a `@@UID`, and the use of `|page=10` with a `@PDF` link.
@@ -202,6 +205,12 @@ Feel free to forward me any system-specific .mjs files which you've created for 
 ### Inspect Data option for Actor sheet
 
 The Data Inspector window from PDFoundry is available from the PDF Actor Sheet for those wanting to modify their own PDFs to use the data fields present in the Actor records. This window was taken directly from the PDFoundry module available for Foundry V9 and earlier at [PDFoundry](https://github.com/Djphoenix719/PDFoundry).
+
+### Resetting the stored Outline for a PDF document
+
+The outline for a PDF document is read the first time that a PDF is opened. If the PDF document is changed, then the TOC will be regenerated automatically.
+
+It is also possible to call the function `ui.pdfpager.deleteOutlines()` from a macro in order to remove all stored Outlines from all PDFs in the world journal sidebar. In this case, the Outline will be regenerated when the PDF is next opened.
 
 ### Translations
 
