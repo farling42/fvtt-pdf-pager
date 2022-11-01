@@ -58,7 +58,7 @@ let pdfcache_show_uuid=undefined;   // The UUID of the Actor/Item to be displaye
 
 function updatePdfView(pdfsheet, anchor) {
     const linkService = pdfsheet?.pdfviewerapp?.pdfLinkService;
-    if (!linkService) return false;
+    if (!linkService || !anchor) return false;
 
     console.debug(`updateSheet(sheet='${pdfsheet.object.name}', anchor='${anchor}')`);
     if (anchor.startsWith('page='))
@@ -87,7 +87,7 @@ function JournalEntryPage_onClickDocumentLink(wrapper, event) {
  */
 function JournalSheet_goToPage(wrapper, pageId, anchor) {
     let page = this._pages.find(page => page._id == pageId);
-    if (page?.type == 'pdf') {
+    if (page?.type == 'pdf' && anchor) {
         if (this._pages[this.pageIndex]?._id === pageId &&
             this._state === Application.RENDER_STATES.RENDERED &&
             updatePdfView(this.getPageSheet(pageId), anchor)) {
