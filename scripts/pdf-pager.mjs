@@ -60,7 +60,7 @@ function updatePdfView(pdfsheet, anchor) {
     const linkService = pdfsheet?.pdfviewerapp?.pdfLinkService;
     if (!linkService || !anchor) return false;
 
-    console.debug(`updateSheet(sheet='${pdfsheet.object.name}', anchor='${anchor}')`);
+    console.debug(`updatePdfView(sheet='${pdfsheet.object.name}', anchor='${anchor}')`);
     if (anchor.startsWith('page='))
         linkService.goToPage(+anchor.slice(5) + (pdfsheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0));
     else
@@ -221,12 +221,12 @@ function buildOutline(pdfoutline) {
         // Wait for PDF to initialise before attaching to event bus.
         this.pdfviewerapp = event.target.contentWindow.PDFViewerApplication;
         await this.pdfviewerapp.initializedPromise;
-        
+
         // pdfviewerapp.pdfDocument isn't defined at this point    
         // Read the outline and generate a TOC object from it.
         if (this.object.permission == CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
-            pdfviewerapp.eventBus.on('annotationlayerrendered', layerevent => {   // from PdfPageView
-                pdfviewerapp.pdfDocument.getOutline().then(outline => {
+            this.pdfviewerapp.eventBus.on('annotationlayerrendered', layerevent => {   // from PdfPageView
+                this.pdfviewerapp.pdfDocument.getOutline().then(outline => {
                     // Store it as JournalPDFPageSheet.toc
                     if (outline) {
                         let oldflag = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
