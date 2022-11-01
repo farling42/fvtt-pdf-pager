@@ -4,6 +4,7 @@
 
 - Don't try to calculate TOC if not owner of the underlying document.
 - Prevent error when clicking on the page in the Nav Pane when no TOC present.
+- Only let GM call `ui.pdfpager.deleteOutlines()`
 
 ## 0.29.1
 
