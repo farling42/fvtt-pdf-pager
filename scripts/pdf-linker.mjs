@@ -134,6 +134,7 @@ function JournalEntryPage_createDocumentLink(wrapped, eventData, args) {
             {
                 let iframe = sheet.element?.find('iframe');
                 if (iframe?.length>0) {
+                    // Read current page from PDF viewer, then remove the user-configured offset from that number.
                     pagenum = iframe[0].contentWindow.PDFViewerApplication.page - (this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0);
                 }
             }

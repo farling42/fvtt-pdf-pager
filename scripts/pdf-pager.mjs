@@ -50,17 +50,22 @@ Hooks.once('ready', async () => {
 });
 
 // Ugly hack to get the PAGE number from the JournalSheet#render down to the JournalPDFPageSheet#render
-let cached_pdfpageid=undefined;       // pageId to which cached_pdfpageanchor refers
-let cached_pdfpageanchor=undefined;   // page number (if number) or TOC anchor (if string)
-let cached_display_uuid=undefined;    // The UUID of the Actor/Item to be displayed in the PDF being opened
+let pdfcache_pageid=undefined;      // pageId to which pdfcache_pageanchor refers
+let pdfcache_anchor=undefined;      // page number (if number) or TOC anchor (if string)
+let pdfcache_show_uuid=undefined;   // The UUID of the Actor/Item to be displayed in the PDF being opened
+
 
 
 function updatePdfView(pdfsheet, anchor) {
-    console.debug(`updateSheet(sheet='${pdfsheet.name}', anchor='${anchor}')`);
+    const linkService = pdfsheet?.pdfviewerapp?.pdfLinkService;
+    if (!linkService) return false;
+
+    console.debug(`updateSheet(sheet='${pdfsheet.object.name}', anchor='${anchor}')`);
     if (anchor.startsWith('page='))
-        pdfsheet.pdfviewerapp.pdfLinkService.goToPage(+anchor.slice(5) + (pdfsheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0));
+        linkService.goToPage(+anchor.slice(5) + (pdfsheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0));
     else
-        pdfsheet.pdfviewerapp.pdfLinkService.goToDestination(JSON.parse(pdfsheet.toc[anchor].pdfslug));
+        linkService.goToDestination(JSON.parse(pdfsheet.toc[anchor].pdfslug));
+    return true;
 }
 
 /**
@@ -70,10 +75,9 @@ function updatePdfView(pdfsheet, anchor) {
  * @returns 
  */
 function JournalEntryPage_onClickDocumentLink(wrapper, event) {
-    //return this.sheet.render(true, {focus: true});
-    let sheet = this.parent.sheet.getPageSheet(this.id)
-    if (this.parent.sheet._state === Application.RENDER_STATES.RENDERED && sheet.pdfviewerapp?.pdfLinkService)
-        updatePdfView(sheet, decodeURIComponent(event.currentTarget.getAttribute('data-hash')));
+    if (this.parent.sheet._state === Application.RENDER_STATES.RENDERED &&
+        updatePdfView(this.parent.sheet.getPageSheet(this.id), decodeURIComponent(event.currentTarget.getAttribute('data-hash'))))
+        return;
     else
         return wrapper(event);
 }
@@ -83,19 +87,16 @@ function JournalEntryPage_onClickDocumentLink(wrapper, event) {
  */
 function JournalSheet_goToPage(wrapper, pageId, anchor) {
     let page = this._pages.find(page => page._id == pageId);
-    if (page && page.type == 'pdf') {
-        if (this._pages[this.pageIndex]?._id !== pageId || this._state !== Application.RENDER_STATES.RENDERED) {
-            // switch to the relevant page with the relevant slug.
-            cached_pdfpageid=pageId;
-            cached_pdfpageanchor=anchor;
-        } else {
-            // Move within existing page
-            let sheet = this.getPageSheet(pageId);
-            if (sheet?.pdfviewerapp.pdfLinkService) {
-                updatePdfView(sheet, anchor);
-                return;
-            }
+    if (page?.type == 'pdf') {
+        if (this._pages[this.pageIndex]?._id === pageId &&
+            this._state === Application.RENDER_STATES.RENDERED &&
+            updatePdfView(this.getPageSheet(pageId), anchor)) {
+            // Moved within existing page - so no need to invoke the normal goToPage processing that will render a new page.
+            return;
         }
+        // switch to the relevant page with the relevant slug (after page gets rendered)
+        pdfcache_pageid=pageId;
+        pdfcache_anchor=anchor;
     }
     return wrapper(pageId, anchor);
 }
@@ -181,19 +182,19 @@ function buildOutline(pdfoutline) {
         })
     } else {
         // Not editting, so maybe replace button
-        if (this.object._id !== cached_pdfpageid)
-            cached_pdfpageanchor = undefined;
+        if (this.object._id !== pdfcache_pageid)
+            pdfcache_anchor = undefined;
 
-        if (cached_pdfpageanchor || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
+        if (pdfcache_anchor || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
             // Immediately do JournalPagePDFSheet#_onLoadPDF
-            if (typeof cached_pdfpageanchor === 'number') {
-                cached_pdfpageanchor = `page=${cached_pdfpageanchor + (pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}`
-            } else if (typeof cached_pdfpageanchor === 'string') {
-                // convert TOC entry to PDFSLUG
-                cached_pdfpageanchor = this.toc[cached_pdfpageanchor].pdfslug;
-            }
-            const pdf_slug = cached_pdfpageanchor ? `#${cached_pdfpageanchor}` : '';
-            cached_pdfpageanchor = undefined;  // only use the buffered page number once
+            const pdf_slug = 
+                (typeof pdfcache_anchor === 'number') ?
+                    `#page=${pdfcache_anchor + (pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}` :
+                (typeof pdfcache_anchor === 'string') ?
+                    `#${this.toc[pdfcache_anchor].pdfslug}` :   // convert TOC entry to PDFSLUG
+                '';
+
+            pdfcache_anchor = undefined;  // only use the buffered page number once
 
             // Replace the "div.load-pdf" with an iframe element.
             // I can't find a way to do it properly, since html is simply a jQuery of top-level elements.
@@ -248,12 +249,11 @@ function buildOutline(pdfoutline) {
 
 function empty_function() {};
 
-Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
+Hooks.on("renderJournalPDFPageSheet", function(sheet, html, data) {
     // Initialising the editor MUST be done after the button has been replaced by the IFRAME.
     if (!sheet.isEditable && game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FORM_FILL_PDF)) {
-        const uuid = cached_display_uuid || sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
-        if (uuid) initEditor(html, uuid);
-        cached_display_uuid=undefined;
+        const uuid = pdfcache_show_uuid || sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
+        if (uuid) initEditor(html, uuid).finally(() => { pdfcache_show_uuid=undefined });
     }
 })
 
@@ -261,18 +261,16 @@ Hooks.on("renderJournalPDFPageSheet", async function(sheet, html, data) {
  * my_journal_render reads the page=xxx anchor from the original link, and stores it temporarily for use by renderJournalPDFPageSheet later
  * Wraps JournalSheet#_render
  */
-async function JournalSheet_render(wrapper,force,options) {
+function JournalSheet_render(wrapper,force,options) {
     // Monk's Active Tile Triggers sets the anchor to an array, so we need to check for a string here.
     if (options.anchor && 
         typeof options.anchor === 'string' &&
         this.object.pages.get(options.pageId)?.type === 'pdf') {
-        cached_pdfpageid     = options.pageId;
-        cached_pdfpageanchor = options.anchor?.startsWith('page=') ? +options.anchor.slice(5) : decodeURIComponent(options.anchor);
+        pdfcache_pageid = options.pageId;
+        pdfcache_anchor = options.anchor?.startsWith('page=') ? +options.anchor.slice(5) : decodeURIComponent(options.anchor);
         delete options.anchor;   // we don't want the wrapper trying to set the anchor
     }
-    let result = await wrapper(force,options);
-    cached_pdfpageanchor = undefined;  // in case renderJournalPDFPageSheet didn't get called
-    return result;
+    return wrapper(force,options).finally(() => { pdfcache_anchor = undefined });
 }
 
 
@@ -326,7 +324,7 @@ let code_cache = new Map();
     let pageoptions = { pageId: pagedoc.id };
     if (options?.page) pageoptions.anchor = `page=${options.page}`;
     // Maybe options contains { uuid: 'Actor.xyz' }
-    cached_display_uuid = options.uuid;
+    pdfcache_show_uuid = options.uuid;
 
     // Render journal entry showing the appropriate page (JOurnalEntryPage#_onClickDocumentLink)
     pagedoc.parent.sheet.render(true, pageoptions);
@@ -339,6 +337,7 @@ export function deleteOutlines() {
             if (page.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC)) {
                 console.log(`Removed stored Outline for page ${page.name} in journal ${journal.name}`)
                 page.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+                if (page.sheet?.toc) delete page.sheet.toc;
             }
         }
     }
