@@ -329,10 +329,14 @@ let code_cache = new Map();
 
 
 export function deleteOutlines() {
+    if (!game.user.isGM) {
+        ui.notifications.warn(game.i18n.format(`${PDFCONFIG.MODULE_NAME}.Warning.OnlyGM`, {function:"deleteOutlines()"}));
+        return;
+    }
     for (const journal of game.journal) {
         for (const page of journal.pages) {
             if (page.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC)) {
-                console.log(`Removed stored Outline for page ${page.name} in journal ${journal.name}`)
+                console.log(`Removed stored Outline for '${page.name}' in '${journal.name}'`)
                 page.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
                 if (page.sheet?.toc) delete page.sheet.toc;
             }
