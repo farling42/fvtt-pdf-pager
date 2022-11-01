@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## 0.30.0
+## 0.29.2
+
+- Don't try to calculate TOC if not owner of the underlying document.
+- Prevent error when clicking on the page in the Nav Pane when no TOC present.
+
+## 0.29.1
 
 - Document the availability of the function `ui.pdfpager.deleteOutlines()` to delete all stored Outlines for PDFs in the Journal sidebar.
 - BUG FIX: Ensure that TOC entries with the same text have different slugs (using `JournalEntryPage._flattenTOC`)

@@ -113,7 +113,6 @@ function buildOutline(pdfoutline) {
         for (let outlineNode of outline) {
             // Create a JournalEntryPageHeading from the PDF node:
             // see Foundry: JournalEntryPage#_makeHeadingNode
-            //const slug = node.title.slugify();
             const tocNode = {
                 text:  outlineNode.title,
                 level: parent.level+1,
@@ -216,23 +215,19 @@ function buildOutline(pdfoutline) {
 
     // Register handler to generate the TOC after the PDF has been loaded.
     // (This is done in the editor too, so that the flag can be set as soon as a PDF is selected)
-    if (this.object.permission == CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
-        html.on('load', async (event) => {
-        //console.debug(`PDF frame loaded for '${document.name}'`);
+    html.on('load', async (event) => {
+    //console.debug(`PDF frame loaded for '${document.name}'`);
         
-            // Wait for the PDFViewer to be fully initialized
-            const contentWindow = event.target.contentWindow;
+        // Wait for PDF to initialise before attaching to event bus.
+        this.pdfviewerapp = event.target.contentWindow.PDFViewerApplication;
+        await this.pdfviewerapp.initializedPromise;
         
-            // Wait for PDF to initialise before attaching to event bus.
-            const pdfviewerapp = contentWindow.PDFViewerApplication;
-            await pdfviewerapp.initializedPromise;
-            // pdfviewerapp.pdfDocument isn't defined at this point
-    
-            // Read the outline and generate a TOC object from it.
+        // pdfviewerapp.pdfDocument isn't defined at this point    
+        // Read the outline and generate a TOC object from it.
+        if (this.object.permission == CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
             pdfviewerapp.eventBus.on('annotationlayerrendered', layerevent => {   // from PdfPageView
                 pdfviewerapp.pdfDocument.getOutline().then(outline => {
                     // Store it as JournalPDFPageSheet.toc
-                    //this.pdfviewerapp = pdfviewerapp;
                     if (outline) {
                         let oldflag = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
                         let newflag = JSON.stringify(buildOutline(outline));
@@ -243,8 +238,8 @@ function buildOutline(pdfoutline) {
                     }
                 })
             })
-        })
-    }   
+        }
+    })
     
     return html;
 }
