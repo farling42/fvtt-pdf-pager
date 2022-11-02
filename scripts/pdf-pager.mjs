@@ -189,7 +189,7 @@ function buildOutline(pdfoutline) {
             const pdf_slug = 
                 (typeof pdfcache_anchor === 'number') ?
                     `#page=${pdfcache_anchor + (pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}` :
-                (typeof pdfcache_anchor === 'string') ?
+                (typeof pdfcache_anchor === 'string' && this.toc) ?
                     `#${this.toc[pdfcache_anchor].pdfslug}` :   // convert TOC entry to PDFSLUG
                 '';
 
@@ -225,11 +225,12 @@ function buildOutline(pdfoutline) {
         // pdfviewerapp.pdfDocument isn't defined at this point    
         // Read the outline and generate a TOC object from it.
         if (this.object.permission == CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
-            this.pdfviewerapp.eventBus.on('annotationlayerrendered', layerevent => {   // from PdfPageView
+            this.pdfviewerapp.eventBus.on('outlineloaded', docevent => {   // from PdfPageView
                 this.pdfviewerapp.pdfDocument.getOutline().then(outline => {
                     // Store it as JournalPDFPageSheet.toc
                     if (outline) {
                         let oldflag = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+                        console.debug(`Calculating TOC for '${this.object.name}'`)
                         let newflag = JSON.stringify(buildOutline(outline));
                         if (oldflag !== newflag)
                             this.object.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC, newflag)
@@ -282,48 +283,45 @@ let code_cache = new Map();
  export function openPDFByCode(pdfcode, options={}) {
     console.log(`openPDFByCode('${pdfcode}', '${JSON.stringify(options)}'`);
 
-    let page_uuid = code_cache.get(pdfcode);
+    let pagedoc;
     // Check cache value is still valid
+    let page_uuid = code_cache.get(pdfcode);
     if (page_uuid) {
-        let code = fromUuidSync(page_uuid)?.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
-        if (!code) {
+        // We don't support Compendiums, so we can use fromUuidSync safely
+        pagedoc = fromUuidSync(page_uuid);
+        let code = pagedoc?.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
+        if (code != pdfcode) {
             // CODE no longer matches, so remove from cache
             code_cache.delete(pdfcode);
-            page_uuid = null;
+            pagedoc = undefined;
         }
     }
     // Not in cache, so find an entry and add it to the cache
-    if (!page_uuid) {
+    if (!pagedoc) {
         for (const journal of game.journal) {
             for (const page of journal.pages) {
                 if (page.type === 'pdf' &&
                     page.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE) == pdfcode) {
-                    page_uuid = page.uuid;
-                    code_cache.set(pdfcode, page_uuid);
+                    code_cache.set(pdfcode, page.uuid);
+                    pagedoc = page;
                     break;
                 }
             }
-            if (page_uuid) break;
+            if (pagedoc) break;
+        }
+        // Stop now if no page was found
+        if (!pagedoc) {
+            console.error(`openPdfByCode: unable to find PDF with code '${pdfcode}'`)
+            ui.notifications.error(game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Error.NoPDFWithCode`))
+            return;
         }
     }
-    // Now request that the corresponding page be loaded.
-    if (!page_uuid) {
-        console.error(`openPdfByCode: unable to find PDF with code '${pdfcode}'`)
-        ui.notifications.error(game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Error.NoPDFWithCode`))
-        return;
-    }
-    let pagedoc = fromUuidSync(page_uuid);
-    if (!pagedoc) {
-        console.error(`openPdfByCode failed to retrieve document uuid '${page_uuid}`)
-        ui.notifications.error(game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Error.FailedLoadPage`))
-        return;
-    }
-    let pageoptions = { pageId: pagedoc.id };
-    if (options?.page) pageoptions.anchor = `page=${options.page}`;
     // Maybe options contains { uuid: 'Actor.xyz' }
     pdfcache_show_uuid = options.uuid;
 
-    // Render journal entry showing the appropriate page (JOurnalEntryPage#_onClickDocumentLink)
+    // Render journal entry showing the appropriate page (JournalEntryPage#_onClickDocumentLink)
+    let pageoptions = { pageId: pagedoc.id };
+    if (options?.page) pageoptions.anchor = `page=${options.page}`;
     pagedoc.parent.sheet.render(true, pageoptions);
 }
 
