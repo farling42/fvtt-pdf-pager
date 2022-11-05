@@ -269,6 +269,8 @@ Hooks.on("renderJournalPDFPageSheet", function(sheet, html, data) {
     }
 })
 
+// Remove the flags we saved on the PAGE when the displayed window is closed.
+
 Hooks.on("closeJournalSheet", (sheet, element) => {
     console.log(`closing ${sheet.document.name}`)
     for (const node of sheet._pages) {
