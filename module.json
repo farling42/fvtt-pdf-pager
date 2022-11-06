@@ -44,6 +44,11 @@
       "lang": "en",
       "name": "English",
       "path": "languages/en.json"
+    },
+    {
+      "lang": "de",
+      "name": "German",
+      "path": "languages/de.json"
     }
   ],
   "url": "https://github.com/farling42/fvtt-pdf-pager",

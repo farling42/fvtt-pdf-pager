@@ -4,6 +4,7 @@
 
 - BUG FIX: Clicking on link when wrong page in journal was displayed didn't show the correct PDF.
 - BUG FIX: Ensure selected page/heading is displayed when TOC doesn't already exist on the PDF.
+- Add German translations, submitted by `CePeU`
 
 ## 0.29.2
 
