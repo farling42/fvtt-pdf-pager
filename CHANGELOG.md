@@ -4,7 +4,8 @@
 
 - BUG FIX: Clicking on link when wrong page in journal was displayed didn't show the correct PDF.
 - BUG FIX: Ensure selected page/heading is displayed when TOC doesn't already exist on the PDF.
-- Add German translations, submitted by `CePeU`
+- Add German translations, submitted by `CePeU`.
+- Use System-provided translations for Actor and Item types if available (note that CoC7 does not use the standard translation keys).
 
 ## 0.29.2
 
