@@ -57,23 +57,27 @@ function getAnchor(match) {
     const [ matches, journalname, pagename=journalname, pagenum, label] = match;
 
     // Find the relevant PAGE in the relevant JOURNAL ENTRY
-    for (const journal of game.journal.contents) {
-        if (journal.name === journalname) {
-            let page = journal.pages.find(page => page.type === 'pdf' && page.name === pagename);
-            if (page) {
-                let attrs = {draggable: true};
-                if (pagenum) attrs["data-hash"] = pagenum;
-                return page.toAnchor({
-                    classes: ["content-link"],
-                    attrs,
-                    name: label
-                });
-            }
-        }
+    let page;
+    for (const journal of game.journal.contents.filter(journal => journal.name === journalname)) {
+        page = journal.pages.find(jpage => jpage.type === 'pdf' && jpage.name === pagename);
+        if (page) break;
     }
-    // Failed to find a page within a journal with the given name.
-    console.debug(`PDF-PAGER: failed to find page called '${pagename}' inside journal '${journalname}'`)
-    return null;
+    // Look for a PDF code that matches journalname (if an explicit page name was given, then obviously they didn't provide a PDF code)
+    if (!page && journalname===pagename) page = getPDFByCode(journalname);
+    // Return the anchor of the found page (if any)
+    if (page) {
+        let attrs = {draggable: true};
+        if (pagenum) attrs["data-hash"] = pagenum;
+        return page.toAnchor({
+            classes: ["content-link"],
+            attrs,
+            name: label
+        });
+    } else {
+        // Failed to find a page within a journal with the given name.
+        console.debug(`PDF-PAGER: failed to find page called '${pagename}' inside journal '${journalname}'`)
+        return null;
+    }
 }
 
 /**
@@ -146,3 +150,38 @@ function JournalEntryPage_createDocumentLink(wrapped, eventData, args) {
         return `@PDF[${fullname}|${slug}]{${label}}`;
     }
 }
+
+// Key = PDFCODE; Value = UUID of JournalPage(PDF)
+let code_cache = new Map();
+
+export function getPDFByCode(pdfcode) {
+    // Check cache value is still valid
+    let pagedoc;
+    let page_uuid = code_cache.get(pdfcode);
+    if (page_uuid) {
+        // We don't support Compendiums, so we can use fromUuidSync safely
+        pagedoc = fromUuidSync(page_uuid);
+        let code = pagedoc?.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
+        if (code != pdfcode) {
+            // CODE no longer matches, so remove from cache
+            code_cache.delete(pdfcode);
+            pagedoc = undefined;
+        }
+    }
+    // Not in cache, so find an entry and add it to the cache
+    if (!pagedoc) {
+        for (const journal of game.journal) {
+            for (const page of journal.pages) {
+                if (page.type === 'pdf' &&
+                    page.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE) == pdfcode) {
+                    code_cache.set(pdfcode, page.uuid);
+                    pagedoc = page;
+                    break;
+                }
+            }
+            if (pagedoc) break;
+        }
+    }
+    return pagedoc;
+}
+

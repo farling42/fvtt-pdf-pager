@@ -68,9 +68,11 @@ An existing Foundry link to a specific PDF page can be augmented with "#page=x" 
 
 ### Method 2: Use `@PDF` link
 
-As was available in PDFoundry (for Foundry V9 and earlier), a new link type can be used which uses the journal name and page name instead of the UUID of the document. If 'pagename' is not present, then the first PDF page within the given journal entry will be used. The '|page=xxx' is optional.
+As was available in PDFoundry (for Foundry V9 and earlier), a new link type can be used which uses the PDF code or journal name and page name instead of the UUID of the document. If 'pagename' is not present, then the first PDF page within the given journal entry will be used. The '|page=xxx' is optional.
 
 ```code
+@PDF[PDFcode]{label}
+@PDF[PDFcode|page=xxx]{label}
 @PDF[journalname]{label}
 @PDF[journalname|page=xxx]{label}
 @PDF[journalname#pagename]{label}

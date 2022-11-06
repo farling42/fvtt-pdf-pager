@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.31.0
+
+- Allow pdfcode to be used as an alternative to supplying the journal name and page name in `@PDF[pdfcode]{label}` or `@PDF[pdfcode|page=x]{label}`
+- `ui.pdfpager.openPDFByCode` optimised so that when a specific page is requested, if the PDF is already open then it simply moves that displayed document to the requested page.
+
 ## 0.30.0
 
 - Calculate PDF's table of contents as soon as possible after loading the PDF document.

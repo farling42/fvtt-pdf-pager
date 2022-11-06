@@ -37,7 +37,7 @@ import { PDFCONFIG } from './pdf-config.mjs'
 
 let map_pdf2actor;                   // key = pdf field name, value = actor field name
 let map_pdf2item;                    // key = pdf field name, value = item  field name
-let document2pdfviewer = new Map();    // key = document uuid, value = container
+let document2pdfviewer = new Map();  // key = document uuid, value = container (WeakMap to allow auto-deletion)
 
 // Function to convert Object into a string whilst keeping the functions
 function Obj2String(obj) {

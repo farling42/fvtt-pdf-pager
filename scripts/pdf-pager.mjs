@@ -24,6 +24,7 @@ SOFTWARE.
 import { PDFCONFIG } from './pdf-config.mjs';
 import { initEditor } from './pdf-editable.mjs';
 import { migratePDFoundry } from './pdf-migrate.mjs';
+import { getPDFByCode } from './pdf-linker.mjs';
 
 /**
  * @UUID{JournalEntry.T29aMDmLCPYybApI.JournalEntryPage.iYV6uMnFwdgZORxi#page=10}
@@ -78,7 +79,7 @@ function getPdfSheet(journalsheet, pageId) {
     if (journalsheet?._state === Application.RENDER_STATES.RENDERED &&
         journalsheet._pages[journalsheet.pageIndex]?._id === pageId) {
         let sheet = journalsheet.getPageSheet(pageId);
-        if (sheet?.document?.type == 'pdf') return sheet;
+        if (sheet?.document?.type === 'pdf') return sheet;
     }
     return null;
 }
@@ -92,8 +93,7 @@ function getPdfSheet(journalsheet, pageId) {
  */
 function JournalEntryPage_onClickDocumentLink(wrapper, event) {
     let pdfsheet = getPdfSheet(this.parent.sheet, this.id);
-    if (pdfsheet &&
-        updatePdfView(pdfsheet, decodeURIComponent(event.currentTarget.getAttribute('data-hash')))) {
+    if (updatePdfView(pdfsheet, decodeURIComponent(event.currentTarget.getAttribute('data-hash')))) {
         // Cancel any previous stored anchor
         delete pdfsheet.document.pdfpager_anchor;
         return;
@@ -319,57 +319,37 @@ function JournalSheet_render(wrapper,force,options) {
 }
 
 
-
-let code_cache = new Map();
-
 /**
  * 
  * @param {*} pdfcode The short code of the PDF page to be displayed
  * @param {*} options Can include {page: <number>}  and/or { pdfcode: <code> } and/or { showUuid : <docid> }
  */
  export function openPDFByCode(pdfcode, options={}) {
-    console.log(`openPDFByCode('${pdfcode}', '${JSON.stringify(options)}'`);
+    if (!options) options = {};
+    console.log(`openPDFByCode('${pdfcode}', '${JSON.stringify(options)}')`);
 
-    let pagedoc;
-    // Check cache value is still valid
-    let page_uuid = code_cache.get(pdfcode);
-    if (page_uuid) {
-        // We don't support Compendiums, so we can use fromUuidSync safely
-        pagedoc = fromUuidSync(page_uuid);
-        let code = pagedoc?.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
-        if (code != pdfcode) {
-            // CODE no longer matches, so remove from cache
-            code_cache.delete(pdfcode);
-            pagedoc = undefined;
-        }
-    }
-    // Not in cache, so find an entry and add it to the cache
-    if (!pagedoc) {
-        for (const journal of game.journal) {
-            for (const page of journal.pages) {
-                if (page.type === 'pdf' &&
-                    page.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE) == pdfcode) {
-                    code_cache.set(pdfcode, page.uuid);
-                    pagedoc = page;
-                    break;
-                }
-            }
-            if (pagedoc) break;
-        }
-        // Stop now if no page was found
-        if (!pagedoc) {
-            console.error(`openPdfByCode: unable to find PDF with code '${pdfcode}'`)
-            ui.notifications.error(game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Error.NoPDFWithCode`))
+    const pagedoc = getPDFByCode(pdfcode);
+    // Stop now if no page was found
+    if (pagedoc) {
+        const journalsheet = pagedoc.parent.sheet;
+        // Render journal entry showing the appropriate page (JournalEntryPage#_onClickDocumentLink)
+        if (!options?.uuid && options.page &&
+            journalsheet?._state === Application.RENDER_STATES.RENDERED &&
+            journalsheet._pages[journalsheet.pageIndex]?._id === pagedoc.id &&
+            updatePdfView(journalsheet.getPageSheet(pagedoc.id), `page=${options.page}`)) {
+            // We updated the already displayed PDF document
             return;
+        } else {
+            // updatePdfView didn't do the work, so do it here instead.
+            let pageoptions = { pageId : pagedoc.id };
+            if (options?.page) pageoptions.anchor = `page=${options.page}`;
+            if (options?.uuid) pageoptions.showUuid = options.uuid;
+            pagedoc.parent.sheet.render(true, pageoptions);
         }
+    } else {
+        console.error(`openPdfByCode: unable to find PDF with code '${pdfcode}'`)
+        ui.notifications.error(game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Error.NoPDFWithCode`))
     }
-
-    // Render journal entry showing the appropriate page (JournalEntryPage#_onClickDocumentLink)
-    let pageoptions = { pageId : pagedoc.id };
-    if (options?.page) pageoptions.anchor = `page=${options.page}`;
-    if (options?.uuid) pageoptions.showUuid = options.uuid;
-    // Maybe options contains { uuid: 'Actor.xyz' }
-    pagedoc.parent.sheet.render(true, pageoptions);
 }
 
 
