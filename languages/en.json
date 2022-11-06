@@ -25,9 +25,9 @@
         "readPdfFields.Hint": "When enabled, when a PDF is opened, any field data (annotations) within the loaded file are copied to the corresponding Actor field OVERWRITING any old values stored on the Actor (editing of the PDF is disabled while this option is enabled)",
         "showInPDF"      :  "Open PDF",
         "actorType.Name" : "Actor: '{name}'",
-        "actorType.Hint" : "Define the PDF CODE of the PDF page to be used when selecting 'Show in PDF' from the Actor context menu for '${name}' actors",
+        "actorType.Hint" : "Define the PDF CODE of the PDF page to be used when selecting 'Show in PDF' from the Actor context menu for '{name}' actors",
         "itemType.Name"  : "Item: '{name}'",
-        "itemType.Hint"  : "Define the PDF CODE of the PDF page to be used when selecting 'Show in PDF' from the Item context menu for '${name}' items",
+        "itemType.Hint"  : "Define the PDF CODE of the PDF page to be used when selecting 'Show in PDF' from the Item context menu for '{name}' items",
         "actorSheet.Name" : "Actor Sheet: '{name}'",
         "actorSheet.Hint" : "Choose the PDF file to be used for a '{name}' Actor",
         "inspector": {

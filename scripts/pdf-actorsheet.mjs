@@ -137,14 +137,14 @@ export class PDFActorSheet extends ActorSheet {
 let defined_types = [];
 
 export function configureActorSettings() {
-  const name  = PDFCONFIG.MODULE_NAME;
+  const modulename = PDFCONFIG.MODULE_NAME;
 
   function updateSheets() {
 
     let types = []
     for (const type of game.template.Actor.types) {
       let param = `${type}Sheet`;
-      if (game.settings.get(name, param)?.length) {
+      if (game.settings.get(modulename, param)?.length) {
         types.push(type);
       }
     }
@@ -153,11 +153,11 @@ export function configureActorSettings() {
     if (types != defined_types) {
       console.log(`Changing registered Actor sheets to ${JSON.stringify(types)}`)
       defined_types = types;
-      Actors.unregisterSheet(PDFCONFIG.MODULE_NAME, PDFActorSheet);
+      Actors.unregisterSheet(modulename, PDFActorSheet);
 
       // Add new list of registered sheets
       if (types.length) {
-        Actors.registerSheet(PDFCONFIG.MODULE_NAME, PDFActorSheet, {
+        Actors.registerSheet(modulename, PDFActorSheet, {
           types,
           makeDefault: false,
           label: "PDF Sheet"
@@ -166,13 +166,11 @@ export function configureActorSettings() {
     }
   }
 
-  for (let type of game.template.Actor.types) {
-    let param = `${type}Sheet`;
-    let basename = game.i18n.format(`${name}.actorSheet.Name`, {name: type});
-    let basehint = game.i18n.format(`${name}.actorSheet.Hint`, {name: type});
-    game.settings.register(name, param, {
-		  name: basename,
-		  hint: basehint,
+  for (let [type,label] of Object.entries(CONFIG.Actor.typeLabels)) {
+    let actorname = game.i18n.has(label) ? game.i18n.localize(label) : type;
+    game.settings.register(modulename, `${type}Sheet`, {
+		  name: game.i18n.format(`${modulename}.actorSheet.Name`, {name: actorname}),
+		  hint: game.i18n.format(`${modulename}.actorSheet.Hint`, {name: actorname}),
 		  scope: "world",
 		  type:  String,
 		  default: "",

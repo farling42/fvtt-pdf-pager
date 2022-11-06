@@ -65,9 +65,10 @@ export function configureMenuSettings() {
     const MODULE = PDFCONFIG.MODULE_NAME;
 	// One entry for each Actor type
 	for (const [type,label] of Object.entries(CONFIG.Actor.typeLabels)) {
+        let actorname = game.i18n.has(label) ? game.i18n.localize(label) : type;
 		game.settings.register(MODULE, `${MENU_ACTOR_FLAG}.${type}`, {
-			name: game.i18n.format(`${MODULE}.actorType.Name`, {'name': game.i18n.localize(type) }),
-			hint: game.i18n.format(`${MODULE}.actorType.Hint`, {'name': game.i18n.localize(type) }),
+			name: game.i18n.format(`${MODULE}.actorType.Name`, {'name': actorname }),
+			hint: game.i18n.format(`${MODULE}.actorType.Hint`, {'name': actorname }),
 			scope: "world",
 			type:  String,
 			default: "",
@@ -76,9 +77,10 @@ export function configureMenuSettings() {
 	}
 	// One entry for each Item type
 	for (const [type,label] of Object.entries(CONFIG.Item.typeLabels)) {
+        let itemname = game.i18n.has(label) ? game.i18n.localize(label) : type;
 		game.settings.register(MODULE, `${MENU_ITEM_FLAG}.${type}`, {
-			name: game.i18n.format(`${MODULE}.itemType.Name`, {'name': game.i18n.localize(type) }),
-			hint: game.i18n.format(`${MODULE}.itemType.Hint`, {'name': game.i18n.localize(type) }),
+			name: game.i18n.format(`${MODULE}.itemType.Name`, {'name': itemname }),
+			hint: game.i18n.format(`${MODULE}.itemType.Hint`, {'name': itemname }),
 			scope: "world",
 			type:  String,
 			default: "",
