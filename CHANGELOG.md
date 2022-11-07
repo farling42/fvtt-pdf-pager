@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.32.1
+
+- Fix an issue with enrichHTML if it is called without a second argument (the optional `options`)
+
 ## 0.32.0
 
 - Add a simple CSS file that ensures that PDF pages are shown full length within the window.

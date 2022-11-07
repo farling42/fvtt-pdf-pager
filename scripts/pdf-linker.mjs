@@ -87,10 +87,10 @@ function getAnchor(match) {
  * @param {*} options 
  * @returns 
  */
-function TextEditor_enrichHTML(wrapped, content, options) {
+function TextEditor_enrichHTML(wrapped, content, options={}) {
     let text = content;
     if (!options.async && text?.length && text.includes('@PDF[')) {
-        text = text.replaceAll(pattern, (match, p1, p2, /*p3*/pagenum, /*p4*/label, options, groups) => {
+        text = text.replaceAll(pattern, (match, p1, p2, /*p3*/pagenum, /*p4*/label, moptions, mgroups) => {
             const anchor = getAnchor([match, p1, p2, pagenum, label]);
             return anchor ? anchor.outerHTML : label;
         });
