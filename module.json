@@ -39,6 +39,9 @@
     "scripts/pdf-pager.mjs",
     "scripts/pdf-migrate.mjs"
   ],
+  "styles": [
+    "style/pdfpager.css"
+  ],
   "languages": [
     {
       "lang": "en",

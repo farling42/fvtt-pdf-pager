@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.32.0
+
+- Add a simple CSS file that ensures that PDF pages are shown full length within the window.
+
 ## 0.31.0
 
 - Allow pdfcode to be used as an alternative to supplying the journal name and page name in `@PDF[pdfcode]{label}` or `@PDF[pdfcode|page=x]{label}`
