@@ -1,8 +1,0 @@
-.sheet.journal-entry .journal-entry-page.pdf {
-    height: 100%;
-}
-
-.journal-entry-page.pdf iframe {
-    min-height: unset;
-    flex-basis: unset;
-}

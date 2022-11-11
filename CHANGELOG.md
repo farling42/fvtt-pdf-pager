@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.32.2
+
+- Remove the temporary styles that were added to make PDF pages fit vertically in the window, since this is available in Foundry V10.290
+
 ## 0.32.1
 
 - Fix an issue with enrichHTML if it is called without a second argument (the optional `options`)

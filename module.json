@@ -6,7 +6,7 @@
   "library": "false",
   "compatibility": {
     "minimum": 10,
-    "verified": 10.288
+    "verified": "10.290"
   },
   "authors": [
 		{
@@ -38,9 +38,6 @@
     "scripts/pdf-menu.mjs",
     "scripts/pdf-pager.mjs",
     "scripts/pdf-migrate.mjs"
-  ],
-  "styles": [
-    "style/pdfpager.css"
   ],
   "languages": [
     {
