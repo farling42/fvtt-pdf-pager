@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.33.1
+
+- Fix syntax issue in main code, and in new macro.
+
 ## 0.33
 
 - Remove the temporary styles that were added to make PDF pages fit vertically in the window, since this is available in Foundry V10.290

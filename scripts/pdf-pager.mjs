@@ -249,7 +249,7 @@ function buildOutline(pdfoutline) {
                     } else {
                             this.object.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
                     }
-                )
+                })
                 /* - working on ensuring window width is good
                 // Set iframe width
                 let iframe = event.target;
