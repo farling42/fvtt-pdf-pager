@@ -39,6 +39,14 @@
     "scripts/pdf-pager.mjs",
     "scripts/pdf-migrate.mjs"
   ],
+  "packs": [
+    {
+      "name": "macros",
+      "label": "PDF Pager Macros",
+      "path": "./packs/macros.db",
+      "type": "Macro"
+    }
+  ],
   "languages": [
     {
       "lang": "en",

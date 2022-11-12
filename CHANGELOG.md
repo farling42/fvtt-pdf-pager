@@ -1,9 +1,10 @@
 # CHANGELOG
 
-## 0.32.2
+## 0.33
 
 - Remove the temporary styles that were added to make PDF pages fit vertically in the window, since this is available in Foundry V10.290
 - Do not automatically invoke migratePDFoundry at startup, to avoid GMs reading ALL the journal compendiums at startup.
+- Provide a Macro in a compendium called "Migrate PDFoundry" to allow GMs to manually invoke the migration without requiring any scripting knowledge.
 
 ## 0.32.1
 

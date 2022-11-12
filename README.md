@@ -102,6 +102,8 @@ https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json
 
 Function are available which can be called directly from a macro script or from the console command-line to migrate your existing PDFoundry documents and links to the new format.
 
+A macro is available in the "PDF Pager Macros" compendium to migrate any journal entries which might have been created with PDFoundry, including those inside compendiums(see `migratePDFoundry()` below for more details.)
+
 ### migratePDFoundry()
 
 This function creates a page in each journal entry containing the information previously configured using PDFoundry for each PDF.
