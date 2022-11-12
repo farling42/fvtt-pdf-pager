@@ -3,6 +3,7 @@
 ## 0.32.2
 
 - Remove the temporary styles that were added to make PDF pages fit vertically in the window, since this is available in Foundry V10.290
+- Do not automatically invoke migratePDFoundry at startup, to avoid GMs reading ALL the journal compendiums at startup.
 
 ## 0.32.1
 

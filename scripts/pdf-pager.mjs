@@ -46,8 +46,6 @@ Hooks.once('ready', async () => {
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._onClickDocumentLink', JournalEntryPage_onClickDocumentLink, libWrapper.MIXED);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render',     JournalSheet_render,  libWrapper.WRAPPER);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype.goToPage',    JournalSheet_goToPage, libWrapper.MIXED);
-
-    if (game.user.isGM) await migratePDFoundry({onlyIfEmpty:true});
 });
 
 // Ugly hack to get the PAGE number from the JournalSheet#render down to the JournalPDFPageSheet#render
@@ -235,7 +233,7 @@ function buildOutline(pdfoutline) {
         this.pdfviewerapp = event.target.contentWindow.PDFViewerApplication;
         await this.pdfviewerapp.initializedPromise;
 
-        // pdfviewerapp.pdfDocument isn't defined at this point    
+        // pdfviewerapp.pdfDocument isn't defined at this point
         // Read the outline and generate a TOC object from it.
         if (this.object.permission == CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
             this.pdfviewerapp.eventBus.on('outlineloaded', docevent => {   // from PdfPageView
@@ -251,8 +249,24 @@ function buildOutline(pdfoutline) {
                     } else {
                             this.object.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
                     }
-                })
+                )
+                /* - working on ensuring window width is good
+                // Set iframe width
+                let iframe = event.target;
+                // PDF.js sets div.textLayer to the actual width of the document (excluding PDF.js borders)
+                let textLayer = iframe.contentWindow.document.body.querySelector('div.textLayer');
+                console.log(textLayer);
+                iframe.style.width = textLayer.scrollWidth + 'px';
+                */
             })
+            /*
+            this.pdfviewerapp.eventBus.on('scalechanged', docevent => {   // from PdfPageView
+                // docevent:
+                //  source: Toolbar
+                //  value:  either a numeric multiplier (1 = 100%, 1.5 = 150%) or a string ('page-fit', 'auto', 'page-actual'. 'page-width', 'page-height')
+                console.log('scalechanged', docevent)
+                // can also be read from this.pdfviewerapp.pdfViewer.currentScale
+            })*/
         }
     })
     
@@ -272,7 +286,7 @@ Hooks.on("renderJournalPDFPageSheet", function(sheet, html, data) {
 // Remove the flags we saved on the PAGE when the displayed window is closed.
 
 Hooks.on("closeJournalSheet", (sheet, element) => {
-    console.log(`closing ${sheet.document.name}`)
+    //console.log(`closing ${sheet.document.name}`)
     for (const node of sheet._pages) {
         if (node.type === 'pdf') {
             let page = sheet.getPageSheet(node._id)?.document;
@@ -283,8 +297,9 @@ Hooks.on("closeJournalSheet", (sheet, element) => {
         }
     }
 })
+
 Hooks.on("closeJournalPDFPageSheet", (sheet, element) => {
-    console.log(`closing PDF ${sheet.document.name}`)
+    //console.log(`closing PDF ${sheet.document.name}`)
     let page = sheet.document;
     delete page.pdfpager_anchor;
     delete page.pdfpager_show_uuid;
