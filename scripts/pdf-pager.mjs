@@ -64,11 +64,15 @@ function updatePdfView(pdfsheet, anchor) {
     const linkService = pdfsheet?.pdfviewerapp?.pdfLinkService;
     if (!linkService || !anchor) return false;
 
-    console.debug(`updatePdfView(sheet='${pdfsheet.object.name}', anchor='${anchor}')`);
-    if (anchor.startsWith('page='))
-        linkService.goToPage(+anchor.slice(5) + (pdfsheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0));
-    else
-        linkService.goToDestination(JSON.parse(pdfsheet.toc[anchor].pdfslug));
+    if (anchor.startsWith('page=')) {
+        const doc_page = +anchor.slice(5) + (pdfsheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0);
+        console.debug(`updatePdfView(sheet='${pdfsheet.object.name}', anchor='${anchor}')\Changing page to ${doc_page}`)
+        linkService.goToPage(doc_page);
+    } else {
+        const slug = JSON.parse(pdfsheet.toc[anchor].pdfslug);
+        console.debug(`updatePdfView(sheet='${pdfsheet.object.name}', anchor='${anchor}')\nGoing to slug`, slug);
+        linkService.goToDestination(slug);
+    }
     return true;
 }
 
@@ -190,13 +194,18 @@ function buildOutline(pdfoutline) {
         // Not editting, so maybe replace button with actual PDF
         let anchor = pagedoc.pdfpager_anchor;
         if (anchor || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
-            // Immediately do JournalPagePDFSheet#_onLoadPDF
-            const pdf_slug = 
+            let pdf_slug = 
                 (typeof anchor === 'number') ?
                     `#page=${anchor + (pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}` :
                 (typeof anchor === 'string' && this.toc) ?
                     `#${this.toc[anchor].pdfslug}` :   // convert TOC entry to PDFSLUG
                 '';
+            // Add configured zoom
+            let default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
+            if (default_zoom) {
+                console.log(`displaying PDF with default zoom of ${default_zoom}%`);
+                pdf_slug += (pdf_slug.length ? "&" : "#") + `zoom=${default_zoom}`;
+            }
 
             // Replace the "div.load-pdf" with an iframe element.
             // I can't find a way to do it properly, since html is simply a jQuery of top-level elements.

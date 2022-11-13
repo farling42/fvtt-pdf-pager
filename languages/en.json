@@ -23,6 +23,8 @@
         "hideFieldBg.Hint" : "Disable the setting of an explicit background colour for editable fields (overrides a default PDFJS styling)",
         "readPdfFields.Name": "Read Fields from PDF",
         "readPdfFields.Hint": "When enabled, when a PDF is opened, any field data (annotations) within the loaded file are copied to the corresponding Actor field OVERWRITING any old values stored on the Actor (editing of the PDF is disabled while this option is enabled)",
+        "defaultZoom.Name": "Default Zoom",
+        "defaultZoom.Hint": "The default zoom (as a percentage) to set when opening a PDF document (0=no default)",
         "showInPDF"      :  "Open PDF",
         "actorType.Name" : "Actor: '{name}'",
         "actorType.Hint" : "Define the PDF CODE of the PDF page to be used when selecting 'Show in PDF' from the Actor context menu for '{name}' actors",

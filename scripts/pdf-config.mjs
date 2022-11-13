@@ -37,6 +37,7 @@ export let PDFCONFIG = {
 	ITEM_CONFIG             : "itemConfig",
 	HIDE_EDITABLE_BG        : "hideFieldBg",
 	READ_FIELDS_FROM_PDF    : "readPdfFields",
+	DEFAULT_ZOOM			: "defaultZoom",
 	// Flags on an Actor
     FLAG_OFFSET             : "pageOffset",
     FLAG_CODE               : "code",
@@ -95,6 +96,16 @@ Hooks.once('ready', () => {
 		scope: "world",
 		type:  Boolean,
 		default: false,
+		config: true
+	});
+
+    param = PDFCONFIG.DEFAULT_ZOOM;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  Number,
+		default: 0,
 		config: true
 	});
 

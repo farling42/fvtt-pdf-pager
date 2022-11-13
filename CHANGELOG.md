@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.34.0
+
+- Provide an optional default zoom parameter which will be used when opening all PDFs (available in the module settings window).
+- Remove temporary patch for bug in core Foundry V10, since 10.290 contains the required fixes.
+
 ## 0.33.1
 
 - Fix syntax issue in main code, and in new macro.
