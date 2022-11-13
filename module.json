@@ -5,7 +5,7 @@
   "version": "0.0.1",
   "library": "false",
   "compatibility": {
-    "minimum": 10,
+    "minimum": "10.290",
     "verified": "10.290"
   },
   "authors": [

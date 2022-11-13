@@ -133,8 +133,6 @@ function buildOutline(pdfoutline) {
                 level: parent.level+1,
                 slug:  JournalEntryPage.slugifyHeading(outlineNode.title),
                 children: [],
-                // Needed to avoid breaking Foundry code
-                element: { dataset : { anchor: "" } },  // FOUNDRY does: element.dataset.anchor = slug;
                 // Our data below:
                 pdfslug:  JSON.stringify(outlineNode.dest)
             };
@@ -160,14 +158,8 @@ function buildOutline(pdfoutline) {
     // Ensure we have a TOC on this sheet.
     // Emulate TextPageSheet._renderInner setting up the TOC
     let toc = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
-    if (toc) {
+    if (toc)
         this.toc = JSON.parse(toc);
-        // Prevent error being reported by core Foundry when it tries to do:
-        // this.getPageSheet(pageId)?.toc[options.anchor]?.element.scrollIntoView();
-        for (let key in this.toc) {
-            this.toc[key].element.scrollIntoView = empty_function;
-        }
-    }
     else   
         delete this.toc;
 
@@ -272,8 +264,6 @@ function buildOutline(pdfoutline) {
     
     return html;
 }
-
-function empty_function() {};
 
 Hooks.on("renderJournalPDFPageSheet", function(sheet, html, data) {
     // Initialising the editor MUST be done after the button has been replaced by the IFRAME.
