@@ -24,7 +24,17 @@
         "readPdfFields.Name": "Read Fields from PDF",
         "readPdfFields.Hint": "When enabled, when a PDF is opened, any field data (annotations) within the loaded file are copied to the corresponding Actor field OVERWRITING any old values stored on the Actor (editing of the PDF is disabled while this option is enabled)",
         "defaultZoom.Name": "Default Zoom",
-        "defaultZoom.Hint": "The default zoom (as a percentage) to set when opening a PDF document (0=no default)",
+        "defaultZoom.Hint": "Choose the preferred default zoom setting to be used when opening a PDF (fixed-value requires setting the next parameter)",
+        "Zoom" : {
+            "none": "None",
+            "page-actual": "Actual Size",
+            "page-width" : "Page Width",
+            "page-fit"   : "Page Fit",
+            "auto"       : "Automatic Zoom",
+            "number"     : "Fixed Percentage"
+        },
+        "zoomPercentage.Name" : "Default Zoom Fixed Percentage",
+        "zoomPercentage.Hint" : "The default zoom (as a percentage) when Default Zoom is set to 'Fixed Percentage'",
         "showInPDF"      :  "Open PDF",
         "actorType.Name" : "Actor: '{name}'",
         "actorType.Hint" : "Define the PDF CODE of the PDF page to be used when selecting 'Show in PDF' from the Actor context menu for '{name}' actors",

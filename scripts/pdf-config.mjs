@@ -38,6 +38,7 @@ export let PDFCONFIG = {
 	HIDE_EDITABLE_BG        : "hideFieldBg",
 	READ_FIELDS_FROM_PDF    : "readPdfFields",
 	DEFAULT_ZOOM			: "defaultZoom",
+	DEFAULT_ZOOM_NUMBER		: "zoomPercentage",
 	// Flags on an Actor
     FLAG_OFFSET             : "pageOffset",
     FLAG_CODE               : "code",
@@ -104,8 +105,26 @@ Hooks.once('ready', () => {
 		name: game.i18n.localize(`${name}.${param}.Name`),
 		hint: game.i18n.localize(`${name}.${param}.Hint`),
 		scope: "world",
+		type:  String,
+		choices: {
+			"none"        : game.i18n.localize(`${name}.Zoom.none`),
+			"page-actual" : game.i18n.localize(`${name}.Zoom.page-actual`),
+			"page-width"  : game.i18n.localize(`${name}.Zoom.page-width`),
+			"page-fit"    : game.i18n.localize(`${name}.Zoom.page-fit`),
+			"auto"        : game.i18n.localize(`${name}.Zoom.auto`),
+			"number"      : game.i18n.localize(`${name}.Zoom.number`)
+		},
+		default: "none",
+		config: true
+	});
+
+	param = PDFCONFIG.DEFAULT_ZOOM_NUMBER;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
 		type:  Number,
-		default: 0,
+		default: 100,
 		config: true
 	});
 
