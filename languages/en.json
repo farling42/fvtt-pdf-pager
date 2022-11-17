@@ -25,6 +25,12 @@
         "readPdfFields.Hint": "When enabled, when a PDF is opened, any field data (annotations) within the loaded file are copied to the corresponding Actor field OVERWRITING any old values stored on the Actor (editing of the PDF is disabled while this option is enabled)",
         "defaultZoom.Name": "Default Zoom",
         "defaultZoom.Hint": "Choose the preferred default zoom setting to be used when opening a PDF (fixed-value requires setting the next parameter)",
+        "ChoosePdfForm" : {
+            "Title": "Choose PDF for '{name}'",
+            "Prompt": "Custom PDF:",
+            "Hint": "Choose the PDF to be used for this specific Actor",
+            "Submit": "Save Custom PDF"
+        },
         "Zoom" : {
             "none": "None",
             "page-actual": "Actual Size",

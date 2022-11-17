@@ -43,7 +43,7 @@ export class PDFActorSheetConfig extends FormApplication {
   }
   get title() {
     const actor = this.object.document;
-    return `Choose PDF for '${actor.name}'`
+    return game.i18n.format(`${PDFCONFIG.MODULE_NAME}.ChoosePdfForm.Title`, {name: actor.name});
   }
   getData() {
     const actor = this.object.document;

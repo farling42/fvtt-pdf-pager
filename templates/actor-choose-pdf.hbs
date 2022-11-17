@@ -1,6 +1,6 @@
 <form class="{{cssClass}} flexcol" autocomplete="off">
     <div class="form-group">
-    <label>Custom PDF:</label>
+    <label>{{localize "pdf-pager.ChoosePdfForm.Prompt"}}</label>
     <div class="form-fields">
     <button type="button" class="file-picker" data-type="any" data-target="filename" title="Browse Files" tabIndex="-1">
         <i class="fas fa-file-import fa-fw">
@@ -8,10 +8,10 @@
     </button>
     <input type="text" name="filename" value="{{filename}}" data-dtype="String">
     </div>
-    <p class="notes">Choose the PDF to be used for this specific Actor</p>
+    <p class="notes">{{localize "pdf-pager.ChoosePdfForm.Hint"}}</p>
     </div>
     <button type="submit">
         <i class=""fas fa-save"></i>
-        Save Custom PDF
+        {{localize "pdf-pager.ChoosePdfForm.Submit"}}
     </button>
 </form>
