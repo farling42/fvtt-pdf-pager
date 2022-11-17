@@ -4,6 +4,9 @@
 
 - Provide an optional default zoom parameter which will be used when opening all PDFs (available in the module settings window).
 - Remove temporary patch for bug in core Foundry V10, since 10.290 contains the required fixes.
+- Add translations for text in the Actor sheet's Choose PDF dialog.
+- Ensure 'Hide Editable Field BG' works when 'Read Fields from PDF' is enabled.
+- When "Read Fields From PDF" is enabled, then don't register any listeners on the PDF.
 
 ## 0.33.1
 

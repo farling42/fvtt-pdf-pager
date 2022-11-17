@@ -134,12 +134,15 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
 }
 
 
-async function setDocumentFromForm(pdfviewer, document) {
+async function setDocumentFromForm(pdfviewer, document, options) {
     console.debug(`Setting ${document.documentName} '${document.name}' from PDF fields`);
     const inputs = pdfviewer.viewer.querySelectorAll('input,select,textarea');
     let buttonvalues; // support for radio buttons
 
     for (const element of inputs) {
+        // Hide the background, if required
+        if (options.hidebg) element.style.setProperty('background-image', 'none');
+
         if (element.disabled || element.readOnly) continue;
         // Don't allow editing while the PDF is in this mode
         element.readOnly = true;
@@ -261,7 +264,8 @@ export async function initEditor(html, id_to_display) {
     // Wait for the IFRAME to appear in the window before any further initialisation (html = iframe)
     html.on('load', async (event) => {
         console.debug(`PDF frame loaded for '${document.name}'`);
-        let editable = document.canUserModify(game.user, "update");
+        let read_pdf = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF);
+        let editable = !read_pdf && document.canUserModify(game.user, "update");
 
         // Wait for the PDFViewer to be fully initialized
         const contentWindow = event.target.contentWindow;
@@ -301,8 +305,8 @@ export async function initEditor(html, id_to_display) {
                     timeout=setTimeout(load, 100);
                 } else {
                     // Scripting engine is ready (or not available), so do the thing now
-                    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF))
-                        setDocumentFromForm(pdfviewer, document);
+                    if (read_pdf)
+                        setDocumentFromForm(pdfviewer, document, options);
                     else
                         setFormFromDocument(pdfviewer, document, options)
                 }
