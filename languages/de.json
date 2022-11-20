@@ -1,0 +1,72 @@
+{
+    "pdf-pager": {
+        "TitleActorPDFs": "PDFs für Akteure",
+        "TitleMenusActor": "PDF Codes um ein Akteur Dokument aus dem Kontextmenü zu öffnen",
+        "TitleMenusItem": "PDF Codes um einen Gegenstand aus dem Kontextmenü zu öffnen",
+        "PageOffset.Label": "Seiten Offset",
+        "Code.Label": "PDF Code",
+        "Error.NoPDFWithCode": "Unfähig das PDF mit dem angegebenen Code zu finden.",
+        "Error.FailedLoadPage": "PDF konnte mit dem angegebenen Code nicht geladen werden.",
+        "Warning.ThingDeleted" : "Der in einem geöffneten PDF Dokument verwendete '{name}' Akteur wurde gelöscht",
+        "Warning.OnlyGM": "Nur ein Spielleiter kann {function} aufrufen",
+        "alwaysLoadPdf.Name" : "Zeige das PDF sofort an",
+        "alwaysLoadPdf.Hint" : "Falls aktiviert wird das PDF sofort angezeigt wenn es ausgewählt wird, damit entfällt die Notwendigkeit den 'Öffne PDF' Knopf nutzen zu müssen",
+        "dropPdfLink.Name" : "Erzeuge einen @PDF Link beim Einfügen",
+        "dropPdfLink.Hint" : "Wenn eine Journal PDF Seite in ein anderes Dokument eingefügt wird, erzeuge einen @PDF[journalname#pagename|page=1]{pagename} Link statt eines @UUID Links",
+        "formFillPdf.Name" : "Unterstütze ausfüllbare PDF Formulare",
+        "formFillPdf.Hint" : "Aktiviere die Nutzung von ausfüllbaren PDF Formularen im Gegensatz zu nicht ausfüllbaren standard PDF Akteur Dokumenten",
+        "actorConfig.Name" : "Feld Zuordnung für Akteur Dokumente",
+        "actorConfig.Hint" : "Definiert ein Javascript Objekt das ein Zuordnung zwischen PDF-Feld und Akteur-Feld herstellt z.B.: { \"Character_Name\" : \"name\", \"health\" : \"system.health.hp\" }",
+        "itemConfig.Name"  : "Feld Zuordnung für Gegenstände(Items)",
+        "itemConfig.Hint"  : "Definiert ein Javascript Objekt das ein Zuordnung zwischen PDF-Feld und Gegenstand-Feld herstellt z.B.: { \"Name\" : \"name\", \"health\" : \"system.health.hp\" }",
+        "hideFieldBg.Name" : "Formularfeld Hervorhebung deaktivieren",
+        "hideFieldBg.Hint" : "Hebt die Hervorhebung der Formularfelder durch eine eigene Hintergrundfarbe für alle editierbaren Formularfelder auf (überschreibt das standard PDFJS Styling)",
+        "readPdfFields.Name": "Lese Felder aus dem PDF aus",
+        "readPdfFields.Hint": "Sofern dieser Punkt aktiviert ist, wird wenn ein PDF geöffnet wird, jedes Datenfeld (annotations) in der geladenen PDF Datei in das korrespondierende Akteurfeld kopiert. Dabei werden alle anderen im Akteur gespeicherten Werte ÜBERSCHRIEBEN! (Die Editiermöglichkeit des PDF's ist ausgeschaltet solange diese Option aktiviert ist)",     
+        "defaultZoom.Name": "Standard Zoom",
+        "defaultZoom.Hint": "Auswahl der bevorzugten standard Zoom Einstellungen für das Öffnen eines PDF Dokumentes (fester Prozentsatz erfordert das setzen des unten anstehenden Parameters)",
+        "ChoosePdfForm" : {
+            "Title": "Wähle das PDF Dokument für '{name}'",
+            "Prompt": "Individuelles PDF:",
+            "Hint": "Auswahl des PDF Dokumentes das für diesen Akteur verwendet werden soll",
+            "Submit": "Speichere individuelles PDF Dokument"
+        },
+        "Zoom" : {
+            "none": "Kein Zoom",
+            "page-actual": "Aktuelle Größe",
+            "page-width" : "Seitenbreite",
+            "page-fit"   : "Angepasste Seitengröße",
+            "auto"       : "Automatischer Zoom",
+            "number"     : "Fester Prozentsatz"
+        },
+        "zoomPercentage.Name" : "Standard Zoom fester Prozentsatz",
+        "zoomPercentage.Hint" : "Der standard Zoom (als Prozentsatz) wenn der standard Zoom auf 'Fester Prozentsatz' eingestellt ist",
+        "showInPDF"      :  "Öffne PDF",
+        "actorType.Name" : "Akteur: '{name}'",
+        "actorType.Hint" : "Definiert den PDF CODE des PDF Dokumentes der verwendet wird wenn 'Show in PDF' aus dem Akteur Kontextmenü für den Akteur '${name}' ausgewählt wird",
+        "itemType.Name"  : "Gegenstand: '{name}'",
+        "itemType.Hint"  : "Definiert den PDF CODE des PDF Dokumentes der verwendet wird wenn 'Show in PDF' aus dem Gegenstand Kontextmenü für den Gegenstand '${name}' ausgewählt wird",
+        "actorSheet.Name" : "Akteur Dokument: '{name}'",
+        "actorSheet.Hint" : "Wähle die PDF Datei die für den Akteur '{name}' benutzt werden soll",
+        "inspector": {
+            "help1": "Das Fenster kann geöffnet bleiben und man kann zum System Dokument zurückkehren sofern gewünscht. Das Fenster aktualisiert sich alle 10 Sekunden um Änderungen am Akteur darzustellen. Man kann dies mit dem 'Aktualisieren' Knopf im Kopfbereich jedoch auch manuell anstoßen.",
+            "help2": "Seien Sie vorsichtig wenn sie diese Datenverknüpfungen in einem PDF verwenden! Die Farbzuordnung ist eher 'gut geraten'. Während es meistens stimmen wird werden ein paar Spielsystem Ausnahmen haben oder Werte die im PDF hinterlegt werden für bestimmte Datenverknüpfungen überschreiben.",
+            "help3": "Obwohl der Knopf für das Kopieren/Würfeln aus Bequemlichkeitesgründen vorhanden ist, könnten Daten vom Spielsystem beim Würfeln absichtlich verändert oder ignoriert werden. Falls ein Würfelwurf also nicht das erwartete Ergebnis liefert ist das KEIN Fehler (des Moduls!).",
+            "DANGER": {
+                "Safe": "Diese Verknüpfung ist mit großer Wahrscheinlichkeit unproblematisch.",
+                "Low": "Diese Verknüpfung ist vermutlich unproblematisch, dennoch sollte man vorsichtig sein.",
+                "High": "Diese Verknüpfung wird, falls sie genutzt wird, mit großer Wahrscheinlichkeit probleme bereiten.",
+                "Critical": "Diese Verknüpfung sollte unter KEINEN Umständen genutzt werden!"
+            },
+            "CopyDataPath": "Dateipfad in die Zwischenablage kopieren.",
+            "CopyRollPath": "Kopiere Syntaxpfad in die Zwischenablage.",
+            "Refresh": "Aktualisieren",
+            "CopiedToClipboard": "Kopiert!"
+        },
+        "TitleButtonName": {
+            "CustomPDF": "Individuelles PDF",
+            "InspectData": "Untersuche Daten"
+        }
+
+    }
+}
