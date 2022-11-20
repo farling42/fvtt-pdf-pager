@@ -1,17 +1,13 @@
 /*
 PDF-PAGER
-
 Copyright © 2022 Martin Smith
-
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 and associated documentation files (the "Software"), to deal in the Software without 
 restriction, including without limitation the rights to use, copy, modify, merge, publish, 
 distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the 
 Software is furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in all copies or 
 substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
@@ -43,7 +39,7 @@ export class PDFActorSheetConfig extends FormApplication {
   }
   get title() {
     const actor = this.object.document;
-    return `Choose PDF for '${actor.name}'`
+    return game.i18n.format(`${PDFCONFIG.MODULE_NAME}.ChoosePdfForm.Title`, {name: actor.name});
   }
   getData() {
     const actor = this.object.document;
@@ -105,8 +101,13 @@ export class PDFActorSheet extends ActorSheet {
 
   _getHeaderButtons() {
     let buttons = super._getHeaderButtons();
+    
+    // translation strings for title buttons
+    const CustomPDF = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleButtonName.CustomPDF`);
+    const InspectData = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleButtonName.InspectData`);
+    
     buttons.unshift({
-      label: "Custom PDF",
+      label: CustomPDF,
       class: "configure-custom-pdf",
       icon:  "fas fa-file-pdf",
       onclick: event => {
@@ -117,7 +118,7 @@ export class PDFActorSheet extends ActorSheet {
     buttons.unshift({
       icon: 'fas fa-search',
       class: 'pdf-browse-data',
-      label: 'Inspect Data',
+      label: InspectData,
       onclick: () => {
           new PDFActorDataBrowser(this.document).render(true);
       },
@@ -137,14 +138,14 @@ export class PDFActorSheet extends ActorSheet {
 let defined_types = [];
 
 export function configureActorSettings() {
-  const name  = PDFCONFIG.MODULE_NAME;
+  const modulename = PDFCONFIG.MODULE_NAME;
 
   function updateSheets() {
 
     let types = []
     for (const type of game.template.Actor.types) {
       let param = `${type}Sheet`;
-      if (game.settings.get(name, param)?.length) {
+      if (game.settings.get(modulename, param)?.length) {
         types.push(type);
       }
     }
@@ -153,11 +154,11 @@ export function configureActorSettings() {
     if (types != defined_types) {
       console.log(`Changing registered Actor sheets to ${JSON.stringify(types)}`)
       defined_types = types;
-      Actors.unregisterSheet(PDFCONFIG.MODULE_NAME, PDFActorSheet);
+      Actors.unregisterSheet(modulename, PDFActorSheet);
 
       // Add new list of registered sheets
       if (types.length) {
-        Actors.registerSheet(PDFCONFIG.MODULE_NAME, PDFActorSheet, {
+        Actors.registerSheet(modulename, PDFActorSheet, {
           types,
           makeDefault: false,
           label: "PDF Sheet"
@@ -166,13 +167,11 @@ export function configureActorSettings() {
     }
   }
 
-  for (let type of game.template.Actor.types) {
-    let param = `${type}Sheet`;
-    let basename = game.i18n.format(`${name}.actorSheet.Name`, {name: type});
-    let basehint = game.i18n.format(`${name}.actorSheet.Hint`, {name: type});
-    game.settings.register(name, param, {
-		  name: basename,
-		  hint: basehint,
+  for (let [type,label] of Object.entries(CONFIG.Actor.typeLabels)) {
+    let actorname = game.i18n.has(label) ? game.i18n.localize(label) : type;
+    game.settings.register(modulename, `${type}Sheet`, {
+		  name: game.i18n.format(`${modulename}.actorSheet.Name`, {name: actorname}),
+		  hint: game.i18n.format(`${modulename}.actorSheet.Hint`, {name: actorname}),
 		  scope: "world",
 		  type:  String,
 		  default: "",
