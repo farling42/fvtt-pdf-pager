@@ -22,7 +22,25 @@
         "hideFieldBg.Name" : "Formularfeld Hervorhebung deaktivieren",
         "hideFieldBg.Hint" : "Hebt die Hervorhebung der Formularfelder durch eine eigene Hintergrundfarbe für alle editierbaren Formularfelder auf (überschreibt das standard PDFJS Styling)",
         "readPdfFields.Name": "Lese Felder aus dem PDF aus",
-        "readPdfFields.Hint": "Sofern dieser Punkt aktiviert ist, wird wenn ein PDF geöffnet wird, jedes Datenfeld (annotations) in der geladenen PDF Datei in das korrespondierende Akteurfeld kopiert. Dabei werden alle anderen im Akteur gespeicherten Werte ÜBERSCHRIEBEN! (Die Editiermöglichkeit des PDF's ist ausgeschaltet solange diese Option aktiviert ist)",
+        "readPdfFields.Hint": "Sofern dieser Punkt aktiviert ist, wird wenn ein PDF geöffnet wird, jedes Datenfeld (annotations) in der geladenen PDF Datei in das korrespondierende Akteurfeld kopiert. Dabei werden alle anderen im Akteur gespeicherten Werte ÜBERSCHRIEBEN! (Die Editiermöglichkeit des PDF's ist ausgeschaltet solange diese Option aktiviert ist)",     
+        "defaultZoom.Name": "Standard Zoom",
+        "defaultZoom.Hint": "Auswahl der bevorzugten standard Zoom Einstellungen für das Öffnen eines PDF Dokumentes (fester Prozentsatz erfordert das setzen des unten anstehenden Parameters)",
+        "ChoosePdfForm" : {
+            "Title": "Wähle das PDF Dokument für '{name}'",
+            "Prompt": "Individuelles PDF:",
+            "Hint": "Auswahl des PDF Dokumentes das für diesen Akteur verwendet werden soll",
+            "Submit": "Speichere individuelles PDF Dokument"
+        },
+        "Zoom" : {
+            "none": "Kein Zoom",
+            "page-actual": "Aktuelle Größe",
+            "page-width" : "Seitenbreite",
+            "page-fit"   : "Angepasste Seitengröße",
+            "auto"       : "Automatischer Zoom",
+            "number"     : "Fester Prozentsatz"
+        },
+        "zoomPercentage.Name" : "Standard Zoom fester Prozentsatz",
+        "zoomPercentage.Hint" : "Der standard Zoom (als Prozentsatz) wenn der standard Zoom auf 'Fester Prozentsatz' eingestellt ist",
         "showInPDF"      :  "Öffne PDF",
         "actorType.Name" : "Akteur: '{name}'",
         "actorType.Hint" : "Definiert den PDF CODE des PDF Dokumentes der verwendet wird wenn 'Show in PDF' aus dem Akteur Kontextmenü für den Akteur '${name}' ausgewählt wird",
@@ -31,7 +49,7 @@
         "actorSheet.Name" : "Akteur Dokument: '{name}'",
         "actorSheet.Hint" : "Wähle die PDF Datei die für den Akteur '{name}' benutzt werden soll",
         "inspector": {
-            "help1": "Das Fenster kann geöffnet bleiben und man kann zum System Dokument zurückkehren sofern gewünscht. Das Fenster aktualisiert sich alle 10 Sekunden um Änderungen am Akteur darzustellen. Man kann dies mit dem 'Akktualisieren' Knopf im Kopfbereich jedoch auch manuell anstoßen.",
+            "help1": "Das Fenster kann geöffnet bleiben und man kann zum System Dokument zurückkehren sofern gewünscht. Das Fenster aktualisiert sich alle 10 Sekunden um Änderungen am Akteur darzustellen. Man kann dies mit dem 'Aktualisieren' Knopf im Kopfbereich jedoch auch manuell anstoßen.",
             "help2": "Seien Sie vorsichtig wenn sie diese Datenverknüpfungen in einem PDF verwenden! Die Farbzuordnung ist eher 'gut geraten'. Während es meistens stimmen wird werden ein paar Spielsystem Ausnahmen haben oder Werte die im PDF hinterlegt werden für bestimmte Datenverknüpfungen überschreiben.",
             "help3": "Obwohl der Knopf für das Kopieren/Würfeln aus Bequemlichkeitesgründen vorhanden ist, könnten Daten vom Spielsystem beim Würfeln absichtlich verändert oder ignoriert werden. Falls ein Würfelwurf also nicht das erwartete Ergebnis liefert ist das KEIN Fehler (des Moduls!).",
             "DANGER": {
@@ -41,9 +59,13 @@
                 "Critical": "Diese Verknüpfung sollte unter KEINEN Umständen genutzt werden!"
             },
             "CopyDataPath": "Dateipfad in die Zwischenablage kopieren.",
-            "CopyRollPath": "Kopiere / Würfle Syntaxpfad in die Zwischenablage.",
+            "CopyRollPath": "Kopiere Syntaxpfad in die Zwischenablage.",
             "Refresh": "Aktualisieren",
             "CopiedToClipboard": "Kopiert!"
+        },
+        "actorSheetButton": {
+            "CustomPDF": "Individuelles PDF",
+            "InspectData": "Untersuche Daten"
         }
     }
 }

@@ -62,6 +62,10 @@
             "CopyRollPath": "Copy /roll syntax path to clipboard.",
             "Refresh": "Refresh",
             "CopiedToClipboard": "Copied!"
+        },
+        "actorSheetButton": {
+            "CustomPDF":   "Custom PDF",
+            "InspectData": "Inspect Data"
         }
     }
 }

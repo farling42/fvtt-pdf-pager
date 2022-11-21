@@ -106,7 +106,7 @@ export class PDFActorSheet extends ActorSheet {
   _getHeaderButtons() {
     let buttons = super._getHeaderButtons();
     buttons.unshift({
-      label: "Custom PDF",
+      label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.CustomPDF`),
       class: "configure-custom-pdf",
       icon:  "fas fa-file-pdf",
       onclick: event => {
@@ -117,7 +117,7 @@ export class PDFActorSheet extends ActorSheet {
     buttons.unshift({
       icon: 'fas fa-search',
       class: 'pdf-browse-data',
-      label: 'Inspect Data',
+      label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.InspectData`),
       onclick: () => {
           new PDFActorDataBrowser(this.document).render(true);
       },
