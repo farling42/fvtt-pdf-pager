@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.34.2
+
+- If the PDF contains complex rules, then the changes to a value were not stored immediately on the Actor - it required the field to be selected again before the new value would get saved.
+
 ## 0.34.1
 
 - Allow buttons in Actor Sheet title bar to be translated.

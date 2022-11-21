@@ -316,9 +316,11 @@ export async function initEditor(html, id_to_display) {
             // A list of all the fields in the PDF document
             //let fields = pdfviewerapp.pdfDocument.getFieldObjects();
 
-            function setValue(event, fieldname="value") {
+            function setValue(event, fieldname="value", value=undefined) {
                 let target = event.target;
-                let value  = target[fieldname] ?? target.getAttribute(fieldname);
+                if (value==undefined) {
+                    value = target[fieldname] ?? target.getAttribute(fieldname);
+                }
                 console.debug(`${event.type}: field='${target.name}', value = '${value}'`);
                 modifyDocument(document, target.name, value);    
             }
@@ -346,8 +348,14 @@ export async function initEditor(html, id_to_display) {
                             element.addEventListener('change', setValue);
                         } else {
                             // blur = lose focus
-                            // submit = press RETURN
                             element.addEventListener('blur',   setValue);
+                            // If there is extra validation, the 'blur' event returns the OLD value!
+                            // so we also have to wait for new value from sandbox (but updatefromsandbox fires on every character change)
+                            element.addEventListener('updatefromsandbox', (event) => {
+                                if (event.detail.formattedValue)
+                                    setValue(event, "value", event.detail.formattedValue)
+                                });
+                            // submit = press RETURN
                             element.addEventListener('submit', setValue);
                         }
                     }
