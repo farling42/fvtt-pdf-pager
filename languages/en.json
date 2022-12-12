@@ -65,7 +65,12 @@
         },
         "actorSheetButton": {
             "CustomPDF":   "Custom PDF",
+            "ShowPdfFields": "Log PDF fields",
             "InspectData": "Inspect Data"
+        },
+        "logPdfFields": {
+            "introduction": "`Here follows a list of all the known fields in the displayed PDF pages`",
+            "pageNumber": "--- Page Number {pageNumber} ---"
         }
     }
 }

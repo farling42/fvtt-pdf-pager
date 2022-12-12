@@ -210,6 +210,10 @@ Feel free to forward me any system-specific .mjs files which you've created for 
 
 The Data Inspector window from PDFoundry is available from the PDF Actor Sheet for those wanting to modify their own PDFs to use the data fields present in the Actor records. This window was taken directly from the PDFoundry module available for Foundry V9 and earlier at [PDFoundry](https://github.com/Djphoenix719/PDFoundry).
 
+### Check browser console log for names of fields in PDF
+
+In the window title bar of the Actor sheet is an option "Log PDF Fields" which will print a list of the names of the PDF fields which are present in the PDF displayed for the Actor. The log includes a header for each page, to make it easier to locate individual PDF fields. Each field name is followed by the data type defined for that field (such as "Tx" for text, "Btn" for checkbox).
+
 ### Resetting the stored Outline for a PDF document
 
 The outline for a PDF document is read the first time that a PDF is opened. If the PDF document is changed, then the TOC will be regenerated automatically.

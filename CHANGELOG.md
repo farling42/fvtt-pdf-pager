@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.35.0
+
+- Add a new 'Log PDF Fields' which will send the list of PDF field names to the browser's console, to aid in setting up custom field mappings. Each field name is followed by the field type defined in the PDF (e.g. "Tx" for Text, "Btn" for a check button).
+
 ## 0.34.2
 
 - If the PDF contains complex rules, then the changes to a value were not stored immediately on the Actor - it required the field to be selected again before the new value would get saved.

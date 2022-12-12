@@ -207,6 +207,7 @@ function buildOutline(pdfoutline) {
                 if (default_zoom === 'number') default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM_NUMBER)
                 pdf_slug += (pdf_slug.length ? "&" : "#") + `zoom=${default_zoom}`;
             }
+            //pdf_slug += "&pageLayout=TwoPageRight"
 
             // Replace the "div.load-pdf" with an iframe element.
             // I can't find a way to do it properly, since html is simply a jQuery of top-level elements.

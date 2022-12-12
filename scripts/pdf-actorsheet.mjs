@@ -28,7 +28,7 @@ SOFTWARE.
  */
 
 import { PDFCONFIG } from './pdf-config.mjs';
-import { initEditor } from './pdf-editable.mjs';
+import { initEditor, logPdfFields } from './pdf-editable.mjs';
 import { PDFActorDataBrowser } from './pdf-actorbrowser.mjs';
 
 export class PDFActorSheetConfig extends FormApplication {
@@ -122,6 +122,16 @@ export class PDFActorSheet extends ActorSheet {
           new PDFActorDataBrowser(this.document).render(true);
       },
     });
+
+    buttons.unshift({
+      icon: 'fas fa-search',
+      class: 'pdf-browse-data',
+      label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.ShowPdfFields`),
+      onclick: () => {
+          logPdfFields(this.document);
+      },
+    });
+
     return buttons;
   }
 

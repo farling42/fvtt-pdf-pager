@@ -419,3 +419,20 @@ export function getPDFValue(document, fieldname) {
     let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {}
     return flags[fieldname];
 }
+
+
+export async function logPdfFields(document) {
+    const pdfviewer = document2pdfviewer.get(document.uuid);
+    let buttonvalues = new Map();
+    console.log(game.i18n.format(`${PDFCONFIG.MODULE_NAME}.logPdfFields.introduction`));
+    for (const pdfpageview of pdfviewer._pages) {
+        let annotations = await pdfpageview.pdfPage?.getAnnotations();
+        if (annotations) {
+            console.log(game.i18n.format(`${PDFCONFIG.MODULE_NAME}.logPdfFields.pageNumber`, {pageNumber: pdfpageview.pdfPage.pageNumber}))
+            for (const annotation of annotations)
+                console.log(`${annotation.fieldName} (${annotation.fieldType})`);
+                //if (annotation.buttonValue) buttonvalues.set(annotation.id, annotation.buttonValue);
+        }
+    }
+}
+
