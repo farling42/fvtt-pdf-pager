@@ -92,6 +92,10 @@ ui.pdfpager.openPDFByCode("DMG", { page : 30 } )
 ui.pdfpager.openPDFByCode("SHEET", { uuid: 'Actor.CY4zUd7qYUeer3d4' } )
 ```
 
+### Method 4: Specify page of PDF in Scene Note
+
+The Note Config window contains an optional "PDF Page Number" field. If a number is put into this field, then clicking on the Note will open the PDF at the specified page (if the journal PDF is already open, then the PDF will be scrolled to the specified page).
+
 ## Installation
 
 The module is available from the Foundry Module Management window, just search for "PDF Pager", or it can be manually added with the following link:
