@@ -71,6 +71,9 @@
         "logPdfFields": {
             "introduction": "`Here follows a list of all the known fields in the displayed PDF pages`",
             "pageNumber": "--- Page Number {pageNumber} ---"
+        },
+        "noteConfig": {
+            "pdfPagePrompt": "PDF Page Number"
         }
     }
 }

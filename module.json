@@ -37,7 +37,8 @@
     "scripts/pdf-linker.mjs",
     "scripts/pdf-menu.mjs",
     "scripts/pdf-pager.mjs",
-    "scripts/pdf-migrate.mjs"
+    "scripts/pdf-migrate.mjs",
+    "scripts/pdf-scenenotes.mjs"
   ],
   "packs": [
     {

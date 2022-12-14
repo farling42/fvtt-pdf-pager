@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.36.0
+
+- Provide an additional field in the Note Config window to allow a PDF page to be specified for each scene Note.
+
 ## 0.35.0
 
 - Add a new 'Log PDF Fields' which will send the list of PDF field names to the browser's console, to aid in setting up custom field mappings. Each field name is followed by the field type defined in the PDF (e.g. "Tx" for Text, "Btn" for a check button).
