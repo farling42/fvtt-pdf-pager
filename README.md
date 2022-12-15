@@ -96,6 +96,8 @@ ui.pdfpager.openPDFByCode("SHEET", { uuid: 'Actor.CY4zUd7qYUeer3d4' } )
 
 The Note Config window contains an optional "PDF Page Number" field. If a number is put into this field, then clicking on the Note will open the PDF at the specified page (if the journal PDF is already open, then the PDF will be scrolled to the specified page).
 
+Dragging an open PDF page onto the Canvas to create a Note will automatically populate the PDF Page Number field with the number of the currently open page in the PDF (adjusted by the "PDF Page Offset" defined for the PDF).
+
 ## Installation
 
 The module is available from the Foundry Module Management window, just search for "PDF Pager", or it can be manually added with the following link:
