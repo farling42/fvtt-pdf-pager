@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.36.1
+
+- If a page from an open journal PDF is dragged onto the canvas, then the default PDF Page Number for the note will be set to the currently visible page in the PDF window. (Note that Foundry V10 does not allow linking to sections within a document.)
+
 ## 0.36.0
 
 - Provide an additional field in the Note Config window to allow a PDF page to be specified for each scene Note.

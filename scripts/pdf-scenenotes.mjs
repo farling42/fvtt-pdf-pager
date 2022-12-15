@@ -22,6 +22,7 @@ SOFTWARE.
 */
 
 import { PDFCONFIG } from './pdf-config.mjs';
+import { getPdfSheet } from './pdf-pager.mjs';
 
 Hooks.on('activateNote', (note, options) => {
     let pdfpage = note.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.PIN_PDF_PAGE);
@@ -29,9 +30,20 @@ Hooks.on('activateNote', (note, options) => {
     return true;
 })
 
-Hooks.on("renderNoteConfig", (app,html,data) => {
+Hooks.on("renderNoteConfig", async (app,html,data) => {
     // Add option to specify the PDF page in the settings.
-    let pdfpage = data.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.PIN_PDF_PAGE) ?? "";
+    let pdfpage = data.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.PIN_PDF_PAGE);
+    if (pdfpage === undefined && data.document) {
+        // If the note doesn't already have a page, then look for an open PDF document from which to grab the page number.
+        const journal = await game.journal.get(data.document.entryId);
+        const pdfsheet = getPdfSheet(journal?.sheet, data.document.pageId)
+        const linkService = pdfsheet?.pdfviewerapp?.pdfLinkService;
+        if (linkService) {
+            let pageoffset = pdfsheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0;
+            pdfpage = linkService.pdfViewer.currentPageNumber - pageoffset;
+        }
+    }
+    if (pdfpage === undefined) pdfpage = "";
     let prompt = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.noteConfig.pdfPagePrompt`);
 	let label = $(`<div class='form-group'><label>${prompt}</label><div class='form-fields'><input name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.PIN_PDF_PAGE}" type='number' value="${pdfpage}"/></div></div>`)
 	html.find("input[name='text']").parent().parent().after(label);

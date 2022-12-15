@@ -77,7 +77,7 @@ function updatePdfView(pdfsheet, anchor) {
 }
 
 /* Determine if the PDF page is visible in the supplied journal sheet */
-function getPdfSheet(journalsheet, pageId) {
+export function getPdfSheet(journalsheet, pageId) {
     if (journalsheet?._state === Application.RENDER_STATES.RENDERED &&
         journalsheet._pages[journalsheet.pageIndex]?._id === pageId) {
         let sheet = journalsheet.getPageSheet(pageId);
