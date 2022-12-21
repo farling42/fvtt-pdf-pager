@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.36.2
+
+- Fix constant reloading of a PDF if the PDF page was initially created without this plugin, and the PDF has no outline defined within it.
+
 ## 0.36.1
 
 - If a page from an open journal PDF is dragged onto the canvas, then the default PDF Page Number for the note will be set to the currently visible page in the PDF window. (Note that Foundry V10 does not allow linking to sections within a document.)

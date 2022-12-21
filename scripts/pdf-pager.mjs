@@ -242,14 +242,14 @@ function buildOutline(pdfoutline) {
             this.pdfviewerapp.eventBus.on('outlineloaded', docevent => {   // from PdfPageView
                 this.pdfviewerapp.pdfDocument.getOutline().then(outline => {
                     // Store it as JournalPDFPageSheet.toc
+                    const oldflag = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
                     if (outline) {
-                        let oldflag = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
                         let newflag = JSON.stringify(buildOutline(outline));
                         if (oldflag !== newflag) {
                             console.debug(`Storing new TOC for '${this.object.name}'`)
                             this.object.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC, newflag)
                         }
-                    } else {
+                    } else if (oldflag !== undefined) {
                             this.object.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
                     }
                 })
