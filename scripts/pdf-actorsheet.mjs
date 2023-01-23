@@ -125,7 +125,7 @@ export class PDFActorSheet extends ActorSheet {
 
     buttons.unshift({
       icon: 'fas fa-search',
-      class: 'pdf-browse-data',
+      class: 'pdf-list-fields',
       label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.ShowPdfFields`),
       onclick: () => {
           logPdfFields(this.document);

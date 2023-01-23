@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.36.3
+
+- Restore the functionality of the "Inspect Data" button in the Actor title bar.
+
 ## 0.36.2
 
 - Fix constant reloading of a PDF if the PDF page was initially created without this plugin, and the PDF has no outline defined within it.
