@@ -7,7 +7,7 @@
 
 # PDF Pager
 
-This module augments the core PDF functionality by adding support for opening PDFs at a specific page, or using a PDF as an Actor sheet.
+This module augments the core PDF functionality by adding support for opening PDFs at a specific page, using a form-fillable PDF as an Actor sheet, and scene Notes which link to specific pages within a PDF journal entry.
 
 It also generates reads the Outline from the PDF file to use as the Table of Contents in the page navigation panel.
 
