@@ -36,6 +36,7 @@ export let PDFCONFIG = {
 	ACTOR_CONFIG            : "actorConfig",
 	ITEM_CONFIG             : "itemConfig",
 	HIDE_EDITABLE_BG        : "hideFieldBg",
+	HIDE_EDITABLE_BORDER    : "hideFieldBorder",
 	READ_FIELDS_FROM_PDF    : "readPdfFields",
 	DEFAULT_ZOOM			: "defaultZoom",
 	DEFAULT_ZOOM_NUMBER		: "zoomPercentage",
@@ -83,6 +84,16 @@ Hooks.once('ready', () => {
 	});
 
     param = PDFCONFIG.HIDE_EDITABLE_BG;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  Boolean,
+		default: false,
+		config: true
+	});
+
+    param = PDFCONFIG.HIDE_EDITABLE_BORDER;
     game.settings.register(name, param, {
 		name: game.i18n.localize(`${name}.${param}.Name`),
 		hint: game.i18n.localize(`${name}.${param}.Hint`),

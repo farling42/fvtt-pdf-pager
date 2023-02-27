@@ -64,7 +64,7 @@ async function getbuttonvalues(pdfviewer) {
     for (const pdfpageview of pdfviewer._pages) {
         let annotations = await pdfpageview.pdfPage?.getAnnotations();
         if (annotations) {
-            for (const annotation of annotations)
+            for (const annotation of annotations.filter(an => an.subtype === 'Widget'))
                 if (annotation.buttonValue) buttonvalues.set(annotation.id, annotation.buttonValue);
         }
     }
@@ -76,7 +76,7 @@ async function getbuttonvalues(pdfviewer) {
  * Copy all the data from the specified Document (Actor/Item) to the fields on the PDF sheet (container)
  * @param {PDFViewer} pdfviewer  
  * @param {Document} document An Actor or Item
- * @param {Object} options  Can contain either or both of { disabled : true , hidebg : true }
+ * @param {Object} options  Can contain any of { disabled : true , hidebg : true, hideborder: true }
  */
 async function setFormFromDocument(pdfviewer, document, options={}) {
     console.debug(`Loading PDF from ${document.documentName} '${document.name}'`);
@@ -88,8 +88,9 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
     const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
     //const storage = pdfpageview.annotationLayer.annotationStorage;
     for (let elem of inputs) {
-        if (options.hidebg)   elem.style.setProperty('background-image', 'none');
-        if (options.disabled) elem.readOnly = true;
+        if (options.hidebg)     elem.style.setProperty('background-image', 'none');
+        if (options.hideborder) elem.parentElement.style.setProperty('border-style', 'none');
+        if (options.disabled)   elem.readOnly = true;
 
         // don't modify disabled (readonly) fields
         if (elem.disabled) continue; // DISABLED
@@ -142,6 +143,7 @@ async function setDocumentFromForm(pdfviewer, document, options) {
     for (const element of inputs) {
         // Hide the background, if required
         if (options.hidebg) element.style.setProperty('background-image', 'none');
+        if (options.hideborder) element.parentElement.style.setProperty('border-style', 'none');
 
         if (element.disabled || element.readOnly) continue;
         // Don't allow editing while the PDF is in this mode
@@ -290,6 +292,7 @@ export async function initEditor(html, id_to_display) {
             let options = {};
             if (!editable) options.disabled=true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG)) options.hidebg = true;
+            if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BORDER)) options.hideborder = true;
 
             // Wait until the scripting engine is ready before doing either setDocumentFromForm or setFormFromDocument
             if (timeout) {
@@ -429,7 +432,7 @@ export async function logPdfFields(document) {
         let annotations = await pdfpageview.pdfPage?.getAnnotations();
         if (annotations) {
             console.log(game.i18n.format(`${PDFCONFIG.MODULE_NAME}.logPdfFields.pageNumber`, {pageNumber: pdfpageview.pdfPage.pageNumber}))
-            for (const annotation of annotations)
+            for (const annotation of annotations.filter(an => an.subtype === 'Widget'))
                 console.log(`${annotation.fieldName} (${annotation.fieldType})`);
                 //if (annotation.buttonValue) buttonvalues.set(annotation.id, annotation.buttonValue);
         }

@@ -21,6 +21,8 @@
         "itemConfig.Hint"  : "Define a Javascript object that contains a mapping between PDF field and ITEM field, such as: { \"Name\" : \"name\", \"health\" : \"system.health.hp\" }",
         "hideFieldBg.Name" : "Hide Editable Field BG",
         "hideFieldBg.Hint" : "Disable the setting of an explicit background colour for editable fields (overrides a default PDFJS styling)",
+        "hideFieldBorder.Name" : "Hide Editable Field Border",
+        "hideFieldBorder.Hint" : "Disable the box that is drawn around editable fields (overrides a default PDFJS styling)",
         "readPdfFields.Name": "Read Fields from PDF",
         "readPdfFields.Hint": "When enabled, when a PDF is opened, any field data (annotations) within the loaded file are copied to the corresponding Actor field OVERWRITING any old values stored on the Actor (editing of the PDF is disabled while this option is enabled)",
         "defaultZoom.Name": "Default Zoom",
@@ -69,7 +71,7 @@
             "InspectData": "Inspect Data"
         },
         "logPdfFields": {
-            "introduction": "`Here follows a list of all the known fields in the displayed PDF pages`",
+            "introduction": "Here follows a list of all the known fields in the displayed PDF pages",
             "pageNumber": "--- Page Number {pageNumber} ---"
         },
         "noteConfig": {

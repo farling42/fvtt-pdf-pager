@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.38.0
+
+- Provide a new option 'Hide Editable Field Border" which will remove the box around editable fields. This complements the support already provided by the 'Hide Editable Field BG" setting.
+
+## 0.37.0
+
+- Ensure that only annotations of the Widget type are used for fillable PDFs.
+
 ## 0.36.3
 
 - Restore the functionality of the "Inspect Data" button in the Actor title bar.
