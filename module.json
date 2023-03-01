@@ -55,6 +55,11 @@
       "path": "languages/en.json"
     },
     {
+      "lang": "fr",
+      "name": "French",
+      "path": "languages/fr.json"
+    },
+    {
       "lang": "de",
       "name": "German",
       "path": "languages/de.json"

@@ -229,3 +229,6 @@ It is also possible to call the function `ui.pdfpager.deleteOutlines()` from a m
 ### Translations
 
 Feel free to submit a pull request or an issue containing translations for the entries in the en.json file.
+
+- German translations provided by CePeU
+- French translations provided by Gabryel666
