@@ -2,10 +2,12 @@
 
 ## 0.38.0
 
-- Provide a new option 'Hide Editable Field Border" which will remove the box around editable fields. This complements the support already provided by the 'Hide Editable Field BG" setting.
+- Provide an option to disable the browser's spell checker within editable fields of a PDF.
+- Apply the Zoom Level module option to Actor sheets as well as journal entries.
 
 ## 0.37.0
 
+- Provide a new option 'Hide Editable Field Border" which will remove the box around editable fields. This complements the support already provided by the 'Hide Editable Field BG" setting.
 - Ensure that only annotations of the Widget type are used for fillable PDFs.
 
 ## 0.36.3

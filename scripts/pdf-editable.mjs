@@ -76,7 +76,7 @@ async function getbuttonvalues(pdfviewer) {
  * Copy all the data from the specified Document (Actor/Item) to the fields on the PDF sheet (container)
  * @param {PDFViewer} pdfviewer  
  * @param {Document} document An Actor or Item
- * @param {Object} options  Can contain any of { disabled : true , hidebg : true, hideborder: true }
+ * @param {Object} options  Can contain any of { disabled : true , hidebg : true, hideborder: true, nospellcheck: false }
  */
 async function setFormFromDocument(pdfviewer, document, options={}) {
     console.debug(`Loading PDF from ${document.documentName} '${document.name}'`);
@@ -89,6 +89,7 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
     //const storage = pdfpageview.annotationLayer.annotationStorage;
     for (let elem of inputs) {
         if (options.hidebg)     elem.style.setProperty('background-image', 'none');
+        if (options.nospellcheck) elem.setAttribute('spellcheck', 'false');
         if (options.hideborder) elem.parentElement.style.setProperty('border-style', 'none');
         if (options.disabled)   elem.readOnly = true;
 
@@ -143,6 +144,7 @@ async function setDocumentFromForm(pdfviewer, document, options) {
     for (const element of inputs) {
         // Hide the background, if required
         if (options.hidebg) element.style.setProperty('background-image', 'none');
+        if (options.nospellcheck) element.setAttribute('spellcheck', 'false');
         if (options.hideborder) element.parentElement.style.setProperty('border-style', 'none');
 
         if (element.disabled || element.readOnly) continue;
@@ -293,6 +295,7 @@ export async function initEditor(html, id_to_display) {
             if (!editable) options.disabled=true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG)) options.hidebg = true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BORDER)) options.hideborder = true;
+            if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.NO_SPELL_CHECK)) options.nospellcheck = true;
 
             // Wait until the scripting engine is ready before doing either setDocumentFromForm or setFormFromDocument
             if (timeout) {

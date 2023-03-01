@@ -86,6 +86,15 @@ export class PDFActorSheet extends ActorSheet {
     // instead of a file relative to the Foundry USERDATA area.
     // (This would typically be an issue on The Forge hosting service.)
     context.pdfFilename = URL.parseSafe(pdffile) ? pdffile : foundry.utils.getRoute(pdffile);
+
+    // Perhaps set zoom level
+    context.zoomLevel = "";
+    let default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
+    if (default_zoom && default_zoom !== 'none') {
+        console.log(`displaying actor PDF with default zoom of ${default_zoom}%`);
+        if (default_zoom === 'number') default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM_NUMBER)
+        context.zoomLevel = `#zoom=${default_zoom}`;
+    }
     return context;
   }
 

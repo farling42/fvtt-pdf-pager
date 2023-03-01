@@ -23,7 +23,6 @@ SOFTWARE.
 
 import { PDFCONFIG } from './pdf-config.mjs';
 import { initEditor } from './pdf-editable.mjs';
-import { migratePDFoundry } from './pdf-migrate.mjs';
 import { getPDFByCode } from './pdf-linker.mjs';
 
 /**

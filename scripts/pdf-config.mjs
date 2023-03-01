@@ -40,6 +40,7 @@ export let PDFCONFIG = {
 	READ_FIELDS_FROM_PDF    : "readPdfFields",
 	DEFAULT_ZOOM			: "defaultZoom",
 	DEFAULT_ZOOM_NUMBER		: "zoomPercentage",
+	NO_SPELL_CHECK          : "noSpellCheck",
 	// Flags on an Actor
     FLAG_OFFSET             : "pageOffset",
     FLAG_CODE               : "code",
@@ -94,6 +95,16 @@ Hooks.once('ready', () => {
 	});
 
     param = PDFCONFIG.HIDE_EDITABLE_BORDER;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  Boolean,
+		default: false,
+		config: true
+	});
+
+    param = PDFCONFIG.NO_SPELL_CHECK;
     game.settings.register(name, param, {
 		name: game.i18n.localize(`${name}.${param}.Name`),
 		hint: game.i18n.localize(`${name}.${param}.Hint`),
