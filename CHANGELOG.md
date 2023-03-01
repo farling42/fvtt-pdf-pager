@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.38.1
+
+- Add fr translations, provided by @Gabryel666
+
 ## 0.38.0
 
 - Provide an option to disable the browser's spell checker within editable fields of a PDF.
