@@ -1,0 +1,83 @@
+{
+    "pdf-pager": {
+        "TitleActorPDFs": "PDFs pour les fiches d'acteurs",
+        "TitleMenusActor": "Codes PDF pour ouvrir l'acteur à partir du menu contextuel",
+        "TitleMenusItem": "Codes PDF pour ouvrir l'élément à partir du menu contextuel",
+        "PageOffset.Label": "Décalage de la page",
+        "Code.Label": "Code PDF",
+        "Error.NoPDFWithCode": "Impossible de trouver le PDF avec le code spécifié.",
+        "Error.FailedLoadPage": "Impossible de charger la page du PDF avec le code spécifié.",
+        "Warning.ThingDeleted" : "'{name}' affiché dans une page PDF ouverte a été supprimé.",
+        "Warning.OnlyGM": "Seul un GM peut invoquer {function}",
+        "alwaysLoadPdf.Name" : "Afficher immédiatement le PDF",
+        "alwaysLoadPdf.Hint" : "Si cette case est cochée, les PDF seront immédiatement affichés lorsque leur page est sélectionnée, ce qui évite de devoir appuyer sur le bouton 'Charger le PDF'.",
+        "dropPdfLink.Name" : "Créer un lien @PDF en le déposant",
+        "dropPdfLink.Hint" : "Lorsqu'une page de journal PDF est déposée dans un autre document, cela créé un lien @PDF[journalname#pagename|page=1]{pagename} au lieu d'un lien @UUID.",
+        "formFillPdf.Name" : "Activer les PDFs éditables",
+        "formFillPdf.Hint" : "Permet l'utilisation de PDFs éditables comme alternative aux fiches d'acteurs",
+        "actorConfig.Name" : "Mappages de champs pour les acteurs",
+        "actorConfig.Hint" : "Définit un objet Javascript qui contient un mappage entre le champ PDF et le champ ACTEUR, tel que : { \"Character_Name\" : \"name\", \"health\" : \"system.health.hp\" }",
+        "itemConfig.Name"  : "Mappages de champs pour les objets",
+        "itemConfig.Hint"  : "Définit un objet Javascript qui contient un mappage entre le champ PDF et le champ OBJET, tel que: { \"Name\" : \"name\", \"health\" : \"system.health.hp\" }",
+        "hideFieldBg.Name" : "Masquer les champs éditables",
+        "hideFieldBg.Hint" : "Désactive la couleur de fond des champs éditables (remplace le style PDFJS par défaut).",
+        "hideFieldBorder.Name" : "Masquer les bordures des champs éditables",
+        "hideFieldBorder.Hint" : "Désactive le contour qui est dessiné autour des champs éditables (remplace un style PDFJS par défaut)",
+        "noSpellCheck.Name": "Désactiver la vérification orthographique",
+        "noSpellCheck.Hint": "Lorsque cette option est cochée, la vérification orthographique est désactivée dans les champs éditables des PDF.",
+        "readPdfFields.Name": "Lire les champs depuis le PDF",
+        "readPdfFields.Hint": "Lorsqu'un PDF est ouvert, toutes les données de champ du fichier chargé (annotations) sont copiées dans le champ correspondant de l'Acteur, REMPLACANT toutes les anciennes valeurs stockées sur l'Acteur (l'édition du PDF est désactivée lorsque cette option est activée).)",
+        "defaultZoom.Name": "Zoom par défaut",
+        "defaultZoom.Hint": "Choisissez le paramètre de zoom par défaut à utiliser lors de l'ouverture d'un PDF (une valeur fixe nécessite la définition du paramètre suivant).",
+        "ChoosePdfForm" : {
+            "Title": "Choisir le PDF pour '{name}'",
+            "Prompt": "PDF personnalisé:",
+            "Hint": "Choisir le PDF à utiliser spécifiquement pour cet Acteur",
+            "Submit": "Sauvegarder le PDF personnalisé"
+        },
+        "Zoom" : {
+            "none": "Aucun",
+            "page-actual": "Taille actuelle",
+            "page-width" : "Pleine largeur",
+            "page-fit"   : "Ajusté à la page",
+            "auto"       : "Zoom automatique",
+            "number"     : "Pourcentage fixe"
+        },
+        "zoomPercentage.Name" : "Pourcentage fixe du Zoom par défaut",
+        "zoomPercentage.Hint" : "Le zoom par défaut (en pourcentage) lorsque le zoom est réglé sur 'Pourcentage fixe'",
+        "showInPDF"      :  "Ouvrir PDF",
+        "actorType.Name" : "Acteur: '{name}'",
+        "actorType.Hint" : "Définit le CODE PDF de la page PDF à utiliser lorsque l'on sélectionne 'Afficher en PDF' dans le menu contextuel pour l'acteur : '{name}'",
+        "itemType.Name"  : "Objet: '{name}'",
+        "itemType.Hint"  : "Définit le CODE PDF de la page PDF à utiliser lorsque vous sélectionnez 'Afficher en PDF' dans le menu contextuel pour l'objet : '{name}'",
+        "actorSheet.Name" : "Feuille d'acteur: '{name}'",
+        "actorSheet.Hint" : "Choisit le fichier PDF à utiliser pour l'acteur : '{name}'",
+        "inspector": {
+            "help1": "Vous pouvez laisser cette fenêtre ouverte et retourner à votre fiche si vous le souhaitez. La fenêtre se rafraîchira toutes les 10 secondes pour refléter les changements apportés à l'acteur, mais vous pouvez également la rafraîchir manuellement à l'aide du bouton 'Rafraîchir' situé dans l'en-tête.",
+            "aide2" : "Vous devez être très prudent lorsque vous utilisez ces chemins de données dans un PDF. Le codage couleur est une bonne chose et, bien qu'il soit généralement correct, certains systèmes peuvent présenter des exceptions ou faire en sorte que les modifications que vous saisissez dans la feuille soient annulées par le système pour certains chemins de données.",
+            "aide3" : "Bien que le bouton permettant de copier la syntaxe '/roll' soit fourni par commodité, des données peuvent être volontairement omises ou modifiées par le système au cours d'un jet. Si une syntaxe /roll ne produit pas le résultat attendu, il ne s'agit pas d'un bug.",
+            "DANGER": {
+                "Safe": "Ce chemin peut être utilisé en toute sécurité.",
+                "Low": "Ce chemin n'est probablement pas dangereux, mais vous devez faire preuve de prudence.",
+                "High": "Ce chemin est susceptible de causer des problèmes s'il est utilisé.",
+                "Critical": "Vous ne devez en aucun cas utiliser ce chemin !"
+            },
+            "CopyDataPath": "Copier le chemin des données dans le presse-papiers.",
+            "CopyRollPath": "Copier le chemin de la syntaxe /roll dans le presse-papiers.",
+            "Refresh": "Rafraichir",
+            "CopiedToClipboard": "Copié!"
+        },
+        "actorSheetButton": {
+            "CustomPDF":   "PDF perssonnalisé",
+            "ShowPdfFields": "Log champs PDF",
+            "InspectData": "Inspecter les données"
+        },
+        "logPdfFields": {
+            "introduction": "Voici une liste de tous les champs connus dans les pages PDF affichées",
+            "pageNumber": "--- Numéro de page {pageNumber} ---"
+        },
+        "noteConfig": {
+            "pdfPagePrompt": "Numéro de page PDF"
+        }
+    }
+}
