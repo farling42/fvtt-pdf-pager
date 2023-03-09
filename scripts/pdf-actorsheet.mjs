@@ -72,6 +72,15 @@ export class PDFActorSheetConfig extends FormApplication {
 
 export class PDFActorSheet extends ActorSheet {    
 
+  constructor(actor, options) {
+    super(actor,options);
+    let winsize = actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_WINDOW_SIZE);
+    if (winsize) {
+      this.position.width  = winsize.width;
+      this.position.height = winsize.height;
+    }
+  }
+
   get template() {
     return `modules/${PDFCONFIG.MODULE_NAME}/templates/actor-pdf-sheet.hbs`;
   }    
@@ -148,6 +157,11 @@ export class PDFActorSheet extends ActorSheet {
   // since the `initEditor` call will otherwise handle changes to actor field data.
   render(force=false, context={}) {
     if (!this.rendered) super.render(force,context);
+  }
+
+  _onResize(event) {
+    super._onResize(event);
+    this.actor.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_WINDOW_SIZE, {width: this.position.width, height: this.position.height});
   }
 }
 

@@ -47,6 +47,7 @@ export let PDFCONFIG = {
 	FLAG_FIELDTEXT          : "fieldText",
 	FLAG_CUSTOM_PDF         : "customPDF",
 	FLAG_TOC                : "toc",
+	FLAG_WINDOW_SIZE        : "windowSize",
 	// Flags on Note
 	PIN_PDF_PAGE            : "pdfPage"
 };
