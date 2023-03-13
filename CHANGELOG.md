@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.39.1
+
+- Fix the detection of the PDF scripting manager being ready. The old version worked fine when running with a local server, but always failed when running on a remote server.
+
 ## 0.39.0
 
 - When using Fillable PDFs as Actor sheets, remember the current size of the Actor Sheet on a Foundry reload/restart. (The default Foundry behaviour is that the window size is remembered during a game session, but it isn't saved between restarts of Foundry.)
