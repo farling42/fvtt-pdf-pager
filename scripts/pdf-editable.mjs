@@ -306,7 +306,7 @@ export async function initEditor(html, id_to_display) {
             function load() {
                 timeout=undefined;
                 let pdfviewer = pdfviewerapp.pdfViewer;
-                if (pdfviewer.enableScripting && !pdfviewer._scriptingManager.ready) {
+                if (pdfviewer.enableScripting && !pdfviewerapp.scriptingReady) {
                     // Defer a short while until ready flag is set
                     timeout=setTimeout(load, 100);
                 } else {
