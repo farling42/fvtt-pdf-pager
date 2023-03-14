@@ -28,7 +28,7 @@ SOFTWARE.
  */
 
 import { PDFCONFIG } from './pdf-config.mjs';
-import { initEditor, logPdfFields } from './pdf-editable.mjs';
+import { initEditor, logPdfFields, getPdfViewer } from './pdf-editable.mjs';
 import { PDFActorDataBrowser } from './pdf-actorbrowser.mjs';
 
 export class PDFActorSheetConfig extends FormApplication {
@@ -145,8 +145,12 @@ export class PDFActorSheet extends ActorSheet {
       icon: 'fas fa-search',
       class: 'pdf-list-fields',
       label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.ShowPdfFields`),
-      onclick: () => {
-          logPdfFields(this.document);
+      onclick: (event) => {
+        const pdfviewer = getPdfViewer(this.form);
+        if (pdfviewer)
+          logPdfFields(pdfviewer);
+        else
+          ui.notifications.warn(game.i18n.format(`${PDFCONFIG.MODULE_NAME}.Warning.NoPDFforListFields`, {docname: this.document.name }));
       },
     });
 

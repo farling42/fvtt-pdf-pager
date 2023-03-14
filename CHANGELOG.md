@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.39.2
+
+- Change how the 'Log PDF Fields' button decides which PDF to actually read when generating the list of fields (and include an UI warning if no PDF was found).
+- Optimise the code so that a local cache of document-to-PDFviewer mapping is no longer required.
+
 ## 0.39.1
 
 - Fix the detection of the PDF scripting manager being ready. The old version worked fine when running with a local server, but always failed when running on a remote server.

@@ -9,6 +9,7 @@
         "Error.FailedLoadPage": "Failed to load page for PDF with specified code.",
         "Warning.ThingDeleted" : "'{name}' displayed in an open PDF Page has been deleted",
         "Warning.OnlyGM": "Only a GM can invoke {function}",
+        "Warning.NoPDFforListFields": "No PDF found for '{docname}'",
         "alwaysLoadPdf.Name" : "Immediately Display PDF",
         "alwaysLoadPdf.Hint" : "When checked, then PDFs will be immediately displayed when their page is selected, removing the need to press the 'Load PDF' button",
         "dropPdfLink.Name" : "Create @PDF link on drop",

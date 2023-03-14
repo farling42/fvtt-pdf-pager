@@ -37,7 +37,16 @@ import { PDFCONFIG } from './pdf-config.mjs'
 
 let map_pdf2actor;                   // key = pdf field name, value = actor field name
 let map_pdf2item;                    // key = pdf field name, value = item  field name
-let document2pdfviewer = new Map();  // key = document uuid, value = container (WeakMap to allow auto-deletion)
+
+/**
+ * Given the form for a window, return the PDFViewer embedded within the window
+ * @param {html} htmlform The form for the window which contains a PDFViewer.
+ * @returns the PDFViewer for the PDF embedded inside the window (or undefined if no PDF is found)
+ */
+export function getPdfViewer(htmlform) {
+    return htmlform.getElementsByTagName('iframe')?.[0].contentWindow?.PDFViewerApplication?.pdfViewer;
+}
+
 
 // Function to convert Object into a string whilst keeping the functions
 function Obj2String(obj) {
@@ -212,27 +221,14 @@ function modifyDocument(document, fieldname, value) {
  * Handle updates to actors which are present in one of the open PDF sheets.
  */
 async function update_document(document, change, options, userId) {
-    let pdfviewer = document2pdfviewer.get(document.uuid);
-    if (!pdfviewer) return;
-    if (!game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF))
-        setFormFromDocument(pdfviewer, document);
+    if (document?.sheet.rendered && document.sheet.constructor.name === "PDFActorSheet") {
+        const pdfviewer = getPdfViewer(document.sheet.form);
+        if (pdfviewer && !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF))
+            setFormFromDocument(pdfviewer, document);
+    }
 }
 Hooks.on('updateActor', update_document)
 Hooks.on('updateItem',  update_document)
-
-/**
- * Handle a displayed item being deleted, break the connection to the displayed PDF page.
- */
-async function delete_document(document, options, userId) {
-    console.log(`Item ${document.uuid} was deleted`)
-    let pdfviewer = document2pdfviewer.get(document.uuid);
-    if (!pdfviewer) return;
-    ui.notifications.warn(game.i18n.format(`${PDFCONFIG.MODULE_NAME}.Warning.ThingDeleted`, {name: document.name }));
-    document2pdfviewer.delete(document.uuid);
-}
-Hooks.on('deleteActor', delete_document)
-Hooks.on('deleteItem',  delete_document)
-
 
 /**
  * Called from renderJournalPDFPageSheet
@@ -273,10 +269,6 @@ export async function initEditor(html, id_to_display) {
 
         // Wait for the PDFViewer to be fully initialized
         const contentWindow = event.target.contentWindow;
-        // Keep DOCUMENT->container mapping only while the window is open
-        contentWindow.addEventListener('unload', event => {
-            document2pdfviewer.delete(document.uuid);
-        })
 
         // Wait for PDF to initialise before attaching to event bus.
         const pdfviewerapp = contentWindow.PDFViewerApplication;
@@ -290,7 +282,6 @@ export async function initEditor(html, id_to_display) {
         pdfviewerapp.eventBus.on('annotationlayerrendered', async layerevent => {   // from PdfPageView
 
             console.log(`Loaded page ${layerevent.pageNumber} for '${document.name}'`);
-            if (!document2pdfviewer.has(document.uuid)) document2pdfviewer.set(document.uuid, pdfviewerapp.pdfViewer);
             let options = {};
             if (!editable) options.disabled=true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG)) options.hidebg = true;
@@ -426,10 +417,11 @@ export function getPDFValue(document, fieldname) {
     return flags[fieldname];
 }
 
-
-export async function logPdfFields(document) {
-    const pdfviewer = document2pdfviewer.get(document.uuid);
-    let buttonvalues = new Map();
+/**
+ * Dumps to the console the name of all the editable fields in the PDF currently being displayed by the provided pdfviewer.
+ * @param {PDFViewer} pdfviewer The viewer for the PDF whose fields are to be dumped to the console.
+ */
+export async function logPdfFields(pdfviewer) {
     console.log(game.i18n.format(`${PDFCONFIG.MODULE_NAME}.logPdfFields.introduction`));
     for (const pdfpageview of pdfviewer._pages) {
         let annotations = await pdfpageview.pdfPage?.getAnnotations();
@@ -437,7 +429,6 @@ export async function logPdfFields(document) {
             console.log(game.i18n.format(`${PDFCONFIG.MODULE_NAME}.logPdfFields.pageNumber`, {pageNumber: pdfpageview.pdfPage.pageNumber}))
             for (const annotation of annotations.filter(an => an.subtype === 'Widget'))
                 console.log(`${annotation.fieldName} (${annotation.fieldType})`);
-                //if (annotation.buttonValue) buttonvalues.set(annotation.id, annotation.buttonValue);
         }
     }
 }
