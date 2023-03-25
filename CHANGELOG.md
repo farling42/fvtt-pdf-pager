@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.39.3
+
+- The "Inspect Data" window now checks to see if an embedded object is an Actor, and won't display any of the fields of that Actor. This fixes a lock-up that would occur when using the Inspect Data button with the "Generic Roleplaying Game Aid" system.
+
 ## 0.39.2
 
 - Change how the 'Log PDF Fields' button decides which PDF to actually read when generating the list of fields (and include an UI warning if no PDF was found).

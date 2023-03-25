@@ -87,6 +87,10 @@ export class PDFActorDataBrowser extends Application {
             if (data === undefined)
                 return results;
             if (typeof data === 'object') {
+                if (data instanceof Actor) {
+                    console.warn('Embedded Actor found in data, excluding the embedded Actor from the list of fields')
+                    return results;
+                }
                 for (const [key, value] of Object.entries(data)) {
                     if (Array.isArray(value)) {
                         // Case 1 : The value is an array
