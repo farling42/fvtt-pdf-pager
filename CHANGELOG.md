@@ -3,6 +3,7 @@
 ## 0.39.4
 
 - Fix an issue where a link to a section was not opening at the correct section if an explicit preferred Zoom has been set in the PDF Pager module settings.
+- Don't prompt for game reload after changing preferred zoom.
 
 ## 0.39.3
 
