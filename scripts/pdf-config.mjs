@@ -150,7 +150,8 @@ Hooks.once('ready', () => {
 		scope: "world",
 		type:  Number,
 		default: 100,
-		config: true
+		config: true,
+		requiresReload: false
 	});
 
 	// Ideally ACTOR_CONFIG and ITEM_CONFIG would use a TextArea.
