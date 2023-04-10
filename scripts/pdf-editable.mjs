@@ -135,8 +135,11 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             if (elem.checked == newchecked) continue;
             elem.checked  = newchecked;
         } else {
+            // plain text "type==textarea" OR rich text (type===?)
             let newvalue = value || "";
             if (elem.value === newvalue) continue;
+            //if (newvalue.includes("<") && newvalue.includes(">"))
+            //    newvalue = TextEditor.decodeHTML(TextEditor.enrichHTML(value, {async:false})).replace( /(<([^>]+)>)/ig, '');
             elem.value = newvalue;
         }
         // Force any calculations that might be set in the PDF

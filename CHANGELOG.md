@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## ???
+
+- Add a file of Actor fields mappings for cyphersystem (for "Cypher System Character Sheets-Revised-FormFillable-2019-09-10.pdf")
+
 ## 0.39.4
 
 - Fix an issue where a link to a section was not opening at the correct section if an explicit preferred Zoom has been set in the PDF Pager module settings.
