@@ -197,7 +197,7 @@ function buildOutline(pdfoutline) {
                 (typeof anchor === 'number') ?
                     `#page=${anchor + (pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}` :
                 (typeof anchor === 'string' && this.toc) ?
-                    `#${this.toc[anchor].pdfslug}` :   // convert TOC entry to PDFSLUG
+                    `#nameddest=${JSON.parse(this.toc[anchor].pdfslug)}` :   // convert TOC entry to PDFSLUG
                 '';
             // Add configured zoom
             let default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
