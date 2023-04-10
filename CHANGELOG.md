@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.39.4
+
+- Fix an issue where a link to a section was not opening at the correct section if an explicit preferred Zoom has been set in the PDF Pager module setting.s
+
 ## 0.39.3
 
 - The "Inspect Data" window now checks to see if an embedded object is an Actor, and won't display any of the fields of that Actor. This fixes a lock-up that would occur when using the Inspect Data button with the "Generic Roleplaying Game Aid" system.
