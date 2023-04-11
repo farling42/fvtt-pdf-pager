@@ -1,8 +1,9 @@
 # CHANGELOG
 
-## ???
+## 0.39.5
 
 - Add a file of Actor fields mappings for cyphersystem (for "Cypher System Character Sheets-Revised-FormFillable-2019-09-10.pdf")
+- Section links would fail if the PDF's outline uses a destination array instead of a named destination (such as the CoC rulebook), so allow these to work by NOT setting the default zoom.
 
 ## 0.39.4
 

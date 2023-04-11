@@ -193,20 +193,36 @@ function buildOutline(pdfoutline) {
         // Not editting, so maybe replace button with actual PDF
         let anchor = pagedoc.pdfpager_anchor;
         if (anchor || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
-            let pdf_slug = 
-                (typeof anchor === 'number') ?
-                    `#page=${anchor + (pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}` :
-                (typeof anchor === 'string' && this.toc) ?
-                    `#nameddest=${JSON.parse(this.toc[anchor].pdfslug)}` :   // convert TOC entry to PDFSLUG
-                '';
-            // Add configured zoom
-            let default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
-            if (default_zoom && default_zoom !== 'none') {
-                console.log(`displaying PDF with default zoom of ${default_zoom}%`);
-                if (default_zoom === 'number') default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM_NUMBER)
-                pdf_slug += (pdf_slug.length ? "&" : "#") + `zoom=${default_zoom}`;
+            let rawlink=false;
+            let pdf_slug="";
+            if (typeof anchor === 'number')
+                pdf_slug = `#page=${anchor + (pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}`;
+            else if (typeof anchor === 'string' && this.toc) {
+                // convert TOC entry to PDFSLUG.
+                // if the final slug is a string then it is an entry in the PDF's destination table.
+                // if the final slug is an ARRAY, then we can't pass it as a parameter to viewer.html.
+                let docslug = this.toc[anchor].pdfslug;
+                let slug = JSON.parse(docslug);
+                if (typeof slug === 'string') 
+                    pdf_slug = `#nameddest=${slug}`;
+                else {
+                    // Pas array directly
+                    pdf_slug = `#${docslug}`;
+                    rawlink=true;
+                }
+                // In all likelihood the outline's array is likely to have an explicit zoom value anyway.
             }
-            //pdf_slug += "&pageLayout=TwoPageRight"
+            // If we are using a raw bookmark (rather than a named bookmark), then don't allow other parameters on the line
+            if (!rawlink) {
+                // Add configured zoom
+                let default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
+                if (default_zoom && default_zoom !== 'none' && !rawlink) {
+                    console.log(`displaying PDF with default zoom of ${default_zoom}%`);
+                    if (default_zoom === 'number') default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM_NUMBER)
+                    pdf_slug += (pdf_slug.length ? "&" : "#") + `zoom=${default_zoom}`;
+                }
+                //pdf_slug += "&pageLayout=TwoPageRight"
+            }
 
             // Replace the "div.load-pdf" with an iframe element.
             // I can't find a way to do it properly, since html is simply a jQuery of top-level elements.
@@ -251,6 +267,7 @@ function buildOutline(pdfoutline) {
                     } else if (oldflag !== undefined) {
                             this.object.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
                     }
+                    this.pdfviewerapp.pdfDocument.getDestinations().then(destinations => console.log(destinations));
                 })
                 /* - working on ensuring window width is good
                 // Set iframe width
