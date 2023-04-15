@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 0.40.0
+
+- If an explicit zoom is set in the module's settings, then this will override the zoom in a destination embedded in the PDF (it won't override an "array" type of bookmark defined inside the PDF).
+
 ## 0.39.5
 
 - Add a file of Actor fields mappings for cyphersystem (for "Cypher System Character Sheets-Revised-FormFillable-2019-09-10.pdf")
