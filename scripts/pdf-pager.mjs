@@ -244,7 +244,7 @@ function buildOutline(pdfoutline) {
     // Register handler to generate the TOC after the PDF has been loaded.
     // (This is done in the editor too, so that the flag can be set as soon as a PDF is selected)
     html.on('load', async (event) => {
-    //console.debug(`PDF frame loaded for '${document.name}'`);
+        //console.debug(`PDF frame loaded for '${pagedoc.name}'`);
         
         // Wait for PDF to initialise before attaching to event bus.
         this.pdfviewerapp = event.target.contentWindow.PDFViewerApplication;
@@ -266,7 +266,7 @@ function buildOutline(pdfoutline) {
                     } else if (oldflag !== undefined) {
                             this.object.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
                     }
-                    this.pdfviewerapp.pdfDocument.getDestinations().then(destinations => console.log(destinations));
+                    //this.pdfviewerapp.pdfDocument.getDestinations().then(destinations => console.log("PDF Destinations =", destinations));
                 })
                 /* - working on ensuring window width is good
                 // Set iframe width
@@ -326,7 +326,27 @@ Hooks.on("closeJournalPDFPageSheet", (sheet, element) => {
  * my_journal_render reads the page=xxx anchor from the original link, and stores it temporarily for use by renderJournalPDFPageSheet later
  * Wraps JournalSheet#_render
  */
+let webviewerloaded_set = false;
+
 function JournalSheet_render(wrapper,force,options) {
+
+    if (!webviewerloaded_set)
+    {
+        webviewerloaded_set=true;
+
+        window.document.addEventListener("webviewerloaded", event => {
+            //console.log("webviewerloaded", event, source);
+            const source = event.detail.source;
+
+            const default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
+            const ignore = (default_zoom && default_zoom !== 'none');
+
+            console.log(`Setting ignoreDestinationZoom=${ignore}`);
+            source.PDFViewerApplicationOptions.set("disablePreferences", true);
+            source.PDFViewerApplicationOptions.set("ignoreDestinationZoom", ignore);
+        });
+    }
+
     // Monk's Active Tile Triggers sets the anchor to an array, so we need to check for a string here.
     let page  = this.object.pages.get(options.pageId);
     let ispdf = page?.type === 'pdf';

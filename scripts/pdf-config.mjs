@@ -140,6 +140,7 @@ Hooks.once('ready', () => {
 			"number"      : game.i18n.localize(`${name}.Zoom.number`)
 		},
 		default: "none",
+		requiresReload: true,
 		config: true
 	});
 
