@@ -3,6 +3,7 @@
 # 0.40.0
 
 - If an explicit zoom is set in the module's settings, then this will override the zoom in a destination embedded in the PDF (it won't override an "array" type of bookmark defined inside the PDF).
+- Changing the explicit zoom module setting will now prompt to reload Foundry, to ensure that the new setting is honoured.
 
 ## 0.39.5
 
