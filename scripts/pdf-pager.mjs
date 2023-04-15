@@ -63,13 +63,11 @@ function updatePdfView(pdfsheet, anchor) {
     const linkService = pdfsheet?.pdfviewerapp?.pdfLinkService;
     if (!linkService || !anchor) return false;
 
-    let dest;
-    if (anchor.startsWith('page='))
+    const dest = anchor.startsWith('page=') ? 
         // Adjust page with configured PDF Page Offset
-        dest = `page=${+anchor.slice(5) + (pdfsheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}`;
-    else
+        `page=${+anchor.slice(5) + (pdfsheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}` : 
         // Convert our internal link name into a PDF outline slug
-        dest = JSON.parse(pdfsheet.toc[anchor].pdfslug);
+        pdfsheet.toc[anchor].pdfslug;
 
     console.debug(`updatePdfView(sheet='${pdfsheet.object.name}', anchor='${anchor}')\n=>'${dest}'`);
     linkService.setHash(dest);
