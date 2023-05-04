@@ -41,7 +41,7 @@ import { PDFCONFIG } from './pdf-config.mjs'
  * Enrich the generated HTML to show a link or just plain text
  */
 
- const pattern = /@PDF\[([^|#\]]+)(?:#([^\|\]]+))?(?:\|([^\]]+))?\]{([^}]*)}/g;
+ const pattern = /@PDF\[(.+?)(?:#(.+?))?(?:\|(.+?))?\]{(.+?)}/g;
 
  Hooks.once('ready', () => {
     // Fields on Actors and Items call enrichHTML with async=false

@@ -61,7 +61,7 @@ Hooks.once('ready', async () => {
  */
 function updatePdfView(pdfsheet, anchor) {
     const linkService = pdfsheet?.pdfviewerapp?.pdfLinkService;
-    if (!linkService || !anchor) return false;
+    if (!linkService || !anchor || anchor === "null") return false;
 
     const dest = anchor.startsWith('page=') ? 
         // Adjust page with configured PDF Page Offset

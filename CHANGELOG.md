@@ -3,6 +3,7 @@
 # 0.41.0
 
 - Add a separate module option which allows a user to always ignore the zoom setting within a PDF's bookmarks (previously the zoom was only ignored if "Default Zoom" was set to something other than "None").
+- Improve pattern matching for `@PDF` links, and fix error generated when `@PDF[docid]{label}` is clicked.
 
 # 0.40.0
 
