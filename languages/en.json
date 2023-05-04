@@ -28,6 +28,8 @@
         "noSpellCheck.Hint": "When checked, spell checking will be disabled within editable fields of PDFs",
         "readPdfFields.Name": "Read Fields from PDF",
         "readPdfFields.Hint": "When enabled, when a PDF is opened, any field data (annotations) within the loaded file are copied to the corresponding Actor field OVERWRITING any old values stored on the Actor (editing of the PDF is disabled while this option is enabled)",
+        "ignoreBookmarkZoom.Name": "Ignore Zoom in Bookmarks",
+        "ignoreBookmarkZoom.Hint": "Always ignore the zoom configured in the PDF's own bookmarks",
         "defaultZoom.Name": "Default Zoom",
         "defaultZoom.Hint": "Choose the preferred default zoom setting to be used when opening a PDF (fixed-value requires setting the next parameter)",
         "ChoosePdfForm" : {

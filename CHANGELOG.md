@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 0.41.0
+
+- Add a separate module option which allows a user to always ignore the zoom setting within a PDF's bookmarks (previously the zoom was only ignored if "Default Zoom" was set to something other than "None").
+
 # 0.40.0
 
 - If an explicit zoom is set in the module's settings, then this will override the zoom in a destination embedded in the PDF (it won't override an "array" type of bookmark defined inside the PDF).

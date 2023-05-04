@@ -41,6 +41,7 @@ export let PDFCONFIG = {
 	DEFAULT_ZOOM			: "defaultZoom",
 	DEFAULT_ZOOM_NUMBER		: "zoomPercentage",
 	NO_SPELL_CHECK          : "noSpellCheck",
+	IGNORE_BOOKMARK_ZOOM    : "ignoreBookmarkZoom",
 	// Flags on an Actor
     FLAG_OFFSET             : "pageOffset",
     FLAG_CODE               : "code",
@@ -122,6 +123,17 @@ Hooks.once('ready', () => {
 		scope: "world",
 		type:  Boolean,
 		default: false,
+		config: true
+	});
+
+    param = PDFCONFIG.IGNORE_BOOKMARK_ZOOM;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  Boolean,
+		default: false,
+		requiresReload: true,
 		config: true
 	});
 

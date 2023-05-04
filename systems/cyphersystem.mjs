@@ -60,7 +60,7 @@ export let actormap = {
 			return result;
 		}
 	}
-};
+}
 
 /*
 pdf-editable.mjs:431 Special_Abilities (Tx)

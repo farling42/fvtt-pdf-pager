@@ -338,8 +338,9 @@ function JournalSheet_render(wrapper,force,options) {
             //console.log("webviewerloaded", event, source);
             const source = event.detail.source;
 
-            const default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
-            const ignore = (default_zoom && default_zoom !== 'none');
+            const always_ignore = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.IGNORE_BOOKMARK_ZOOM);
+            const default_zoom  = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
+            const ignore = always_ignore || (default_zoom && default_zoom !== 'none');
 
             console.log(`Setting ignoreDestinationZoom=${ignore}`);
             source.PDFViewerApplicationOptions.set("disablePreferences", true);
