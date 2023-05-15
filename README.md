@@ -226,6 +226,10 @@ The outline for a PDF document is read the first time that a PDF is opened. If t
 
 It is also possible to call the function `ui.pdfpager.deleteOutlines()` from a macro in order to remove all stored Outlines from all PDFs in the world journal sidebar. In this case, the Outline will be regenerated when the PDF is next opened.
 
+## Incompatible Game Systems
+
+The GURPS game system implements its own support for PDF documents which is incompatible with the additional functionality that is provided by this module.
+
 ### Translations
 
 Feel free to submit a pull request or an issue containing translations for the entries in the en.json file.
