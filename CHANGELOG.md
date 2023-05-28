@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 0.41.1
+
+- Mark as compatible with Foundry 11 (299)
+
 # 0.41.0
 
 - Add a separate module option which allows a user to always ignore the zoom setting within a PDF's bookmarks (previously the zoom was only ignored if "Default Zoom" was set to something other than "None").

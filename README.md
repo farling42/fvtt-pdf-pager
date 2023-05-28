@@ -2,7 +2,7 @@
 [![patreon](https://img.shields.io/badge/Patreon-amusingtime-success)](https://patreon.com/amusingtime)
 [![paypal](https://img.shields.io/badge/Paypal-farling-success)](https://paypal.me/farling)
 ![GitHub License](https://img.shields.io/github/license/farling42/fvtt-pdf-pager)
-![Foundry Info](https://img.shields.io/badge/Foundry-v10-informational)
+![Foundry Info](https://img.shields.io/badge/Foundry-v11-informational)
 ![Latest Release Download Count](https://img.shields.io/github/downloads/farling42/fvtt-pdf-pager/latest/module.zip)
 
 # PDF Pager
