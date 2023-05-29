@@ -194,11 +194,13 @@ export function configureActorSettings() {
 
       // Add new list of registered sheets
       if (types.length) {
-        Actors.registerSheet(modulename, PDFActorSheet, {
-          types,
-          makeDefault: false,
-          label: "PDF Sheet"
-        })
+          let options = {
+            makeDefault: false,
+            label: game.i18n.format(`${modulename}.PDFSheetName`)
+          }
+          // Simple World Building doesn't set the 'types' field, and on Foundry 11 it won't work if WE set the 'types' field.
+          if (game.template.Actor.types.length > 1) options.types = types;
+          Actors.registerSheet(modulename, PDFActorSheet, options)
       }
     }
   }

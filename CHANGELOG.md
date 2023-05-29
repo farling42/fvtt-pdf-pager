@@ -1,5 +1,10 @@
 # CHANGELOG
 
+# 0.41.2
+
+- Change the way that the Actor PDF sheet is registered so that it works with the Simple World Building system on Foundry V11.
+- Add translation key for the name of 'PDF Sheet'.
+
 # 0.41.1
 
 - Mark as compatible with Foundry 11 (299)

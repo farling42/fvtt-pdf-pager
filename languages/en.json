@@ -3,6 +3,7 @@
         "TitleActorPDFs": "PDFs for Actor Sheets",
         "TitleMenusActor": "PDF Codes to open Actor from context Menu",
         "TitleMenusItem": "PDF Codes to open Item from context Menu",
+        "PDFSheetName": "PDF Sheet",
         "PageOffset.Label": "Page Offset",
         "Code.Label": "PDF Code",
         "Error.NoPDFWithCode": "Unable to find PDF with specified code.",
