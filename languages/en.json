@@ -47,6 +47,23 @@
             "auto"       : "Automatic Zoom",
             "number"     : "Fixed Percentage"
         },
+        "defaultSpread.Name" : "Default Spread",
+        "defaultSpread.Hint" : "Set an explicit spread mode to be used when viewing PDFs",
+        "Spread" : {
+            "none" : "---",
+            "no-spread" : "No Spread",
+            "odd-spread" : "Odd Spread",
+            "even-spread" : "Even Spread"
+        },
+        "defaultScroll.Name" : "Default Scroll",
+        "defaultScroll.Hint" : "Set an explicit scroll mode to be used when viewing PDFs",
+        "Scroll": {
+            "none" : "---",
+            "vertical" : "Vertical",
+            "horizontal" : "Horizontal",
+            "wrapped" : "Wrapped",
+            "page" : "Page"
+        },
         "zoomPercentage.Name" : "Default Zoom Fixed Percentage",
         "zoomPercentage.Hint" : "The default zoom (as a percentage) when Default Zoom is set to 'Fixed Percentage'",
         "showInPDF"      :  "Open PDF",

@@ -40,6 +40,8 @@ export let PDFCONFIG = {
 	READ_FIELDS_FROM_PDF    : "readPdfFields",
 	DEFAULT_ZOOM			: "defaultZoom",
 	DEFAULT_ZOOM_NUMBER		: "zoomPercentage",
+	DEFAULT_SPREAD          : "defaultSpread",
+	DEFAULT_SCROLL          : "defaultScroll",
 	NO_SPELL_CHECK          : "noSpellCheck",
 	IGNORE_BOOKMARK_ZOOM    : "ignoreBookmarkZoom",
 	// Flags on an Actor
@@ -166,6 +168,57 @@ Hooks.once('ready', () => {
 		config: true,
 		requiresReload: false
 	});
+
+	// PDFjs: ui_utils.js
+	const SpreadMode = {
+		UNKNOWN: -1,
+		NONE: 0, // Default value.
+		ODD: 1,
+		EVEN: 2,
+	  };
+	param = PDFCONFIG.DEFAULT_SPREAD;  // PDFjs: SpreadMode (ui_utils.js)
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  Number,
+		choices: {
+			[SpreadMode.UNKNOWN] : game.i18n.localize(`${name}.Spread.none`),
+			[SpreadMode.NONE]    : game.i18n.localize(`${name}.Spread.no-spread`),
+			[SpreadMode.ODD]     : game.i18n.localize(`${name}.Spread.odd-spread`),
+			[SpreadMode.EVEN]    : game.i18n.localize(`${name}.Spread.even-spread`)
+		},
+		default: SpreadMode.UNKNOWN,
+		requiresReload: true,
+		config: true
+	});
+
+	// PDFjs: ui_utils.js
+	const ScrollMode = {
+		UNKNOWN: -1,
+		VERTICAL: 0, // Default value.
+		HORIZONTAL: 1,
+		WRAPPED: 2,
+		PAGE: 3,
+	  };	  
+    param = PDFCONFIG.DEFAULT_SCROLL;  // PDFjs ScrollMode (ui_utils.js)
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  Number,
+		choices: {
+			[ScrollMode.UNKNOWN]    : game.i18n.localize(`${name}.Scroll.none`),
+			[ScrollMode.VERTICAL]   : game.i18n.localize(`${name}.Scroll.vertical`),
+			[ScrollMode.HORIZONTAL] : game.i18n.localize(`${name}.Scroll.horizontal`),
+			[ScrollMode.WRAPPED]    : game.i18n.localize(`${name}.Scroll.wrapped`),
+			[ScrollMode.PAGE]       : game.i18n.localize(`${name}.Scroll.page`)
+		},
+		default: ScrollMode.UNKNOWN,
+		requiresReload: true,
+		config: true
+	});
+
 
 	// Ideally ACTOR_CONFIG and ITEM_CONFIG would use a TextArea.
 	// We can't simply patch the SettingsConfig.prototype._renderInner to swap "<input" for "<textarea" because

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 0.42.0
+
+- Add module settings to set default Scroll and Page modes for PDFs.
+
 # 0.41.2
 
 - Change the way that the Actor PDF sheet is registered so that it works with the Simple World Building system on Foundry V11.

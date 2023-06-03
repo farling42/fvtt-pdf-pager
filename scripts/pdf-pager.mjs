@@ -345,6 +345,15 @@ function JournalSheet_render(wrapper,force,options) {
             console.log(`Setting ignoreDestinationZoom=${ignore}`);
             source.PDFViewerApplicationOptions.set("disablePreferences", true);
             source.PDFViewerApplicationOptions.set("ignoreDestinationZoom", ignore);
+            // defaultZoomValue
+
+            // scrollModeOnLoad
+            let value = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_SCROLL);
+            source.PDFViewerApplicationOptions.set("scrollModeOnLoad", value);
+            // spreadModeOnLoad
+            value = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_SPREAD);
+            source.PDFViewerApplicationOptions.set("spreadModeOnLoad", value);
+            // sidebarViewOnLoad
         });
     }
 
