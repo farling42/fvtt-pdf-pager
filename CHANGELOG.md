@@ -1,28 +1,28 @@
 # CHANGELOG
 
-# 0.43.0
+## 0.43.0
 
 - Add a module setting to allow the maximum TOC nesting to be changed from the Foundry default of 2 for PDF pages only.
 
-# 0.42.0
+## 0.42.0
 
 - Add module settings to set default Scroll and Page modes for PDFs.
 
-# 0.41.2
+## 0.41.2
 
 - Change the way that the Actor PDF sheet is registered so that it works with the Simple World Building system on Foundry V11.
 - Add translation key for the name of 'PDF Sheet'.
 
-# 0.41.1
+## 0.41.1
 
 - Mark as compatible with Foundry 11 (299)
 
-# 0.41.0
+## 0.41.0
 
 - Add a separate module option which allows a user to always ignore the zoom setting within a PDF's bookmarks (previously the zoom was only ignored if "Default Zoom" was set to something other than "None").
 - Improve pattern matching for `@PDF` links, and fix error generated when `@PDF[docid]{label}` is clicked.
 
-# 0.40.0
+## 0.40.0
 
 - If an explicit zoom is set in the module's settings, then this will override the zoom in a destination embedded in the PDF (it won't override an "array" type of bookmark defined inside the PDF).
 - Changing the explicit zoom module setting will now prompt to reload Foundry, to ensure that the new setting is honoured.
