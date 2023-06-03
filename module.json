@@ -40,6 +40,9 @@
     "scripts/pdf-migrate.mjs",
     "scripts/pdf-scenenotes.mjs"
   ],
+  "styles": [
+    "css/style.css"
+  ],
   "packs": [
     {
       "name": "macros",

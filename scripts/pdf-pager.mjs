@@ -43,8 +43,9 @@ Hooks.once('ready', async () => {
     // Need to capture the PDF page number
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner',      JournalPDFPageSheet_renderInner,      libWrapper.WRAPPER);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._onClickDocumentLink', JournalEntryPage_onClickDocumentLink, libWrapper.MIXED);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render',     JournalSheet_render,  libWrapper.WRAPPER);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype.goToPage',    JournalSheet_goToPage, libWrapper.MIXED);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render',         JournalSheet_render,         libWrapper.WRAPPER);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype.goToPage',        JournalSheet_goToPage,       libWrapper.MIXED);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._renderHeadings', JournalSheet_renderHeadings, libWrapper.OVERRIDE);
 });
 
 // Ugly hack to get the PAGE number from the JournalSheet#render down to the JournalPDFPageSheet#render
@@ -321,6 +322,33 @@ Hooks.on("closeJournalPDFPageSheet", (sheet, element) => {
     delete page.pdfpager_show_uuid;
 })
 
+/**
+ * An exact copy of JournalSheeet#_renderHeading from foundry.js,
+ * with the only change to set MAX_NESTING depending on whether the page is a PDF or not.
+ */
+
+async function JournalSheet_renderHeadings(pageNode, toc) {
+    const pageId = pageNode.dataset.pageId;
+    const page = this.object.pages.get(pageId);
+    const MAX_NESTING = (page.type == 'pdf') ? game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.MAX_TOC_DEPTH) : 2;
+    const tocNode = this.element[0].querySelector(`.directory-item[data-page-id="${pageId}"]`);
+    if ( !tocNode || !toc ) return;
+    const headings = Object.values(toc);
+    if ( page.title.show ) headings.shift();
+    const minLevel = Math.min(...headings.map(node => node.level));
+    tocNode.querySelector(":scope > ol")?.remove();
+    const tocHTML = await renderTemplate("templates/journal/journal-page-toc.html", {
+      headings: headings.reduce((arr, {text, level, slug, element}) => {
+        if ( element ) element.dataset.anchor = slug;
+        if ( level < minLevel + MAX_NESTING ) arr.push({text, slug, level: level - minLevel + 2});
+        return arr;
+      }, [])
+    });
+    tocNode.innerHTML += tocHTML;
+    tocNode.querySelectorAll(".heading-link").forEach(el =>
+      el.addEventListener("click", this._onClickPageLink.bind(this)));
+    this._dragDrop.forEach(d => d.bind(tocNode));
+}
 
 /**
  * my_journal_render reads the page=xxx anchor from the original link, and stores it temporarily for use by renderJournalPDFPageSheet later

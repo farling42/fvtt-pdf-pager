@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 0.43.0
+
+- Add a module setting to allow the maximum TOC nesting to be changed from the Foundry default of 2 for PDF pages only.
+
 # 0.42.0
 
 - Add module settings to set default Scroll and Page modes for PDFs.

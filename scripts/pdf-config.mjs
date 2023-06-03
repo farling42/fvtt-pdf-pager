@@ -44,6 +44,7 @@ export let PDFCONFIG = {
 	DEFAULT_SCROLL          : "defaultScroll",
 	NO_SPELL_CHECK          : "noSpellCheck",
 	IGNORE_BOOKMARK_ZOOM    : "ignoreBookmarkZoom",
+	MAX_TOC_DEPTH           : "maxTocDepth",
 	// Flags on an Actor
     FLAG_OFFSET             : "pageOffset",
     FLAG_CODE               : "code",
@@ -125,6 +126,20 @@ Hooks.once('ready', () => {
 		scope: "world",
 		type:  Boolean,
 		default: false,
+		config: true
+	});
+
+    param = PDFCONFIG.MAX_TOC_DEPTH;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  Number,
+		range: {
+			min: 2,
+			max: 6
+		},
+		default: 3,
 		config: true
 	});
 

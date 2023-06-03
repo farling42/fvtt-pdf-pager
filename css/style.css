@@ -1,0 +1,12 @@
+.sheet.journal-entry .pages-list .h4 .heading-link {
+  text-indent: calc(3 * var(--level-indent));
+}
+.sheet.journal-entry .pages-list .h5 .heading-link {
+  text-indent: calc(4 * var(--level-indent));
+}
+.sheet.journal-entry .pages-list .h6 .heading-link {
+  text-indent: calc(5 * var(--level-indent));
+}
+.sheet.journal-entry .pages-list .h7 .heading-link {
+  text-indent: calc(6 * var(--level-indent));
+}
