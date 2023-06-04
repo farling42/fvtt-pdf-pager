@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.44.0
+
+- Allow the getValue() helper function in the Field Mappings to be async (e.g. to allow other async functions).
+
 ## 0.43.2
 
 - Put in the correct location for the style.css file
