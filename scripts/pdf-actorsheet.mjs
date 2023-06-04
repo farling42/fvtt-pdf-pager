@@ -123,6 +123,10 @@ export class PDFActorSheet extends ActorSheet {
 
   _getHeaderButtons() {
     let buttons = super._getHeaderButtons();
+
+    // No extra buttons if we can't edit the actor.
+    if (this.document.permission < CONST.DOCUMENT_PERMISSION_LEVELS.OWNER) return buttons;
+
     buttons.unshift({
       label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.CustomPDF`),
       class: "configure-custom-pdf",
@@ -160,7 +164,7 @@ export class PDFActorSheet extends ActorSheet {
   // Only actually call the render function if the window is not currently rendered,
   // since the `initEditor` call will otherwise handle changes to actor field data.
   render(force=false, context={}) {
-    if (!this.rendered) super.render(force,context);
+    if (!this.rendered && this.document.permission >= CONST.DOCUMENT_PERMISSION_LEVELS.OBSERVER) super.render(force,context);
   }
 
   _onResize(event) {

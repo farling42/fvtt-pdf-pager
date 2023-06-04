@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.43.1
+
+- Only show buttons in Actor title bar if the user is an OWNER of the actor.
+- Don't allow the Actor window to open if the user has only LIMITED access to the actor.
+
 ## 0.43.0
 
 - Add a module setting to allow the maximum TOC nesting to be changed from the Foundry default of 2 for PDF pages only.
