@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.43.2
+
+- Put in the correct location for the style.css file
+
 ## 0.43.1
 
 - Only show buttons in Actor title bar if the user is an OWNER of the actor.
