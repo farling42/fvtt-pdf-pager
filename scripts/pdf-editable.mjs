@@ -113,7 +113,7 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             value = flags[elem.name];
         } else {
             if (docfield instanceof Object && docfield.getValue) {
-                value = docfield.getValue(document);
+                value = await docfield.getValue(document);
                 if (!docfield.setValue) elem.readOnly = true;
             } else if (typeof docfield === 'string') {
                 value = getProperty(document, docfield);

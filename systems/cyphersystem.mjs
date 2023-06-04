@@ -29,10 +29,10 @@ export let actormap = {
 	"Skill_Training":"system.basic.advancement.skill",
 	"Other":"system.basic.advancement.other",
 	"Background": {
-		getValue(actor) { return actor.system.description; } 
+		async getValue(actor) { return TextEditor.enrichHTML(actor.system.description, {async:true} ); } 
 	},
 	"Notes": {
-		getValue(actor) { return actor.system.notes; }
+		async getValue(actor) { return TextEditor.enrichHTML(actor.system.notes, {async:true} ); }
 	},
 	"Impaired": {
 		getValue(actor) { return actor.system.combat.damageTrack.state == 'Impaired'; },
