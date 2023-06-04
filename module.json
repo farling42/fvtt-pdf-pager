@@ -41,7 +41,7 @@
     "scripts/pdf-scenenotes.mjs"
   ],
   "styles": [
-    "css/style.css"
+    "style/style.css"
   ],
   "packs": [
     {
