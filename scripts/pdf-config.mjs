@@ -26,6 +26,7 @@ import { migratePDFoundry, replacePDFlinks } from './pdf-migrate.mjs';
 import { registerActorMapping, registerItemMapping, getPDFValue, setPDFValue } from './pdf-editable.mjs';
 import { configureMenuSettings } from './pdf-menu.mjs';
 import { configureActorSettings } from './pdf-actorsheet.mjs';
+import { configureItemSettings } from './pdf-itemsheet.mjs';
 
 export let PDFCONFIG = {
     MODULE_NAME             : "pdf-pager",
@@ -263,6 +264,7 @@ Hooks.once('ready', () => {
 	});
 
 	configureActorSettings();
+	configureItemSettings();
 	configureMenuSettings();
 
     if (!ui.pdfpager) {

@@ -1,6 +1,7 @@
 {
     "pdf-pager": {
         "TitleActorPDFs": "PDFs for Actor Sheets",
+        "TitleItemPDFs": "PDFs for Item Sheets",
         "TitleMenusActor": "PDF Codes to open Actor from context Menu",
         "TitleMenusItem": "PDF Codes to open Item from context Menu",
         "PDFSheetName": "PDF Sheet",
@@ -75,6 +76,8 @@
         "itemType.Hint"  : "Define the PDF CODE of the PDF page to be used when selecting 'Show in PDF' from the Item context menu for '{name}' items",
         "actorSheet.Name" : "Actor Sheet: '{name}'",
         "actorSheet.Hint" : "Choose the PDF file to be used for a '{name}' Actor",
+        "itemSheet.Name" : "Item Sheet: '{name}'",
+        "itemSheet.Hint" : "Choose the PDF file to be used for a '{name}' Item",
         "inspector": {
             "help1": "You may leave this window open and return the sheet to your system sheet if you so wish. The window will refresh every 10 seconds to reflect changes made to the actor, but you may also refresh it manually with the 'Refresh' button located on the header.",
             "help2": "You should be very careful when using these data paths in a PDF. The color coding is a 'best guess', and while it will usually be correct some systems may have exceptions or cause changes you enter into the sheet to be overridden by the system for certain data paths.",
@@ -91,6 +94,11 @@
             "CopiedToClipboard": "Copied!"
         },
         "actorSheetButton": {
+            "CustomPDF":   "Custom PDF",
+            "ShowPdfFields": "Log PDF fields",
+            "InspectData": "Inspect Data"
+        },
+        "itemSheetButton": {
             "CustomPDF":   "Custom PDF",
             "ShowPdfFields": "Log PDF fields",
             "InspectData": "Inspect Data"

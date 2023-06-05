@@ -34,6 +34,8 @@
     "scripts/pdf-actorsheet.mjs",
     "scripts/pdf-editable.mjs",
     "scripts/pdf-config.mjs",
+    "scripts/pdf-itembrowser.mjs",
+    "scripts/pdf-itemsheet.mjs",
     "scripts/pdf-linker.mjs",
     "scripts/pdf-menu.mjs",
     "scripts/pdf-pager.mjs",
