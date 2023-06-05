@@ -36,6 +36,8 @@
         "maxTocDepth.Hint": "The maximum nesting of the table of contents in the left sidebar of a Journal Page",
         "defaultZoom.Name": "Default Zoom",
         "defaultZoom.Hint": "Choose the preferred default zoom setting to be used when opening a PDF (fixed-value requires setting the next parameter)",
+        "hideToolbar.Name": "Hide PDF browser toolbar",
+        "hideToolbar.Hint": "Hides the PDF browser toolbar when editing form fillable PDFs",
         "ChoosePdfForm" : {
             "Title": "Choose PDF for '{name}'",
             "Prompt": "Custom PDF:",

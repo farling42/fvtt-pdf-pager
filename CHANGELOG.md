@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.45.0
+
+- Provide an option (default true) to hide the PDF viewer toolbar when opening a PDF for editing (e.g. in Actor and Item sheets).
+
 ## 0.44.0
 
 - Provide the same level of support for Item sheets as is available for Actor sheets (setting a default PDF to be used, and allowing a custom PDF for each individual item).

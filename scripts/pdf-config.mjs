@@ -46,6 +46,7 @@ export let PDFCONFIG = {
 	NO_SPELL_CHECK          : "noSpellCheck",
 	IGNORE_BOOKMARK_ZOOM    : "ignoreBookmarkZoom",
 	MAX_TOC_DEPTH           : "maxTocDepth",
+	HIDE_TOOLBAR            : "hideToolbar",
 	// Flags on an Actor
     FLAG_OFFSET             : "pageOffset",
     FLAG_CODE               : "code",
@@ -144,7 +145,18 @@ Hooks.once('ready', () => {
 		config: true
 	});
 
-    param = PDFCONFIG.IGNORE_BOOKMARK_ZOOM;
+    param = PDFCONFIG.HIDE_TOOLBAR;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  Boolean,
+		default: true,
+		config: true
+	});
+
+
+	param = PDFCONFIG.IGNORE_BOOKMARK_ZOOM;
     game.settings.register(name, param, {
 		name: game.i18n.localize(`${name}.${param}.Name`),
 		hint: game.i18n.localize(`${name}.${param}.Hint`),

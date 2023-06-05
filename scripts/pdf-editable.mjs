@@ -277,6 +277,12 @@ export async function initEditor(html, id_to_display) {
         const pdfviewerapp = contentWindow.PDFViewerApplication;
         await pdfviewerapp.initializedPromise;
 
+        // Hide the toolbar (but we need to reclaim the space)
+        if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_TOOLBAR)) {
+            pdfviewerapp.appConfig.appContainer.querySelector("div.toolbar").style.display="none";
+            pdfviewerapp.appConfig.appContainer.querySelector("#viewerContainer").style.top = "0px";
+        }
+
         let timeout=false;
 
         // Wait for the AnnotationLayer to get drawn before populating all the fields with data from the Document.
