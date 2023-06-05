@@ -1,11 +1,8 @@
 # CHANGELOG
 
-## 0.45.0
-
-- Provide the same level of support for Item sheets as is available for Actor sheets (setting a default PDF to be used, and allowing a custom PDF for each individual item).
-
 ## 0.44.0
 
+- Provide the same level of support for Item sheets as is available for Actor sheets (setting a default PDF to be used, and allowing a custom PDF for each individual item).
 - Allow the getValue() helper function in the Field Mappings to be async (e.g. to allow other async functions).
 
 ## 0.43.2
