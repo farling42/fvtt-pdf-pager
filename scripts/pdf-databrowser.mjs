@@ -21,24 +21,25 @@
 import { PDFCONFIG } from './pdf-config.mjs';
 
 /**
- * Basic app to allow the user to see data keys for actor sheets
+ * Basic app to allow the user to see data keys for actor/item sheets
  * @internal
  */
-export class PDFActorDataBrowser extends Application {
-    constructor(actor, options) {
+export class PDFDataBrowser extends Application {
+    // doc = actor or item
+    constructor(doc, options) {
         super(options);
-        this.actor = actor;
+        this.doc = doc;
     }
     static get defaultOptions() {
         const options = super.defaultOptions;
-        options.template = `modules/${PDFCONFIG.MODULE_NAME}/templates/actor-data-browser.hbs`;
+        options.template = `modules/${PDFCONFIG.MODULE_NAME}/templates/data-browser.hbs`;
         options.width = 600;
         options.height = 400;
         options.resizable = true;
         return options;
     }
     get title() {
-        return `${this.actor.name}`;
+        return `${this.doc.name}`;
     }
     _getHeaderButtons() {
         const buttons = super._getHeaderButtons();
@@ -53,6 +54,7 @@ export class PDFActorDataBrowser extends Application {
     getData(options) {
         const data = super.getData(options);
         let DangerLevel;
+        let baseclass;
         (function (DangerLevel) {
             DangerLevel[DangerLevel["Safe"] = 0] = "Safe";
             DangerLevel[DangerLevel["Low"] = 1] = "Low";
@@ -61,7 +63,7 @@ export class PDFActorDataBrowser extends Application {
         })(DangerLevel || (DangerLevel = {}));
         const flatten = (data, current = '', danger = DangerLevel.Safe) => {
             let results = [];
-            window['actorData'] = this.actor.system;
+            window['actorData'] = this.doc.system;
             const path = (curr, ...next) => {
                 if (curr.length > 0) {
                     for (let i = 0; i < next.length; i++) {
@@ -87,7 +89,7 @@ export class PDFActorDataBrowser extends Application {
             if (data === undefined)
                 return results;
             if (typeof data === 'object') {
-                if (data instanceof Actor) {
+                if (data instanceof baseclass) {   // data instanceof Actor/Item
                     console.warn('Embedded Actor found in data, excluding the embedded Actor from the list of fields')
                     return results;
                 }
@@ -178,10 +180,11 @@ export class PDFActorDataBrowser extends Application {
             [DangerLevel.High]: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.inspector.DANGER.High`),
             [DangerLevel.Critical]: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.inspector.DANGER.Critical`),
         };
-        data['paths'] = flatten(this.actor.system, 'system');
+        baseclass = (this.doc instanceof Actor) ? Actor : Item;
+        data['paths'] = flatten(this.doc.system, 'system');
         data['paths'].push({
             key: 'name',
-            value: this.actor.name,
+            value: this.doc.name,
             danger: DangerLevel.Safe,
         });
         data['paths'].sort((a, b) => a.key.localeCompare(b.key));

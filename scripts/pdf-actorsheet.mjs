@@ -29,40 +29,38 @@ SOFTWARE.
 
 import { PDFCONFIG } from './pdf-config.mjs';
 import { initEditor, logPdfFields, getPdfViewer } from './pdf-editable.mjs';
-import { PDFActorDataBrowser } from './pdf-actorbrowser.mjs';
+import { PDFDataBrowser } from './pdf-databrowser.mjs';
 
-export class PDFActorSheetConfig extends FormApplication {
-  // this.object = PDFActorSheet
+export class PDFSheetConfig extends FormApplication {
+  // this.object = PDFActorSheet or PDFItemSheet
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       width: 600,
     })
   }
   get template() {
-    return `modules/${PDFCONFIG.MODULE_NAME}/templates/actor-choose-pdf.hbs`;
+    return `modules/${PDFCONFIG.MODULE_NAME}/templates/choose-pdf.hbs`;
   }
   get title() {
-    const actor = this.object.document;
-    return game.i18n.format(`${PDFCONFIG.MODULE_NAME}.ChoosePdfForm.Title`, {name: actor.name});
+    return game.i18n.format(`${PDFCONFIG.MODULE_NAME}.ChoosePdfForm.Title`, {name: this.object.document.name});
   }
   getData() {
-    const actor = this.object.document;
     return {
-      filename: actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
+      filename: this.object.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
     }
   }
   async _updateObject(event, formData) {
     event.preventDefault();
-    const actor = this.object.document;
-    const oldflag = actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF);
+    const doc = this.object.document;
+    const oldflag = doc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF);
     if (formData.filename == oldflag) return;
 
     if (formData.filename) {
-      console.log(`Configuring Actor '${actor.name}' to use PDF sheet '${formData.filename}'`)
-      actor.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF, formData.filename)
+      console.log(`Configuring Actor '${doc.name}' to use PDF sheet '${formData.filename}'`)
+      doc.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF, formData.filename)
     } else {
-      console.log(`Removing custom PDF sheet for Actor '${actor.name}'`)
-      actor.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
+      console.log(`Removing custom PDF sheet for Actor '${doc.name}'`)
+      doc.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
     }
     // Regenerate the PDFActorSheet with the new PDF
     this.object.render(true);
@@ -82,7 +80,7 @@ export class PDFActorSheet extends ActorSheet {
   }
 
   get template() {
-    return `modules/${PDFCONFIG.MODULE_NAME}/templates/actor-pdf-sheet.hbs`;
+    return `modules/${PDFCONFIG.MODULE_NAME}/templates/pdf-sheet.hbs`;
   }    
 
   getData() {
@@ -114,9 +112,9 @@ export class PDFActorSheet extends ActorSheet {
 
   _onChoosePdf(event) {
     event.preventDefault();
-    new PDFActorSheetConfig(this, {
+    new PDFSheetConfig(this, {
       top: this.position.top + 40,
-      left: this.position.left + ((this.position.width - PDFActorSheetConfig.defaultOptions.width) / 2)
+      left: this.position.left + ((this.position.width - PDFSheetConfig.defaultOptions.width) / 2)
     }).render(true);
     console.log('choose a custom PDF')
   }
@@ -141,7 +139,7 @@ export class PDFActorSheet extends ActorSheet {
       class: 'pdf-browse-data',
       label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.InspectData`),
       onclick: () => {
-          new PDFActorDataBrowser(this.document).render(true);
+          new PDFDataBrowser(this.document).render(true);
       },
     });
 

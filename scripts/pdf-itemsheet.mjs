@@ -29,46 +29,8 @@ SOFTWARE.
 
 import { PDFCONFIG } from './pdf-config.mjs';
 import { initEditor, logPdfFields, getPdfViewer } from './pdf-editable.mjs';
-import { PDFItemDataBrowser } from './pdf-itembrowser.mjs';
-
-export class PDFItemSheetConfig extends FormApplication {
-  // this.object = PDFItemSheet
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      width: 600,
-    })
-  }
-  get template() {
-    return `modules/${PDFCONFIG.MODULE_NAME}/templates/actor-choose-pdf.hbs`;
-  }
-  get title() {
-    const item = this.object.document;
-    return game.i18n.format(`${PDFCONFIG.MODULE_NAME}.ChoosePdfForm.Title`, {name: item.name});
-  }
-  getData() {
-    const item = this.object.document;
-    return {
-      filename: item.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
-    }
-  }
-  async _updateObject(event, formData) {
-    event.preventDefault();
-    const item = this.object.document;
-    const oldflag = item.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF);
-    if (formData.filename == oldflag) return;
-
-    if (formData.filename) {
-      console.log(`Configuring Item '${item.name}' to use PDF sheet '${formData.filename}'`)
-      item.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF, formData.filename)
-    } else {
-      console.log(`Removing custom PDF sheet for Item '${item.name}'`)
-      item.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
-    }
-    // Regenerate the PDFItemSheet with the new PDF
-    this.object.render(true);
-  }
-}
-
+import { PDFSheetConfig } from './pdf-actorsheet.mjs';
+import { PDFDataBrowser } from './pdf-databrowser.mjs';
 
 export class PDFItemSheet extends ItemSheet {    
 
@@ -82,7 +44,7 @@ export class PDFItemSheet extends ItemSheet {
   }
 
   get template() {
-    return `modules/${PDFCONFIG.MODULE_NAME}/templates/actor-pdf-sheet.hbs`;
+    return `modules/${PDFCONFIG.MODULE_NAME}/templates/pdf-sheet.hbs`;
   }    
 
   getData() {
@@ -114,9 +76,9 @@ export class PDFItemSheet extends ItemSheet {
 
   _onChoosePdf(event) {
     event.preventDefault();
-    new PDFItemSheetConfig(this, {
+    new PDFSheetConfig(this, {
       top: this.position.top + 40,
-      left: this.position.left + ((this.position.width - PDFItemSheetConfig.defaultOptions.width) / 2)
+      left: this.position.left + ((this.position.width - PDFSheetConfig.defaultOptions.width) / 2)
     }).render(true);
     console.log('choose a custom PDF')
   }
@@ -141,7 +103,7 @@ export class PDFItemSheet extends ItemSheet {
       class: 'pdf-browse-data',
       label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.itemSheetButton.InspectData`),
       onclick: () => {
-          new PDFItemDataBrowser(this.document).render(true);
+          new PDFDataBrowser(this.document).render(true);
       },
     });
 
