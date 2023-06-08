@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.45.1
+
+- Ensure that PDF field names with "." in them are handled properly.
+
 ## 0.45.0
 
 - Provide an option (default true) to hide the PDF viewer toolbar when opening a PDF for editing (e.g. in Actor and Item sheets).

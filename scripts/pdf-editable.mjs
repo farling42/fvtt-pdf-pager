@@ -110,7 +110,7 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
         if (!docfield && getProperty(document, elem.name) !== undefined) docfield = elem.name;
         let value;
         if (!docfield) {
-            value = flags[elem.name];
+            value = getProperty(flags, elem.name);
         } else {
             if (docfield instanceof Object && docfield.getValue) {
                 value = await docfield.getValue(document);
@@ -194,9 +194,9 @@ function modifyDocument(document, fieldname, value) {
         // Copy the modified field to the MODULE FLAG in the Document
         let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
         if (!(flags instanceof Object)) flags = {};
-        if (flags[fieldname] === value) return;
+        if (getProperty(flags, fieldname) === value) return;
         console.debug(`Hiding value '${document.name}'['${fieldname}'] = '${value}'`);
-        flags[fieldname] = value;
+        setProperty(flags, fieldname, value);
         document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, flags);
     } else if (typeof docfield === 'string') {
         let currentvalue = getProperty(document, docfield)
@@ -411,7 +411,7 @@ export function registerItemMapping(mapping) {
  */
 export function setPDFValue(document, fieldname, value) {
     let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {}
-    flags[fieldname] = value;
+    setProperty(flags, fieldname, value);
     document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, flags);
 }
 
@@ -423,7 +423,7 @@ export function setPDFValue(document, fieldname, value) {
  */
 export function getPDFValue(document, fieldname) {
     let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {}
-    return flags[fieldname];
+    return getProperty(flags, fieldname);
 }
 
 /**
