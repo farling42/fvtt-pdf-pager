@@ -2,6 +2,7 @@
 
 ## 0.46.0
 
+- Provide a module option 'Edit Field Mapping' which will replace all PDF fields with a drop-down menu allowing the GM to modify the mapping between PDF field and Actor/Item fields.
 - Provide a module option 'Show Mapping Tooltips' which will add a tooltip to each field in a PDF used in an Actor/Item sheet giving the name of the PDF field as well as the name of the field on the Actor/Item to which it is mapped. (The tooltip will simply identify gett/setter functions without showing the code of the function).
 
 ## 0.45.1

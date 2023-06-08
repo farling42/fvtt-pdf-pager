@@ -48,6 +48,7 @@ export let PDFCONFIG = {
 	MAX_TOC_DEPTH           : "maxTocDepth",
 	HIDE_TOOLBAR            : "hideToolbar",
 	SHOW_MAP_TOOLTIPS       : "showMapTooltips",
+	FIELD_MAPPING_MODE      : "showFieldMenus",
 	// Flags on an Actor
     FLAG_OFFSET             : "pageOffset",
     FLAG_CODE               : "code",
@@ -157,6 +158,16 @@ Hooks.once('ready', () => {
 	});
 
     param = PDFCONFIG.SHOW_MAP_TOOLTIPS;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  Boolean,
+		default: false,
+		config: true
+	});
+
+    param = PDFCONFIG.FIELD_MAPPING_MODE;
     game.settings.register(name, param, {
 		name: game.i18n.localize(`${name}.${param}.Name`),
 		hint: game.i18n.localize(`${name}.${param}.Hint`),

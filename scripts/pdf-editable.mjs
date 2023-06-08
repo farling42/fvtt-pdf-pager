@@ -38,6 +38,9 @@ import { PDFCONFIG } from './pdf-config.mjs'
 let map_pdf2actor;                   // key = pdf field name, value = actor field name
 let map_pdf2item;                    // key = pdf field name, value = item  field name
 
+const NO_FIELD_SET = "--------";
+const OBJECT_FIELD = "\u1d453 accessors";
+
 /**
  * Given the form for a window, return the PDFViewer embedded within the window
  * @param {html} htmlform The form for the window which contains a PDFViewer.
@@ -95,6 +98,8 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
     // Set values from the module FLAG on the Document.
     const inputs = pdfviewer.viewer.querySelectorAll('input,select,textarea');
     const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
+    const edit_field_mappings = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FIELD_MAPPING_MODE);
+
     //const storage = pdfpageview.annotationLayer.annotationStorage;
     for (let elem of inputs) {
         if (options.hidebg)     elem.style.setProperty('background-image', 'none');
@@ -107,7 +112,13 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
 
         // Get required value, either from the FLAGS or from a field on the Actor
         let docfield = mapping && (mapping[elem.name]);
+        if (edit_field_mappings && elem.nodeName == 'SELECT') {
+            elem.value = (typeof docfield === 'string') ? docfield : NO_FIELD_SET;
+            continue;
+        }
+
         if (!docfield && getProperty(document, elem.name) !== undefined) docfield = elem.name;
+        
         let value;
         if (!docfield) {
             value = getProperty(flags, elem.name);
@@ -185,9 +196,20 @@ async function setDocumentFromForm(pdfviewer, document, options) {
  */
 function modifyDocument(document, fieldname, value) {
     // Copy the modified field to the corresponding field in the Document
-    let docfield;
     const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
-    docfield = mapping?.[fieldname];
+
+    // If in edit mode, then modify the mapping
+    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FIELD_MAPPING_MODE)) {
+        // Update the local mapping
+        mapping[fieldname] = (value === NO_FIELD_SET) ? undefined : value;
+        if (document instanceof Actor)
+            game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ACTOR_CONFIG, map_pdf2actor);
+        else
+            game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ITEM_CONFIG, map_pdf2item);
+        return;
+    }
+
+    const docfield = mapping?.[fieldname];
     if (!docfield && getProperty(document, fieldname) !== undefined) docfield = fieldname;
 
     if (!docfield) {
@@ -290,7 +312,7 @@ export async function initEditor(html, id_to_display) {
         //        Resizing the window causes this to be called again for each page!
         pdfviewerapp.eventBus.on('annotationlayerrendered', async layerevent => {   // from PdfPageView
 
-            console.log(`Loaded page ${layerevent.pageNumber} for '${document.name}'`);
+            console.debug(`Loaded page ${layerevent.pageNumber} for '${document.name}'`);
             let options = {};
             if (!editable) options.disabled=true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG)) options.hidebg = true;
@@ -299,7 +321,7 @@ export async function initEditor(html, id_to_display) {
 
             // Wait until the scripting engine is ready before doing either setDocumentFromForm or setFormFromDocument
             if (timeout) {
-                console.log(`disabling previous load timeout`);
+                console.debug(`pdf-pager: disabling previous load timeout`);
                 clearTimeout(timeout);
                 timeout=undefined;
             }
@@ -334,9 +356,9 @@ export async function initEditor(html, id_to_display) {
             // Register listeners to all the editable fields
             if (editable) {        
                 // Only the inputs on this page, rather than the entire form.
-                let map_tooltips = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_MAP_TOOLTIPS);
-                let field_mappings;
-                let doc_type;
+                const editor_menus = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FIELD_MAPPING_MODE);
+                const map_tooltips = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_MAP_TOOLTIPS);
+                let field_mappings, doc_type, objkeys;
                 let pdfpageview = layerevent.source;
                 let annotations = await pdfpageview.annotationLayer.pdfPage.getAnnotations();
 
@@ -370,10 +392,8 @@ export async function initEditor(html, id_to_display) {
 
                         // Maybe show mapping tooltip
                         if (map_tooltips) {
-                            if (!field_mappings) {
-                                field_mappings = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
-                                doc_type = (document instanceof Actor) ? "Actor" : "Item";
-                            }
+                            if (!field_mappings) field_mappings = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
+                            if (!doc_type) doc_type = (document instanceof Actor) ? "Actor" : "Item";
                             let extra = "";
                             const docfield = field_mappings?.[element.name];
                             if (docfield) {
@@ -387,6 +407,72 @@ export async function initEditor(html, id_to_display) {
                                 extra += ")";
                             }
                             element.setAttribute('title', `PDF(${element.name})${extra}`);
+                        }
+
+                        if (editor_menus) {
+                            if (!field_mappings) field_mappings = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
+                            if (!objkeys) {
+                                const flatdoc = flattenObject(document);
+                                objkeys = [];
+                                for (const fieldname of Object.keys(flatdoc)) {
+                                    if (fieldname.startsWith(`flags.${PDFCONFIG.MODULE_NAME}`)) continue;
+                                    let type = typeof flatdoc[fieldname];
+                                    if (["string","number","boolean"].includes(type)) {
+                                        objkeys.push(fieldname);
+                                    }
+                                }
+                            }
+
+                            const elemdocument = element.ownerDocument;
+
+                            const select = elemdocument.createElement("select");
+                            select.name  = element.name;
+                            select.id    = element.id;
+                            select.addEventListener("change", (event) => {
+                                const select = event.target;
+                                const pdffield = select.name;
+                                const docfield = select.value;
+                                console.debug(`Changing mapping of ${pdffield} to ${docfield}`);
+
+                                const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
+                                if (typeof mapping[pdffield] === 'object') {
+                                    console.debug(`Mapping contains an object (most likely getter/setter functions) - not modifying mapping`)
+                                    return;
+                                }
+                                // Update the local mapping
+                                mapping[pdffield] = (docfield === NO_FIELD_SET) ? undefined : docfield;
+                                // Update the saved mapping
+                                if (document instanceof Actor)
+                                    game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ACTOR_CONFIG, map_pdf2actor);
+                                else
+                                    game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ITEM_CONFIG, map_pdf2item);
+                            })
+
+                            if (typeof field_mappings[element.name] === 'object') {
+                                select.setAttribute("title", `PDF(${element.name}) - uses getter/setter functions`);
+                                select.disabled = true;
+                            } else {
+                                select.setAttribute("title", `PDF(${element.name})`);
+                                // First Option = default (no field selected)
+                                const option2 = elemdocument.createElement('option');
+                                option2.text  = NO_FIELD_SET;
+                                option2.value = NO_FIELD_SET;
+                                select.add(option2);
+
+                                // Subsequent options = fields from Actor/Item
+                                for (const fieldname of objkeys) {
+                                    const option = elemdocument.createElement('option');
+                                    option.value = fieldname;
+                                    option.text  = fieldname;                                
+                                    select.add(option);
+                                }
+                                const docfield = field_mappings?.[element.name];
+                                select.value = (typeof docfield === 'string') ? docfield : NO_FIELD_SET;
+                            }
+
+                            // Replace the old type of element with the new select statement
+                            element.parentElement.classList.add("choiceWidgetAnnotation");
+                            element.replaceWith(select);
                         }
                     }
                 }
