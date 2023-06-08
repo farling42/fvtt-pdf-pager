@@ -38,6 +38,8 @@
         "defaultZoom.Hint": "Choose the preferred default zoom setting to be used when opening a PDF (fixed-value requires setting the next parameter)",
         "hideToolbar.Name": "Hide PDF browser toolbar",
         "hideToolbar.Hint": "Hides the PDF browser toolbar when editing form fillable PDFs",
+        "showMapTooltips.Name": "Show Mapping Tooltips",
+        "showMapTooltips.Hint": "Adds a tooltip to each field on an fillable PDF displayed as an Actor/Item sheet indicating the name of the PDF field as well as the field in the Actor/Item to which it is mapped (if any)",
         "ChoosePdfForm" : {
             "Title": "Choose PDF for '{name}'",
             "Prompt": "Custom PDF:",

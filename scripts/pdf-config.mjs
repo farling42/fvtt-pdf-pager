@@ -47,6 +47,7 @@ export let PDFCONFIG = {
 	IGNORE_BOOKMARK_ZOOM    : "ignoreBookmarkZoom",
 	MAX_TOC_DEPTH           : "maxTocDepth",
 	HIDE_TOOLBAR            : "hideToolbar",
+	SHOW_MAP_TOOLTIPS       : "showMapTooltips",
 	// Flags on an Actor
     FLAG_OFFSET             : "pageOffset",
     FLAG_CODE               : "code",
@@ -155,6 +156,15 @@ Hooks.once('ready', () => {
 		config: true
 	});
 
+    param = PDFCONFIG.SHOW_MAP_TOOLTIPS;
+    game.settings.register(name, param, {
+		name: game.i18n.localize(`${name}.${param}.Name`),
+		hint: game.i18n.localize(`${name}.${param}.Hint`),
+		scope: "world",
+		type:  Boolean,
+		default: false,
+		config: true
+	});
 
 	param = PDFCONFIG.IGNORE_BOOKMARK_ZOOM;
     game.settings.register(name, param, {

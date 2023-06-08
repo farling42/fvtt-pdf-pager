@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.46.0
+
+- Provide a module option 'Show Mapping Tooltips' which will add a tooltip to each field in a PDF used in an Actor/Item sheet giving the name of the PDF field as well as the name of the field on the Actor/Item to which it is mapped. (The tooltip will simply identify gett/setter functions without showing the code of the function).
+
 ## 0.45.1
 
 - Ensure that PDF field names with "." in them are handled properly.

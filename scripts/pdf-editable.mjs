@@ -334,6 +334,9 @@ export async function initEditor(html, id_to_display) {
             // Register listeners to all the editable fields
             if (editable) {        
                 // Only the inputs on this page, rather than the entire form.
+                let map_tooltips = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_MAP_TOOLTIPS);
+                let field_mappings;
+                let doc_type;
                 let pdfpageview = layerevent.source;
                 let annotations = await pdfpageview.annotationLayer.pdfPage.getAnnotations();
 
@@ -363,6 +366,27 @@ export async function initEditor(html, id_to_display) {
                                 });
                             // submit = press RETURN
                             element.addEventListener('submit', setValue);
+                        }
+
+                        // Maybe show mapping tooltip
+                        if (map_tooltips) {
+                            if (!field_mappings) {
+                                field_mappings = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
+                                doc_type = (document instanceof Actor) ? "Actor" : "Item";
+                            }
+                            let extra = "";
+                            const docfield = field_mappings?.[element.name];
+                            if (docfield) {
+                                extra += ` \u2192 ${doc_type}(`;
+                                if (typeof docfield === 'string')
+                                    extra += `${docfield}`;
+                                else if (docfield.setValue)
+                                    extra += `getter/setter functions`;
+                                else
+                                    extra += `getter function (no setter)`;
+                                extra += ")";
+                            }
+                            element.setAttribute('title', `PDF(${element.name})${extra}`);
                         }
                     }
                 }
