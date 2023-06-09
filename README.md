@@ -37,7 +37,7 @@ Without setting up a mapping, any data entered into the sheet will be stored on 
 
 When the module option 'Edit Field Mapping' is enabled, then all the editable fields in the displayed PDF are replaced by drop-down menus. These menus can be used to specify to which field on the Actor/Item this field is mapped. (If a getter/setter function has already been configured for a particular field, then that field will be disabled so that a field can't be chosen for it.)
 
-![Image of field Editing](images/pdfpager.fields.png)
+![Image of field Editing](https://raw.githubusercontent.com/farling42/fvtt-pdf-pager/master/images/pdfpager-fields.png)
 
 #### A manually created object mapping
 
