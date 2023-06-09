@@ -37,6 +37,8 @@ Without setting up a mapping, any data entered into the sheet will be stored on 
 
 When the module option 'Edit Field Mapping' is enabled, then all the editable fields in the displayed PDF are replaced by drop-down menus. These menus can be used to specify to which field on the Actor/Item this field is mapped. (If a getter/setter function has already been configured for a particular field, then that field will be disabled so that a field can't be chosen for it.)
 
+![Image of field Editing](images/pdfpager.fields.png)
+
 #### A manually created object mapping
 
 To map the PDF fields to Actor fields (such as hit points or armour class), a mapping is required. This can be prepared outside of Foundry and then pasted into the corresponding "Field Mappings..." box of the module settings window. The simple case is to have something like:
