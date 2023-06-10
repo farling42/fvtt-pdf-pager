@@ -25,6 +25,11 @@ import { PDFCONFIG } from './pdf-config.mjs';
 import { getPdfSheet } from './pdf-pager.mjs';
 
 Hooks.on('activateNote', (note, options) => {
+    // Let the jal module specify a section
+    if (options.anchor) {
+        console.debug(`activateNote: anchor already set to '${options.anchor}'`)
+        return;
+    }
     let pdfpage = note.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.PIN_PDF_PAGE);
     if (typeof pdfpage === 'number') options.anchor = `page=${pdfpage}`;
     return true;

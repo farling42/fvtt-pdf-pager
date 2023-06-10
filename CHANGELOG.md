@@ -3,6 +3,7 @@
 ## 0.46.1
 
 - Get JournalEntryPage#toc working properly for PDF pages.
+- When clicking on a scene Note, don't replace an anchor with a PDF page number (The assumption is that the 'Journal Anchor Links' module is already providing a slug anchor.)
 
 ## 0.46.0
 
