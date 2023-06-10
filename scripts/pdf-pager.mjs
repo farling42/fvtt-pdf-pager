@@ -43,16 +43,18 @@ Hooks.once('ready', async () => {
     // Need to capture the PDF page number
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner',      JournalPDFPageSheet_renderInner,      libWrapper.WRAPPER);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._onClickDocumentLink', JournalEntryPage_onClickDocumentLink, libWrapper.MIXED);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype.toc', JournalEntryPage_toc, libWrapper.MIXED);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render',         JournalSheet_render,         libWrapper.WRAPPER);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype.goToPage',        JournalSheet_goToPage,       libWrapper.MIXED);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._renderHeadings', JournalSheet_renderHeadings, libWrapper.OVERRIDE);
 });
 
-// Ugly hack to get the PAGE number from the JournalSheet#render down to the JournalPDFPageSheet#render
-// We store local variables on the JournalEntryPage
-// page.pdfpager_anchor=undefined;      // page number (if number) or TOC anchor (if string)
-// page.pdfpager_show_uuid=undefined;   // The UUID of the Actor/Item to be displayed in the PDF being opened
-
+// JournalEntryPage#toc only works when type === 'text'
+function JournalEntryPage_toc(wrapped) {
+    if (this.type !== 'pdf') return wrapped();
+    if (!this._toc) this._toc = JSON.parse(this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC));
+    return this._toc;
+}
 
 /**
  * 
@@ -263,6 +265,7 @@ function buildOutline(pdfoutline) {
                         if (oldflag !== newflag) {
                             console.debug(`Storing new TOC for '${this.object.name}'`)
                             this.object.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC, newflag)
+                            this._toc = outline;
                         }
                     } else if (oldflag !== undefined) {
                             this.object.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
@@ -452,7 +455,7 @@ export function deleteOutlines() {
             if (page.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC)) {
                 console.log(`Removed stored Outline for '${page.name}' in '${journal.name}'`)
                 page.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
-                if (page.sheet?.toc) delete page.sheet.toc;
+                if (page._toc) page._toc = null;
             }
         }
     }

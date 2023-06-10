@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.46.1
+
+- Get JournalEntryPage#toc working properly for PDF pages.
+
 ## 0.46.0
 
 - Provide a module option 'Edit Field Mapping' which will replace all PDF fields with a drop-down menu allowing the GM to modify the mapping between PDF field and Actor/Item fields.
