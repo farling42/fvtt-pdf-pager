@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.47.0
+
+- Support accessing items within a document, using a field value something like `items[type=spell,system.level=2][3].name` (which takes all the items which have a `type` that matches `spell` and a field `system.level` which matches the value "2"; the found entries are then sorted alphabetically by name; then index `[3]` into the final sorted list will be examined for it's name field). If the given index does not exist in the found entries, then no value will be put into the PDF field. (See `systems/dnd5e.mjs` for an example where the items array is accessed).
+- Update `systems/dnd5e.mjs` to use a full mapping of spell names (and `prepared` for level 1 spells) of the `5E_CharacterSheet_Fillable.pdf` sheet.
+
 ## 0.46.1
 
 - Get JournalEntryPage#toc working properly for PDF pages.

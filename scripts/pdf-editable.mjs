@@ -83,6 +83,49 @@ async function getbuttonvalues(pdfviewer) {
     return buttonvalues;
 }
 
+/**
+ * Takes a string of the form "items[test expression][index].fieldname"
+ * which looks in the supplied document's items field for any items which match the given test expression,
+ * it then sorts the results alphabetically by name, and returns the "index" entry from the sorted list of results.
+ * 
+ * "text expression" is a comma-separated list of "fieldname=value" simple comparison expressions.
+ * "fieldname" can be a dot-separated hierarchy of field names inside the item's object.
+ * @param {Document} document 
+ * @param {String} string 
+ * @returns undefined if no match was found, otherwise an object { item: Document, field: String }
+ */
+function parseItem(document,string) {
+    const regex = /items\[(.+?(?:,.+?)*)]\[(\d+)]\.(.*)/g
+    const parts = regex.exec(string);
+    if (parts?.length!==4) {
+        console.warn(`Failed to parse item field: '${string}'`)
+        return undefined;
+    }
+
+    const exprs = parts[1].split(',');
+    const index = +parts[2];
+    const attr  = parts[3];
+    let test = [];
+    for (const expr of exprs) {
+        const parts = expr.split('=');
+        if (parts.length != 2) {
+            console.error(`Error in field expression: ${string}`);
+            continue;
+        }
+        test.push({field: parts[0], value: parts[1]});
+    }
+    //console.log(`testing '${string}' with`, test);
+    const found = document.items.filter(item => {
+        for (const one of test)
+            if (getProperty(item, one.field) != one.value) 
+                return false;
+            return true
+        }).sort((a,b) => a.name.localeCompare(b.name));
+    if (found.length > 0 && index<found.length)
+        return { item: found[index], field: attr };
+    else
+        return undefined;
+}
 
 /**
  * Copy all the data from the specified Document (Actor/Item) to the fields on the PDF sheet (container)
@@ -127,7 +170,16 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
                 value = await docfield.getValue(document);
                 if (!docfield.setValue) elem.readOnly = true;
             } else if (typeof docfield === 'string') {
-                value = getProperty(document, docfield);
+                // Check for special accessor for items
+                if (docfield.startsWith('items[')) {
+                    let parsed = parseItem(document, docfield);
+                    if (parsed)
+                        value = getProperty(parsed.item, parsed.field);
+                    else 
+                        value = getProperty(flags, elem.name);
+                } else
+                    value = getProperty(document, docfield);
+
                 if (typeof value === 'number') value = '' + value;
             }
         }
@@ -209,8 +261,15 @@ function modifyDocument(document, fieldname, value) {
         return;
     }
 
-    const docfield = mapping?.[fieldname];
+    let docfield = mapping?.[fieldname];
     if (!docfield && getProperty(document, fieldname) !== undefined) docfield = fieldname;
+    if (docfield?.startsWith('items[')) {
+        const parsed = parseItem(document, docfield);
+        if (parsed) {
+            document = parsed.item;
+            docfield = parsed.field;
+        }
+    }
 
     if (!docfield) {
         // Copy the modified field to the MODULE FLAG in the Document
