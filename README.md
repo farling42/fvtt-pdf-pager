@@ -35,7 +35,7 @@ Without setting up a mapping, any data entered into the sheet will be stored on 
 
 #### Manually setting mapping
 
-When the module option 'Edit Field Mapping' is enabled, then all the editable fields in the displayed PDF are replaced by drop-down menus. These menus can be used to specify to which field on the Actor/Item this field is mapped. (If a getter/setter function has already been configured for a particular field, then that field will be disabled so that a field can't be chosen for it.)
+When the module option `Edit Field Mapping` is enabled, then all the editable fields in the displayed PDF display the name of the field to which they are mapped (if any). The fields have autocomplete enabled to allow quickly choosing one of the Actor/Item's known fields, or a manual text string can be entered (in order to pick something from the Actor/Item's items array). (If a getter/setter function has already been configured for a particular field, then that field will be disabled so that a field can't be chosen for it.)
 
 ![Image of field Editing](https://raw.githubusercontent.com/farling42/fvtt-pdf-pager/master/images/pdfpager-fields.png)
 
@@ -53,6 +53,14 @@ To map the PDF fields to Actor fields (such as hit points or armour class), a ma
 The first string in each line should be the name of the PDF field, and the second string in each line should be the path within the Actor in which to store the data. (The full list of Actor fields can be found by using the "Inspect Data" button in the Actor window title bar.)
 
 More complicated attributes can be handled by defining setValue and getValue functions (see below).
+
+#### Mapping to an Item on the Actor/Item
+
+It is possible to reference entries in the `items` array of the Actor using a syntax similar to the following:
+
+`items[type=spell,system.level=7][3].system.preparation.prepared`
+
+The `[type=spell,system.level=7]` describes a list of fields which must match on the item in order for it to be considered (e.g. a spell with a level of 7). All entries which match this first selection are then sorted alphabetically and then the `[3]` index into that sorted array (The first entry in the list is `[0]`) is picked out and the `system.preparation.prepared` attribute of that particular item is linked to the field in the PDF.
 
 ### Loading data from an already filled PDF
 
