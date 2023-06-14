@@ -90,11 +90,13 @@ async function getbuttonvalues(pdfviewer) {
  * 
  * "text expression" is a comma-separated list of "fieldname=value" simple comparison expressions.
  * "fieldname" can be a dot-separated hierarchy of field names inside the item's object.
+ * @param {Object} cache Internal data saved between calls
  * @param {Document} document 
  * @param {String} string 
  * @returns undefined if no match was found, otherwise an object { item: Document, field: String }
  */
-function parseItem(document,string) {
+function parseItem(cache, document,string) {
+
     const regex = /items\[(.+?(?:,.+?)*)]\[(\d+)]\.(.*)/g
     const parts = regex.exec(string);
     if (parts?.length!==4) {
@@ -102,29 +104,35 @@ function parseItem(document,string) {
         return undefined;
     }
 
-    const exprs = parts[1].split(',');
+    // TODO: if the cache already contains parts[1] then we don't need to calculate everything all over again,
+    // just use what we already know
+    const testexpr = parts[1];
+    let found = cache?.get(testexpr);
+    if (!found) {
+        const exprs = testexpr.split(',');
+        let test = [];
+        for (const expr of exprs) {
+            const half = expr.split('=');
+            if (half.length != 2) {
+                console.error(`Error in field expression: ${string}`);
+                continue;
+            }
+            test.push({field: half[0], value: half[1]});
+        }
+        found = document.items.filter(item => {
+            for (const one of test)
+                if (getProperty(item, one.field) != one.value) 
+                    return false;
+                return true
+            }).sort((a,b) => a.name.localeCompare(b.name));
+
+        // Add it to the cache
+        if (cache) cache.set(testexpr, found)
+    }
+
     const index = +parts[2];
     const attr  = parts[3];
-    let test = [];
-    for (const expr of exprs) {
-        const parts = expr.split('=');
-        if (parts.length != 2) {
-            console.error(`Error in field expression: ${string}`);
-            continue;
-        }
-        test.push({field: parts[0], value: parts[1]});
-    }
-    //console.log(`testing '${string}' with`, test);
-    const found = document.items.filter(item => {
-        for (const one of test)
-            if (getProperty(item, one.field) != one.value) 
-                return false;
-            return true
-        }).sort((a,b) => a.name.localeCompare(b.name));
-    if (found.length > 0 && index<found.length)
-        return { item: found[index], field: attr };
-    else
-        return undefined;
+    return (found.length > 0 && index<found.length) ? { item: found[index], field: attr } : undefined;
 }
 
 /**
@@ -144,6 +152,7 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
     const edit_field_mappings = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FIELD_MAPPING_MODE);
 
     //const storage = pdfpageview.annotationLayer.annotationStorage;
+    let itemcache = new Map();
     for (let elem of inputs) {
         if (options.hidebg)     elem.style.setProperty('background-image', 'none');
         if (options.nospellcheck) elem.setAttribute('spellcheck', 'false');
@@ -172,7 +181,7 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             } else if (typeof docfield === 'string') {
                 // Check for special accessor for items
                 if (docfield.startsWith('items[')) {
-                    let parsed = parseItem(document, docfield);
+                    let parsed = parseItem(itemcache, document, docfield);
                     if (parsed)
                         value = getProperty(parsed.item, parsed.field);
                     else 
@@ -247,6 +256,8 @@ async function setDocumentFromForm(pdfviewer, document, options) {
  * @param {string} value      The value to be stored in the document
  */
 function modifyDocument(document, fieldname, value) {
+    let itemcache;
+
     // Copy the modified field to the corresponding field in the Document
     const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
 
@@ -264,7 +275,7 @@ function modifyDocument(document, fieldname, value) {
     let docfield = mapping?.[fieldname];
     if (!docfield && getProperty(document, fieldname) !== undefined) docfield = fieldname;
     if (docfield?.startsWith('items[')) {
-        const parsed = parseItem(document, docfield);
+        const parsed = parseItem(itemcache, document, docfield);
         if (parsed) {
             document = parsed.item;
             docfield = parsed.field;
