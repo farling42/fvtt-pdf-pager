@@ -22,7 +22,7 @@ export let actormap = {
     "WIS": "system.abilities.wis.value",
     "CHA": "system.abilities.cha.value",
     "STRmod": "system.abilities.str.mod",
-    "DEXmod": "system.abilities.dex.mod",
+    "DEXmod ": "system.abilities.dex.mod",
     "CONmod": "system.abilities.con.mod",
     "INTmod": "system.abilities.int.mod",
     "WISmod": "system.abilities.wis.mod",
