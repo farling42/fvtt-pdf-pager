@@ -1,11 +1,9 @@
 # CHANGELOG
 
-## 0.48.1
-
-- A minor update to set PDFActorSheet.getData to async, to work with game systems which have an async getData function in their ActorSheet subclass.
 ## 0.48.0
 
 - Add basic support for displaying the Actor's image in the sheet. This requires mapping the PDF documents data-element-id/data-annotation-id of the corresponding field to the "img" field on the Actor. (The PDFs I've examined don't include a name for this field.) The image has to be set from the default Actor sheet at this time.
+- A minor update to set PDFActorSheet.getData to async, to work with game systems which have an async getData function in their ActorSheet subclass.
 
 ## 0.47.0
 
