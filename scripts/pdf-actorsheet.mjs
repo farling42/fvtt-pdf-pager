@@ -83,8 +83,10 @@ export class PDFActorSheet extends ActorSheet {
     return `modules/${PDFCONFIG.MODULE_NAME}/templates/pdf-sheet.hbs`;
   }    
 
-  getData() {
-    const context = super.getData();
+  async getData() {
+    // This function is async in case the game system has defined their subclass of ActorSheet to have an async function.
+    // I have no idea why that should matter, but it definitely does (at least for the Cypher System game system)
+    const context = await super.getData();
     // Ensure we have the correct prefix (if any) on the file.
     const actor = this.document;
     // Check for a custom PDF local to the Actor before using the generic sheet.
