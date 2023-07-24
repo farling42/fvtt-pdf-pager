@@ -495,7 +495,6 @@ export async function initEditor(html, id_to_display) {
                             input.setAttribute("list", listname);
 
                             const docfield = field_mappings?.[input.name];
-                            if (docfield) console.log(`set mapping for '${docfield}`)
                             if (typeof field_mappings[input.name] === 'object') {
                                 input.disabled = true;
                             } else {
