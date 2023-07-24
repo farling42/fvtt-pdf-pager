@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.48.0
+
+- Add basic support for displaying the Actor's image in the sheet. This requires mapping the PDF documents data-element-id/data-annotation-id of the corresponding field to the "img" field on the Actor. (The PDFs I've examined don't include a name for this field.) The image has to be set from the default Actor sheet at this time.
+
 ## 0.47.0
 
 - Support accessing items within a document, using a field value something like `items[type=spell,system.level=2][3].name` (which takes all the items which have a `type` that matches `spell` and a field `system.level` which matches the value "2"; the found entries are then sorted alphabetically by name; then index `[3]` into the final sorted list will be examined for it's name field). If the given index does not exist in the found entries, then no value will be put into the PDF field. (See `systems/dnd5e.mjs` for an example where the items array is accessed).

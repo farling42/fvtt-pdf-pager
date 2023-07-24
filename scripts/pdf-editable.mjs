@@ -163,7 +163,7 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
     let buttonvalues;  // support for radio buttons
 
     // Set values from the module FLAG on the Document.
-    const inputs = pdfviewer.viewer.querySelectorAll('input,select,textarea');
+    const inputs = pdfviewer.viewer.querySelectorAll('input,select,textarea,img');
     const mapping = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
     const edit_field_mappings = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FIELD_MAPPING_MODE);
     const map_tooltips = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_MAP_TOOLTIPS);
@@ -227,6 +227,8 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             let newchecked = (value == newvalue);
             if (elem.checked == newchecked) continue;
             elem.checked  = newchecked;
+        } else if (elem.nodeName === 'IMG') {
+            elem.setAttribute('src', value ? foundry.utils.getRoute(value) : "");
         } else {
             // plain text "type==textarea" OR rich text (type===?)
             let newvalue = value || "";
@@ -457,7 +459,7 @@ export async function initEditor(html, id_to_display) {
                 let pdfpageview = layerevent.source;
                 let annotations = await pdfpageview.annotationLayer.pdfPage.getAnnotations();
 
-                for (let element of pdfpageview.div.querySelectorAll('input,select,textarea')) {
+                for (let element of pdfpageview.div.querySelectorAll('input,select,textarea,a')) {
                     // disabled fields are presumably automatically calculated values, so don't listen for changes to them.
                     if (!element.disabled && !element.getAttribute('pdfpager')) {
 
@@ -481,15 +483,20 @@ export async function initEditor(html, id_to_display) {
 
                             // Ensure that we always have a "input" field here.
                             const input = domdoc.createElement("input");
-                            input.name  = element.name;
-                            input.id    = element.id;
+                            if (element.nodeName === 'A') {
+                                input.id = input.name = element.parentNode.getAttribute('data-annotation-id');
+                            } else {
+                                input.name = element.name;
+                                input.id   = element.id;    
+                            }
 
                             const datalist = domdoc.createElement("datalist");
                             datalist.id = listname;
                             input.setAttribute("list", listname);
 
-                            const docfield = field_mappings?.[element.name];
-                            if (typeof field_mappings[element.name] === 'object') {
+                            const docfield = field_mappings?.[input.name];
+                            if (docfield) console.log(`set mapping for '${docfield}`)
+                            if (typeof field_mappings[input.name] === 'object') {
                                 input.disabled = true;
                             } else {
                                 // fields from Actor/Item
@@ -499,6 +506,10 @@ export async function initEditor(html, id_to_display) {
                                     datalist.appendChild(option);
                                 }
                                 input.value = (typeof docfield === 'string') ? docfield : NO_FIELD_SET;
+                            }
+                            // Special handling for the "a" tags
+                            if (element.nodeName === 'A') {
+                                input.setAttribute('style', "position:absolute; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: contain");
                             }
 
                             const parent = element.parentElement;
@@ -527,6 +538,12 @@ export async function initEditor(html, id_to_display) {
                         } else if (element.nodeName === 'SELECT') {
                             // select fields need to trigger as soon as a new selection is made
                             element.addEventListener('change', setValue);
+                        } else if (element.nodeName === 'A') {
+                            // "A" is the for character image; it doesn't have a name attribute normally (neither does the canvas or surrounding section)
+                            let img    = element.ownerDocument.createElement("img");
+                            img.name   = element.parentNode.getAttribute('data-annotation-id');
+                            img.setAttribute('style', "position:absolute; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: contain");
+                            element.replaceWith(img);
                         } else {
                             // blur = lose focus
                             element.addEventListener('blur',   setValue);
