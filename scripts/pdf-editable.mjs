@@ -297,7 +297,7 @@ function modifyDocument(document, fieldname, value) {
 
     let docfield = mapping?.[fieldname];
     if (!docfield && getProperty(document, fieldname) !== undefined) docfield = fieldname;
-    if (docfield?.startsWith('items[')) {
+    if (typeof docfield === 'string' && docfield.startsWith('items[')) {
         const parsed = parseItem(itemcache, document, docfield);
         if (parsed) {
             document = parsed.item;
