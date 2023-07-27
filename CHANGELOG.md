@@ -3,6 +3,7 @@
 ## 0.48.1
 
 - Prevent an error occurring if a field is defined by an object rather than as a simple string.
+- Change how field values are sent to pdfjs so that they are available for printing (ctrl-P) and saving (ctrl-S).
 
 ## 0.48.0
 

@@ -214,11 +214,14 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             }
         }
 
-        // Set required value on the HTML element
+        // Set required value on the HTML element:
+        // ensuring the new value is handled properly by annotation_layer.js in pdfjs
         if (elem.type === 'checkbox') {
             let newchecked = value || false;
             if (elem.checked  == newchecked) continue;
             elem.checked  = newchecked;
+            // Ensure pdfjs is notified of the change
+            elem.dispatchEvent(new Event("change"));
         } else if (elem.type === 'radio') {
             if (!buttonvalues) buttonvalues = await getbuttonvalues(pdfviewer);
             let field = buttonvalues.get(elem.id);
@@ -227,8 +230,11 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             let newchecked = (value == newvalue);
             if (elem.checked == newchecked) continue;
             elem.checked  = newchecked;
+            // Ensure pdfjs is notified of the change
+            elem.dispatchEvent(new Event("change"));
         } else if (elem.nodeName === 'IMG') {
             elem.setAttribute('src', value ? foundry.utils.getRoute(value) : "");
+            elem.dispatchEvent(new Event("change"));
         } else {
             // plain text "type==textarea" OR rich text (type===?)
             let newvalue = value || "";
@@ -236,9 +242,10 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             //if (newvalue.includes("<") && newvalue.includes(">"))
             //    newvalue = TextEditor.decodeHTML(TextEditor.enrichHTML(value, {async:false})).replace( /(<([^>]+)>)/ig, '');
             elem.value = newvalue;
+            // Ensure pdfjs is notified of the change
+            elem.dispatchEvent(new Event("input"));   // needed to get print/save to work
+            elem.dispatchEvent(new KeyboardEvent("keydown", {key: 'Tab'}));   // needed to get pdf-embedded processing to work
         }
-        // Force any calculations that might be set in the PDF
-        elem.dispatchEvent(new KeyboardEvent("keydown", {key: 'Tab'}));   // Escape | Enter | Tab
     }
 }
 
