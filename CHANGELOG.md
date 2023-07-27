@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.48.1
+
+- Prevent an error occurring if a field is defined by an object rather than as a simple string.
+
 ## 0.48.0
 
 - Add basic support for displaying the Actor's image in the sheet. This requires mapping the PDF documents data-element-id/data-annotation-id of the corresponding field to the "img" field on the Actor. (The PDFs I've examined don't include a name for this field.) The image has to be set from the default Actor sheet at this time.
