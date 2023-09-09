@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.48.2
+
+- Update German translations, provided by @CePeU
+
 ## 0.48.1
 
 - Prevent an error occurring if a field is defined by an object rather than as a simple string.
