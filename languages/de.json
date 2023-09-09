@@ -1,14 +1,17 @@
 {
     "pdf-pager": {
         "TitleActorPDFs": "PDFs für Akteure",
+        "TitleItemPDFs": "PDFs für Gegenstände", 
         "TitleMenusActor": "PDF Codes um ein Akteur Dokument aus dem Kontextmenü zu öffnen",
         "TitleMenusItem": "PDF Codes um einen Gegenstand aus dem Kontextmenü zu öffnen",
+        "PDFSheetName": "PDF Name",              
         "PageOffset.Label": "Seiten Offset",
         "Code.Label": "PDF Code",
         "Error.NoPDFWithCode": "Unfähig das PDF mit dem angegebenen Code zu finden.",
         "Error.FailedLoadPage": "PDF konnte mit dem angegebenen Code nicht geladen werden.",
         "Warning.ThingDeleted" : "Der in einem geöffneten PDF Dokument verwendete '{name}' Akteur wurde gelöscht",
         "Warning.OnlyGM": "Nur ein Spielleiter kann {function} aufrufen",
+        "Warning.NoPDFforListFields": "Kein PDF für '{docname}' gefunden",
         "alwaysLoadPdf.Name" : "Zeige das PDF sofort an",
         "alwaysLoadPdf.Hint" : "Falls aktiviert wird das PDF sofort angezeigt wenn es ausgewählt wird, damit entfällt die Notwendigkeit den 'Öffne PDF' Knopf nutzen zu müssen",
         "dropPdfLink.Name" : "Erzeuge einen @PDF Link beim Einfügen",
@@ -21,10 +24,24 @@
         "itemConfig.Hint"  : "Definiert ein Javascript Objekt das ein Zuordnung zwischen PDF-Feld und Gegenstand-Feld herstellt z.B.: { \"Name\" : \"name\", \"health\" : \"system.health.hp\" }",
         "hideFieldBg.Name" : "Formularfeld Hervorhebung deaktivieren",
         "hideFieldBg.Hint" : "Hebt die Hervorhebung der Formularfelder durch eine eigene Hintergrundfarbe für alle editierbaren Formularfelder auf (überschreibt das standard PDFJS Styling)",
+        "hideFieldBorder.Name" : "Verberge Ränder der editierbaren Felder",
+        "hideFieldBorder.Hint" : "Deaktiviere die Hervorhebung editierbarer Felder (überschreibt den Default PDFJS Stil)",
+        "noSpellCheck.Name": "Deaktiviere die Rechtschreibprüfung",
+        "noSpellCheck.Hint": "Sofern Ausgewählt wird die Rechtschreibprüfung innerhalb editierbarer Felder deaktiviert",  
         "readPdfFields.Name": "Lese Felder aus dem PDF aus",
         "readPdfFields.Hint": "Sofern dieser Punkt aktiviert ist, wird wenn ein PDF geöffnet wird, jedes Datenfeld (annotations) in der geladenen PDF Datei in das korrespondierende Akteurfeld kopiert. Dabei werden alle anderen im Akteur gespeicherten Werte ÜBERSCHRIEBEN! (Die Editiermöglichkeit des PDF's ist ausgeschaltet solange diese Option aktiviert ist)",     
+        "ignoreBookmarkZoom.Name": "Ignoriere den Zoom für Lesezeichen",
+        "ignoreBookmarkZoom.Hint": "Ignoriere immer den eingestellten Zoom für die PDF Lesezeichen",
+        "maxTocDepth.Name": "Maximale Verschachtelung des Inhaltsverzeichnisses",
+        "maxTocDepth.Hint": "Die maximale Verschachtelungstiefe des Inhaltsverzeichnisses in der linken Seitenleiste des Journals",
         "defaultZoom.Name": "Standard Zoom",
         "defaultZoom.Hint": "Auswahl der bevorzugten standard Zoom Einstellungen für das Öffnen eines PDF Dokumentes (fester Prozentsatz erfordert das setzen des unten anstehenden Parameters)",
+        "hideToolbar.Name": "Verberge die PDF Browser-Toolbar",
+        "hideToolbar.Hint": "Verbirg die PDF Browser-Toolbar wenn ein editierbares Formular PDF bearbeitet wird",
+        "showMapTooltips.Name": "Mapping der Tooltips",
+        "showMapTooltips.Hint": "Fügt einen Tooltip zu jedem editierbaren Feld eines ausfüllbaren Akteur/Gegenstand PDF hinzu. Weist dabei sowohl den Namen des PDF Feldes als auch des zugehörigen Akteur/Gegenstand Feldes aus auf das es verweist (falls ein Verweis vorhanden ist)",
+        "showFieldMenus.Name": "Editiere die Feld Zuweisungen",
+        "showFieldMenus.Hint": "Ersetzt jedes editierbare Feld mit einem drop-down Menu aus dem ein Feld des Akteurs/Gegenstandes ausgewählt werden kann. (Fall ein Feld bereits durch eine getter/setter function konfiguriert wurde dann ist das Feld nicht mehr editierbar)",
         "ChoosePdfForm" : {
             "Title": "Wähle das PDF Dokument für '{name}'",
             "Prompt": "Individuelles PDF:",
@@ -39,6 +56,23 @@
             "auto"       : "Automatischer Zoom",
             "number"     : "Fester Prozentsatz"
         },
+        "defaultSpread.Name" : "Standard Ausrichtung",
+        "defaultSpread.Hint" : "Weist einen Modus zu der die Ausrichtung steuert wenn PDF's betrachtet werden",
+        "Spread" : {
+            "none" : "---",
+            "no-spread" : "Keine Ausrichtung",
+            "odd-spread" : "Ungerade Ausrichtung",
+            "even-spread" : "Gerade Ausrichtung"
+        },
+        "defaultScroll.Name" : "Standard Scrolling",
+        "defaultScroll.Hint" : "Weist einen Scroll Modus zu der Verwendet wird wenn man PDF's betrachtet",
+        "Scroll": {
+            "none" : "---",
+            "vertical" : "Vertikal",
+            "horizontal" : "Horizontal",
+            "wrapped" : "Wrapped",
+            "page" : "Seite"
+        },
         "zoomPercentage.Name" : "Standard Zoom fester Prozentsatz",
         "zoomPercentage.Hint" : "Der standard Zoom (als Prozentsatz) wenn der standard Zoom auf 'Fester Prozentsatz' eingestellt ist",
         "showInPDF"      :  "Öffne PDF",
@@ -48,6 +82,8 @@
         "itemType.Hint"  : "Definiert den PDF CODE des PDF Dokumentes der verwendet wird wenn 'Show in PDF' aus dem Gegenstand Kontextmenü für den Gegenstand '${name}' ausgewählt wird",
         "actorSheet.Name" : "Akteur Dokument: '{name}'",
         "actorSheet.Hint" : "Wähle die PDF Datei die für den Akteur '{name}' benutzt werden soll",
+        "itemSheet.Name" : "Gegenstand PDF: '{name}'",
+        "itemSheet.Hint" : "Wähle die PDF Datei die für den '{name}' Gegenstand verwendet werden soll",
         "inspector": {
             "help1": "Das Fenster kann geöffnet bleiben und man kann zum System Dokument zurückkehren sofern gewünscht. Das Fenster aktualisiert sich alle 10 Sekunden um Änderungen am Akteur darzustellen. Man kann dies mit dem 'Aktualisieren' Knopf im Kopfbereich jedoch auch manuell anstoßen.",
             "help2": "Seien Sie vorsichtig wenn sie diese Datenverknüpfungen in einem PDF verwenden! Die Farbzuordnung ist eher 'gut geraten'. Während es meistens stimmen wird werden ein paar Spielsystem Ausnahmen haben oder Werte die im PDF hinterlegt werden für bestimmte Datenverknüpfungen überschreiben.",
@@ -64,8 +100,21 @@
             "CopiedToClipboard": "Kopiert!"
         },
         "actorSheetButton": {
-            "CustomPDF": "Individuelles PDF",
+            "CustomPDF":   "Individuelles PDF",
+            "ShowPdfFields": "Übersicht PDF Felder",
             "InspectData": "Untersuche Daten"
-        }
+        },
+        "itemSheetButton": {
+            "CustomPDF":   "Individuelles PDF",
+            "ShowPdfFields": "Übersicht PDF Felder",
+            "InspectData": "Untersuche Daten"
+        },
+        "logPdfFields": {
+            "introduction": "Es folgt eine Übersicht aller bekannter Felder in den Angezeigten PDF Seiten",
+            "pageNumber": "--- Seite {pageNumber} ---"
+        },
+        "noteConfig": {
+            "pdfPagePrompt": "PDF Seitennummer"
+        }    
     }
 }
