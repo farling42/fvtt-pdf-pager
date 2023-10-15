@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.49.0
+
+- Allow editing of a PDF that is stored directly in a journal page.
+
 ## 0.48.2
 
 - Update German translations, provided by @CePeU

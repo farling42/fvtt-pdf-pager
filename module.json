@@ -2,11 +2,11 @@
   "id": "pdf-pager",
   "title": "PDF Pager",
   "description": "Allows automatically loading of PDFs, and addition of specific page numbers in document links.",
-  "version": "0.0.1",
+  "version": "0.49.0",
   "library": "false",
   "compatibility": {
     "minimum": "10.291",
-    "verified": "11.306"
+    "verified": "11"
   },
   "authors": [
 		{

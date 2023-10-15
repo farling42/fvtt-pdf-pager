@@ -151,6 +151,27 @@ function setMappingTooltip(element, document, docfield) {
     element.setAttribute('title', `PDF(${element.name})${extra}`);
 }
 
+//
+// We can't call setFlag on FLAG_FIELDTEXT, since that will cause a re-render of the affected document.
+// Which is a bad thing if they are editing the PDF as a Journal page (so the render would redraw the
+// journal page, thus reloading the PDF)
+//
+function storeFieldText(document, value) {
+    //document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, value);
+    // as per document.setFlag, but with maybe setting render flag to false
+    let context = {};
+    if (document instanceof JournalEntryPage && document.type === 'pdf') context = { render: false};
+
+    document.update({
+        flags: {
+            [PDFCONFIG.MODULE_NAME]: {
+                [PDFCONFIG.FLAG_FIELDTEXT]: value
+            }
+        }
+    },
+    context );
+}
+
 /**
  * Copy all the data from the specified Document (Actor/Item) to the fields on the PDF sheet (container)
  * @param {PDFViewer} pdfviewer  
@@ -319,7 +340,7 @@ function modifyDocument(document, fieldname, value) {
         if (getProperty(flags, fieldname) === value) return;
         console.debug(`Hiding value '${document.name}'['${fieldname}'] = '${value}'`);
         setProperty(flags, fieldname, value);
-        document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, flags);
+        storeFieldText(document, flags);
     } else if (typeof docfield === 'string') {
         let currentvalue = getProperty(document, docfield)
         // Maybe convert PDF value into the correct Document type
@@ -610,7 +631,7 @@ export function registerItemMapping(mapping) {
 export function setPDFValue(document, fieldname, value) {
     let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {}
     setProperty(flags, fieldname, value);
-    document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, flags);
+    storeFieldText(document, flags);
 }
 
 /**
