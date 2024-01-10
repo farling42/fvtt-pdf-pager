@@ -173,7 +173,7 @@ function storeFieldText(document, value) {
 }
 
 /**
- * Copy all the data from the specified Document (Actor/Item) to the fields on the PDF sheet (container)
+ * Copy all the data from the specified Foundry Document (Actor/Item) to the fields on the PDF sheet (container)
  * @param {PDFViewer} pdfviewer  
  * @param {Document} document An Actor or Item
  * @param {Object} options  Can contain any of { disabled : true , hidebg : true, hideborder: true, nospellcheck: false }
@@ -270,7 +270,12 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
     }
 }
 
-
+/**
+ * Copy all the data from the loaded PDF sheet to the associated Foundry Document (Actor/Item0)
+ * @param {*} pdfviewer 
+ * @param {*} document 
+ * @param {*} options 
+ */
 async function setDocumentFromForm(pdfviewer, document, options) {
     console.debug(`Setting ${document.documentName} '${document.name}' from PDF fields`);
     const inputs = pdfviewer.viewer.querySelectorAll('input,select,textarea');
@@ -485,9 +490,9 @@ export async function initEditor(html, id_to_display) {
                 // Only the inputs on this page, rather than the entire form.
                 let field_mappings, objkeys;
                 let pdfpageview = layerevent.source;
-                let annotations = await pdfpageview.annotationLayer.pdfPage.getAnnotations();
+                let annotations = await pdfpageview.annotationLayer.pdfPage?.getAnnotations();
 
-                for (let element of pdfpageview.div.querySelectorAll('input,select,textarea,a')) {
+                for (let element of pdfpageview.div.querySelectorAll('input,select,textarea,a,button')) {
                     // disabled fields are presumably automatically calculated values, so don't listen for changes to them.
                     if (!element.disabled && !element.getAttribute('pdfpager')) {
 
@@ -556,11 +561,14 @@ export async function initEditor(html, id_to_display) {
                         // Prevent adding listeners more than once
                         element.setAttribute('pdfpager', id_to_display);
 
+                        console.log(`type '${element.type}', id '${element.id}'`)
                         if (element.type === 'checkbox') {
                             element.addEventListener('click', event => setValue(event,"checked"));
+                        } else if (element.type === 'button') {
+                            element.addEventListener('click', event => setValue(event,"clicked"));
                         } else if (element.type === 'radio') {
                             // If this element has the ":before" computed style, then this option is enabled
-                            element.setAttribute('pdfradiovalue', annotations.find(annot => annot.id == element.id)?.buttonValue ?? element.id);
+                            element.setAttribute('pdfradiovalue', annotations?.find(annot => annot.id == element.id)?.buttonValue ?? element.id);
                             element.addEventListener('click', event => setValue(event,'pdfradiovalue'));
                         } else if (element.nodeName === 'SELECT') {
                             // select fields need to trigger as soon as a new selection is made
@@ -572,6 +580,7 @@ export async function initEditor(html, id_to_display) {
                             img.setAttribute('style', "position:absolute; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: contain");
                             element.replaceWith(img);
                         } else {
+                            if (element.type === 'button') console.log(`Possibly non-clickable button for element.id '${element.id}'`)
                             // blur = lose focus
                             element.addEventListener('blur',   setValue);
                             // If there is extra validation, the 'blur' event returns the OLD value!
