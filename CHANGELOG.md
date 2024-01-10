@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.49.1
+
+- Prevent error being reported when annotations can't be found on the pdfPage.
+- Add basic support for clicking on buttons (if anyone is able to create a clickable button in a PDF editor).
+
 ## 0.49.0
 
 - Allow editing of a PDF that is stored directly in a journal page.
