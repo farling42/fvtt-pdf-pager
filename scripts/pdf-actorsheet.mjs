@@ -125,7 +125,8 @@ export class PDFActorSheet extends ActorSheet {
     let buttons = super._getHeaderButtons();
 
     // No extra buttons if we can't edit the actor.
-    if (this.document.permission < CONST.DOCUMENT_PERMISSION_LEVELS.OWNER) return buttons;
+    if (this.document.permission < CONST.DOCUMENT_PERMISSION_LEVELS.OWNER ||
+        !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_TITLE_BAR_BUTTONS)) return buttons;
 
     buttons.unshift({
       label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.CustomPDF`),
@@ -136,27 +137,29 @@ export class PDFActorSheet extends ActorSheet {
       }
     })
 
-    buttons.unshift({
-      icon: 'fas fa-search',
-      class: 'pdf-browse-data',
-      label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.InspectData`),
-      onclick: () => {
+    if (game.user.isGM) {
+      buttons.unshift({
+        icon: 'fas fa-search',
+        class: 'pdf-browse-data',
+        label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.InspectData`),
+        onclick: () => {
           new PDFDataBrowser(this.document).render(true);
-      },
-    });
+        },
+      });
 
-    buttons.unshift({
-      icon: 'fas fa-search',
-      class: 'pdf-list-fields',
-      label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.ShowPdfFields`),
-      onclick: (event) => {
-        const pdfviewer = getPdfViewer(this.form);
-        if (pdfviewer)
-          logPdfFields(pdfviewer);
-        else
-          ui.notifications.warn(game.i18n.format(`${PDFCONFIG.MODULE_NAME}.Warning.NoPDFforListFields`, {docname: this.document.name }));
-      },
-    });
+      buttons.unshift({
+        icon: 'fas fa-search',
+        class: 'pdf-list-fields',
+        label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.ShowPdfFields`),
+        onclick: (event) => {
+          const pdfviewer = getPdfViewer(this.form);
+          if (pdfviewer)
+            logPdfFields(pdfviewer);
+          else
+            ui.notifications.warn(game.i18n.format(`${PDFCONFIG.MODULE_NAME}.Warning.NoPDFforListFields`, { docname: this.document.name }));
+        },
+      });
+    }
 
     return buttons;
   }

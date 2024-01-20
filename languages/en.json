@@ -42,6 +42,8 @@
         "showMapTooltips.Hint": "Adds a tooltip to each field on an fillable PDF displayed as an Actor/Item sheet indicating the name of the PDF field as well as the field in the Actor/Item to which it is mapped (if any)",
         "showFieldMenus.Name": "Edit Field Mapping",
         "showFieldMenus.Hint": "Replaces each editable field with a drop-down menu from which can be selected a field in the Actor/Item. (If a field is already configured to use getter/setter functions, then the field is not editable.)",
+        "showTitleBarButtons.Name": "Show Buttons in Sheet Title Bar",
+        "showTitleBarButtons.Hint": "When checked, display helpful buttons in the title bar of Actor/Item PDF Sheets",
         "ChoosePdfForm" : {
             "Title": "Choose PDF for '{name}'",
             "Prompt": "Custom PDF:",

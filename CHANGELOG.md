@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.50.0
+
+- Only display "Data Inspector" and "Show PDF Fields" in the Actor/Item PDF sheet if the user is a GM.
+- Provide option to hide all the extra buttons in the Actor/Item PDF sheet title bar.
+
 ## 0.49.1
 
 - Prevent error being reported when annotations can't be found on the pdfPage.
