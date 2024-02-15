@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.51.0
+
+- With Monk's Enhanced Journal module, support creation of `@PDF` links when dragging a PDF page title to a journal page.
+
 ## 0.50.0
 
 - Only display "Data Inspector" and "Show PDF Fields" in the Actor/Item PDF sheet if the user is a GM.

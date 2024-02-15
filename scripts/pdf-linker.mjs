@@ -134,13 +134,16 @@ function JournalEntryPage_createDocumentLink(wrapped, eventData, args) {
             // Use page=xxx as slug
             let pagenum=1;
             let sheet = this.parent?.sheet;  // JournalEntry
-            if (sheet && sheet._pages[sheet.pageIndex]._id == this.id)
-            {
-                let iframe = sheet.element?.find('iframe');
-                if (iframe?.length>0) {
-                    // Read current page from PDF viewer, then remove the user-configured offset from that number.
-                    pagenum = iframe[0].contentWindow.PDFViewerApplication.page - (this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0);
-                }
+            let iframe;
+
+            if (game.MonksEnhancedJournal)
+                iframe = game.MonksEnhancedJournal.journal?.element?.find('iframe');
+            else if (sheet && sheet._pages && sheet._pages[sheet.pageIndex]._id == this.id)
+                iframe = sheet.element?.find('iframe');
+
+            if (iframe?.length>0) {
+                // Read current page from PDF viewer, then remove the user-configured offset from that number.
+                pagenum = iframe[0].contentWindow.PDFViewerApplication.page - (this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0);
             }
             slug = `page=${pagenum}`
             label = this.name;

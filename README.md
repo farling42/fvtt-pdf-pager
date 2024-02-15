@@ -15,6 +15,10 @@ It also generates reads the Outline from the PDF file to use as the Table of Con
 
 The module option "Immediately Display PDF" will remove the "Load PDF" button from the PDF pages of journal and will instead immediately load the PDF into the window.
 
+## Create links to sections within a PDF.
+
+The page header or an individual section from the table of contents of a PDF journal page can be dragged to another journal page in order to create a `@PDF` link to that PDF document. When the page header is dragged from the TOC, then a link is created to the currently visible page within the PDF.
+
 ## PDF Character Sheets
 
 This module will allow a fillable PDF document to be used as the Actor sheet for actors.
