@@ -218,12 +218,11 @@ function buildOutline(pdfoutline) {
             if (!rawlink) {
                 // Add configured zoom
                 let default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
-                if (default_zoom && default_zoom !== 'none' && !rawlink) {
+                if (default_zoom && default_zoom !== 'none') {
                     console.log(`displaying PDF with default zoom of ${default_zoom}%`);
                     if (default_zoom === 'number') default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM_NUMBER)
                     pdf_slug += (pdf_slug.length ? "&" : "#") + `zoom=${default_zoom}`;
                 }
-                //pdf_slug += "&pageLayout=TwoPageRight"
             }
 
             // Replace the "div.load-pdf" with an iframe element.

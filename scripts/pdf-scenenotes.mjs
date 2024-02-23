@@ -28,7 +28,7 @@ Hooks.on('activateNote', (note, options) => {
     // Let the jal module specify a section
     if (options.anchor) {
         console.debug(`activateNote: anchor already set to '${options.anchor}'`)
-        return;
+        return true;
     }
     let pdfpage = note.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.PIN_PDF_PAGE);
     if (typeof pdfpage === 'number') options.anchor = `page=${pdfpage}`;
