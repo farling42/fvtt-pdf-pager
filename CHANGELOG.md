@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.51.2
+
+- Change DOCUMENT_PERMISSION_LEVELS to DOCUMENT_OWNERSHIP_LEVELS (a requirement for Foundry V12).
+
 ## 0.51.1
 
 - Replace all uses of setProperty/getProperty with their corresponding functions foundry.utils.setProperty/getProperty (they became available in V10, and are required in V12).

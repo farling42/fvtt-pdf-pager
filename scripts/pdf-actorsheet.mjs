@@ -125,7 +125,7 @@ export class PDFActorSheet extends ActorSheet {
     let buttons = super._getHeaderButtons();
 
     // No extra buttons if we can't edit the actor.
-    if (this.document.permission < CONST.DOCUMENT_PERMISSION_LEVELS.OWNER ||
+    if (this.document.permission < CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER ||
         !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_TITLE_BAR_BUTTONS)) return buttons;
 
     buttons.unshift({
@@ -167,7 +167,7 @@ export class PDFActorSheet extends ActorSheet {
   // Only actually call the render function if the window is not currently rendered,
   // since the `initEditor` call will otherwise handle changes to actor field data.
   render(force=false, context={}) {
-    if (!this.rendered && this.document.permission >= CONST.DOCUMENT_PERMISSION_LEVELS.OBSERVER) super.render(force,context);
+    if (!this.rendered && this.document.permission >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER) super.render(force,context);
   }
 
   _onResize(event) {
