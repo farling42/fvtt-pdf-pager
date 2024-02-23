@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.51.1
+
+- Replace all uses of setProperty/getProperty with their corresponding functions foundry.utils.setProperty/getProperty (they became available in V10, and are required in V12).
+
 ## 0.51.0
 
 - With Monk's Enhanced Journal module, support creation of `@PDF` links when dragging a PDF page title to a journal page.

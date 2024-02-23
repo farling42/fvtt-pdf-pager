@@ -121,7 +121,7 @@ function parseItem(cache, document,string) {
         }
         found = document.items.filter(item => {
             for (const one of test)
-                if (getProperty(item, one.field) != one.value) 
+                if (foundry.utils.getProperty(item, one.field) != one.value) 
                     return false;
                 return true
             }).sort((a,b) => a.name.localeCompare(b.name));
@@ -211,11 +211,11 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             continue;
         }
 
-        if (!docfield && getProperty(document, elem.name) !== undefined) docfield = elem.name;
+        if (!docfield && foundry.utils.getProperty(document, elem.name) !== undefined) docfield = elem.name;
         
         let value;
         if (!docfield) {
-            value = getProperty(flags, elem.name);
+            value = foundry.utils.getProperty(flags, elem.name);
         } else {
             if (docfield instanceof Object && docfield.getValue) {
                 value = await docfield.getValue(document);
@@ -225,11 +225,11 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
                 if (docfield.startsWith('items[')) {
                     let parsed = parseItem(itemcache, document, docfield);
                     if (parsed)
-                        value = getProperty(parsed.item, parsed.field);
+                        value = foundry.utils.getProperty(parsed.item, parsed.field);
                     else 
-                        value = getProperty(flags, elem.name);
+                        value = foundry.utils.getProperty(flags, elem.name);
                 } else
-                    value = getProperty(document, docfield);
+                    value = foundry.utils.getProperty(document, docfield);
 
                 if (typeof value === 'number') value = '' + value;
             }
@@ -329,7 +329,7 @@ function modifyDocument(document, fieldname, value) {
     }
 
     let docfield = mapping?.[fieldname];
-    if (!docfield && getProperty(document, fieldname) !== undefined) docfield = fieldname;
+    if (!docfield && foundry.utils.getProperty(document, fieldname) !== undefined) docfield = fieldname;
     if (typeof docfield === 'string' && docfield.startsWith('items[')) {
         const parsed = parseItem(itemcache, document, docfield);
         if (parsed) {
@@ -342,12 +342,12 @@ function modifyDocument(document, fieldname, value) {
         // Copy the modified field to the MODULE FLAG in the Document
         let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
         if (!(flags instanceof Object)) flags = {};
-        if (getProperty(flags, fieldname) === value) return;
+        if (foundry.utils.getProperty(flags, fieldname) === value) return;
         console.debug(`Hiding value '${document.name}'['${fieldname}'] = '${value}'`);
-        setProperty(flags, fieldname, value);
+        foundry.utils.setProperty(flags, fieldname, value);
         storeFieldText(document, flags);
     } else if (typeof docfield === 'string') {
-        let currentvalue = getProperty(document, docfield)
+        let currentvalue = foundry.utils.getProperty(document, docfield)
         // Maybe convert PDF value into the correct Document type
         if (typeof value !== typeof currentvalue) {
             switch (typeof currentvalue) {
@@ -360,7 +360,7 @@ function modifyDocument(document, fieldname, value) {
         console.debug(`Setting '${document.name}'['${docfield}'] = '${value}'`);
         // It doesn't seem like we can prevent calling document.update twice
         // when the change is received by both 'dispatcheventinsandbox' and the 'change' event handler.
-        // calling setProperty(document,docfield,value) doesn't retain the value.
+        // calling foundry.utils.setProperty(document,docfield,value) doesn't retain the value.
         document.update({ [docfield]: value });
     } else if (docfield.setValue) {
         console.debug(`Calling setValue function for '${document.name}'['${fieldname}'] with '${value}'`);
@@ -639,7 +639,7 @@ export function registerItemMapping(mapping) {
  */
 export function setPDFValue(document, fieldname, value) {
     let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {}
-    setProperty(flags, fieldname, value);
+    foundry.utils.setProperty(flags, fieldname, value);
     storeFieldText(document, flags);
 }
 
@@ -651,7 +651,7 @@ export function setPDFValue(document, fieldname, value) {
  */
 export function getPDFValue(document, fieldname) {
     let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {}
-    return getProperty(flags, fieldname);
+    return foundry.utils.getProperty(flags, fieldname);
 }
 
 /**
