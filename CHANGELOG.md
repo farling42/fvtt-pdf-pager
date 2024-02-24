@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.51.3
+
+- Change the event generation when copying Foundry values into an editable PDF so that they work on pdf.js version 4.0 as well as earlier.
+
 ## 0.51.2
 
 - Change DOCUMENT_PERMISSION_LEVELS to DOCUMENT_OWNERSHIP_LEVELS (a requirement for Foundry V12).
