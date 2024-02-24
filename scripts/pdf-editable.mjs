@@ -260,13 +260,12 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             // plain text "type==textarea" OR rich text (type===?)
             let newvalue = value || "";
             if (elem.value === newvalue) continue;
-            //if (newvalue.includes("<") && newvalue.includes(">"))
-            //    newvalue = TextEditor.decodeHTML(TextEditor.enrichHTML(value, {async:false})).replace( /(<([^>]+)>)/ig, '');
+            // Ensure pdfjs is notified of the change,
+            // and performs all normal pdf-embedded processing
+            elem.dispatchEvent(new FocusEvent("focus"));
             elem.value = newvalue;
-            // Ensure pdfjs is notified of the change
-            elem.dispatchEvent(new Event("input"));   // needed to get print/save to work
-            elem.dispatchEvent(new KeyboardEvent("keydown", {key: 'Tab'}));   // needed to get pdf-embedded processing to work
-        }
+            elem.dispatchEvent(new KeyboardEvent("keydown", {key: 'Tab'}));
+            elem.dispatchEvent(new FocusEvent("blur", {relatedTarget: elem}));        }
     }
 }
 
