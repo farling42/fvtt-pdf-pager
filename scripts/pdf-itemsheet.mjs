@@ -27,6 +27,8 @@ SOFTWARE.
  * 
  */
 
+// @ts-check
+
 import { PDFCONFIG } from './pdf-config.mjs';
 import { initEditor, logPdfFields, getPdfViewer } from './pdf-editable.mjs';
 import { PDFSheetConfig } from './pdf-actorsheet.mjs';
@@ -74,6 +76,10 @@ export class PDFItemSheet extends ItemSheet {
     initEditor(html.find('iframe'), this.object.uuid);
   }
 
+  /**
+   * 
+   * @param {Event} event 
+   */
   _onChoosePdf(event) {
     event.preventDefault();
     new PDFSheetConfig(this, {
@@ -128,10 +134,19 @@ export class PDFItemSheet extends ItemSheet {
 
   // Only actually call the render function if the window is not currently rendered,
   // since the `initEditor` call will otherwise handle changes to item field data.
+  /**
+   * 
+   * @param {Boolean} force 
+   * @param {Object} context 
+   */
   render(force=false, context={}) {
     if (!this.rendered && this.document.permission >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER) super.render(force,context);
   }
 
+  /**
+   * 
+   * @param {Event} event 
+   */
   _onResize(event) {
     super._onResize(event);
     this.item.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_WINDOW_SIZE, {width: this.position.width, height: this.position.height});
@@ -192,7 +207,7 @@ export function configureItemSettings() {
 }
 
 Hooks.on('renderSettingsConfig', (app, html, options) => {
-  const moduleTab = $(app.form).find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
+  const moduleTab = html.find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
   moduleTab
     .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${game.template.Item.types[0]}Sheet]`)
     .closest('div.form-group')
