@@ -27,8 +27,6 @@ SOFTWARE.
  * 
  */
 
-// @ts-check
-
 import { PDFCONFIG } from './pdf-config.mjs';
 import { initEditor, logPdfFields, getPdfViewer } from './pdf-editable.mjs';
 import { PDFSheetConfig } from './pdf-actorsheet.mjs';
