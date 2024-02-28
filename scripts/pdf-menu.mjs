@@ -93,7 +93,7 @@ Hooks.on('renderSettingsConfig', (app, html, options) => {
     const actors = Object.entries(CONFIG.Actor.typeLabels);
     const items  = Object.entries(CONFIG.Item.typeLabels);
 
-    const moduleTab = $(app.form).find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
+    const moduleTab = html.find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
     moduleTab
       .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${MENU_ACTOR_FLAG}\\.${actors[0][0]}]`)
       .closest('div.form-group')

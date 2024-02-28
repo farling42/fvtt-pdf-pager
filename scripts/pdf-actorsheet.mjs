@@ -49,6 +49,12 @@ export class PDFSheetConfig extends FormApplication {
       filename: this.object.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
     }
   }
+  /**
+   * 
+   * @param {Event} event 
+   * @param {Object} formData 
+   * @returns 
+   */
   async _updateObject(event, formData) {
     event.preventDefault();
     const doc = this.object.document;
@@ -70,6 +76,11 @@ export class PDFSheetConfig extends FormApplication {
 
 export class PDFActorSheet extends ActorSheet {    
 
+  /**
+   * 
+   * @param {Actor} actor 
+   * @param {Object} options 
+   */
   constructor(actor, options) {
     super(actor,options);
     let winsize = actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_WINDOW_SIZE);
@@ -107,11 +118,19 @@ export class PDFActorSheet extends ActorSheet {
     return context;
   }
 
+  /**
+   * 
+   * @param {jQuery} html 
+   */
   activateListeners(html) {
     super.activateListeners(html);      
     initEditor(html.find('iframe'), this.object.uuid);
   }
 
+  /**
+   * 
+   * @param {Event} event 
+   */
   _onChoosePdf(event) {
     event.preventDefault();
     new PDFSheetConfig(this, {
@@ -164,12 +183,21 @@ export class PDFActorSheet extends ActorSheet {
     return buttons;
   }
 
-  // Only actually call the render function if the window is not currently rendered,
-  // since the `initEditor` call will otherwise handle changes to actor field data.
+  /**
+   * 
+   * @param {Boolean} force 
+   * @param {Object} context 
+   */
   render(force=false, context={}) {
+    // Only actually call the render function if the window is not currently rendered,
+    // since the `initEditor` call will otherwise handle changes to actor field data.
     if (!this.rendered && this.document.permission >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER) super.render(force,context);
   }
 
+  /**
+   * Remember the current window size whenever it is resized.
+   * @param {Event} event 
+   */
   _onResize(event) {
     super._onResize(event);
     this.actor.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_WINDOW_SIZE, {width: this.position.width, height: this.position.height});
@@ -230,7 +258,7 @@ export function configureActorSettings() {
 }
 
 Hooks.on('renderSettingsConfig', (app, html, options) => {
-  const moduleTab = $(app.form).find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
+  const moduleTab = html.find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
   moduleTab
     .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${game.template.Actor.types[0]}Sheet]`)
     .closest('div.form-group')
