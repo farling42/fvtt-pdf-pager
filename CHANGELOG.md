@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.52.1
+
+- Fixes an issue where the Call of Cthulhu fillable character sheet would load endlessly when first opened.
+
+## 0.52.0
+
+- The event sequence that was being used to copy fields from Foundry to a fillable PDF don't work with pdf.js version 4.0.x. A better sequence has been developed which works properly for older and newer pdf.js versions.
+- Switch to using DOCUMENT_OWNERSHIP_LEVELS since DOCUMENT_PERMISSION_LEVELS doesn't exist in V12 (it has been deprecated for a while).
+- Changed to use foundry.utils.set/getProperty (added to foundry in V10 or earlier, and required for V12).
+- A couple of one-line code tidy-ups.
+
 ## 0.51.3
 
 - Change the event generation when copying Foundry values into an editable PDF so that they work on pdf.js version 4.0 as well as earlier.
