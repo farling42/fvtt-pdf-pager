@@ -265,7 +265,8 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             elem.dispatchEvent(new FocusEvent("focus"));
             elem.value = newvalue;
             elem.dispatchEvent(new KeyboardEvent("keydown", {key: 'Tab'}));
-            elem.dispatchEvent(new FocusEvent("blur", {relatedTarget: elem}));        }
+            elem.dispatchEvent(new FocusEvent("blur", {relatedTarget: elem, target: elem}));  // target is used by setValue below
+        }
     }
 }
 
@@ -441,6 +442,7 @@ export async function initEditor(html, id_to_display) {
             const map_tooltips = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_MAP_TOOLTIPS);
             console.debug(`Loaded page ${layerevent.pageNumber} for '${document.name}'`);
             let options = {};
+            let ignore_set=false;
             if (!editable) options.disabled=true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG)) options.hidebg = true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BORDER)) options.hideborder = true;
@@ -462,8 +464,15 @@ export async function initEditor(html, id_to_display) {
                     // Scripting engine is ready (or not available), so do the thing now
                     if (read_pdf)
                         setDocumentFromForm(pdfviewer, document, options);
-                    else
-                        setFormFromDocument(pdfviewer, document, options)
+                    else {
+                        ignore_set = true;
+                        try {
+                            setFormFromDocument(pdfviewer, document, options)
+                        } catch (err) {
+                            console.warn(`Error while loading PDF with foundry data`, err)
+                        }
+                        ignore_set = false;
+                    }
                 }
             }
             load();
@@ -472,6 +481,7 @@ export async function initEditor(html, id_to_display) {
             //let fields = pdfviewerapp.pdfDocument.getFieldObjects();
 
             function setValue(event, fieldname="value", value=undefined) {
+                if (ignore_set) return;
                 let target = event.target;
                 if (value==undefined) {
                     value = target[fieldname] ?? target.getAttribute(fieldname);
