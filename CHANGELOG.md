@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.52.2
+
+- Provide a solution for loading endlessly that works when two owners have the same PDF Actor sheet open.
+
 ## 0.52.1
 
 - Fixes an issue where the Call of Cthulhu fillable character sheet would load endlessly when first opened.

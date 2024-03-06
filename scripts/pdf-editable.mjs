@@ -189,6 +189,8 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
     const edit_field_mappings = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FIELD_MAPPING_MODE);
     const map_tooltips = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_MAP_TOOLTIPS);
 
+    document.pdfpagerignoreupdate = true;
+
     //const storage = pdfpageview.annotationLayer.annotationStorage;
     let itemcache = new Map();
     for (let elem of inputs) {
@@ -268,6 +270,8 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             elem.dispatchEvent(new FocusEvent("blur", {relatedTarget: elem, target: elem}));  // target is used by setValue below
         }
     }
+
+    delete document.pdfpagerignoreupdate;
 }
 
 /**
@@ -312,6 +316,7 @@ async function setDocumentFromForm(pdfviewer, document, options) {
  * @param {string} value      The value to be stored in the document
  */
 function modifyDocument(document, fieldname, value) {
+    if (document.pdfpagerignoreupdate) return;
     let itemcache;
 
     // Copy the modified field to the corresponding field in the Document
@@ -442,7 +447,6 @@ export async function initEditor(html, id_to_display) {
             const map_tooltips = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_MAP_TOOLTIPS);
             console.debug(`Loaded page ${layerevent.pageNumber} for '${document.name}'`);
             let options = {};
-            let ignore_set=false;
             if (!editable) options.disabled=true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG)) options.hidebg = true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BORDER)) options.hideborder = true;
@@ -464,15 +468,8 @@ export async function initEditor(html, id_to_display) {
                     // Scripting engine is ready (or not available), so do the thing now
                     if (read_pdf)
                         setDocumentFromForm(pdfviewer, document, options);
-                    else {
-                        ignore_set = true;
-                        try {
-                            setFormFromDocument(pdfviewer, document, options)
-                        } catch (err) {
-                            console.warn(`Error while loading PDF with foundry data`, err)
-                        }
-                        ignore_set = false;
-                    }
+                    else
+                        setFormFromDocument(pdfviewer, document, options)
                 }
             }
             load();
@@ -481,7 +478,6 @@ export async function initEditor(html, id_to_display) {
             //let fields = pdfviewerapp.pdfDocument.getFieldObjects();
 
             function setValue(event, fieldname="value", value=undefined) {
-                if (ignore_set) return;
                 let target = event.target;
                 if (value==undefined) {
                     value = target[fieldname] ?? target.getAttribute(fieldname);
