@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.52.3
+
+- Remove deprecation warnings on Foundry V12.318 (Development 1)
+
 ## 0.52.2
 
 - Provide a solution for loading endlessly that works when two owners have the same PDF Actor sheet open.

@@ -208,6 +208,7 @@ export function configureItemSettings() {
 Hooks.on('renderSettingsConfig', (app, html, options) => {
   const moduleTab = html.find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
   const itemTypes = game.documentTypes["Item"].filter(t => t !== CONST.BASE_DOCUMENT_TYPE);
+  // input for V10/11, file-picker for V12
   moduleTab
     .find(`input[name="${PDFCONFIG.MODULE_NAME}.${itemTypes[0]}Sheet"],file-picker[name="${PDFCONFIG.MODULE_NAME}.${itemTypes[0]}Sheet"]`)
     .closest('div.form-group')
