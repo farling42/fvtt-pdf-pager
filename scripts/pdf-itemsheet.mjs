@@ -160,8 +160,9 @@ export function configureItemSettings() {
 
   function updateSheets() {
 
+    const itemTypes = game.documentTypes["Item"].filter(t => t !== CONST.BASE_DOCUMENT_TYPE);
     let types = []
-    for (const type of game.template.Item.types) {
+    for (const type of itemTypes) {
       let param = `${type}Sheet`;
       if (game.settings.get(modulename, param)?.length) {
         types.push(type);
@@ -181,7 +182,7 @@ export function configureItemSettings() {
             label: game.i18n.format(`${modulename}.PDFSheetName`)
           }
           // Simple World Building doesn't set the 'types' field, and on Foundry 11 it won't work if WE set the 'types' field.
-          if (game.template.Item.types.length > 1) options.types = types;
+          if (itemTypes.length > 1) options.types = types;
           Items.registerSheet(modulename, PDFItemSheet, options)
       }
     }
@@ -206,8 +207,9 @@ export function configureItemSettings() {
 
 Hooks.on('renderSettingsConfig', (app, html, options) => {
   const moduleTab = html.find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
+  const itemTypes = game.documentTypes["Item"].filter(t => t !== CONST.BASE_DOCUMENT_TYPE);
   moduleTab
-    .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${game.template.Item.types[0]}Sheet]`)
+    .find(`input[name="${PDFCONFIG.MODULE_NAME}.${itemTypes[0]}Sheet"],file-picker[name="${PDFCONFIG.MODULE_NAME}.${itemTypes[0]}Sheet"]`)
     .closest('div.form-group')
     .before(
       '<h2 class="setting-header">' +

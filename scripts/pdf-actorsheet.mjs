@@ -213,8 +213,9 @@ export function configureActorSettings() {
 
   function updateSheets() {
 
+    const actorTypes = game.documentTypes["Actor"].filter(t => t !== CONST.BASE_DOCUMENT_TYPE);
     let types = []
-    for (const type of game.template.Actor.types) {
+    for (const type of actorTypes) {
       let param = `${type}Sheet`;
       if (game.settings.get(modulename, param)?.length) {
         types.push(type);
@@ -234,7 +235,7 @@ export function configureActorSettings() {
             label: game.i18n.format(`${modulename}.PDFSheetName`)
           }
           // Simple World Building doesn't set the 'types' field, and on Foundry 11 it won't work if WE set the 'types' field.
-          if (game.template.Actor.types.length > 1) options.types = types;
+          if (actorTypes.length > 1) options.types = types;
           Actors.registerSheet(modulename, PDFActorSheet, options)
       }
     }
@@ -259,8 +260,9 @@ export function configureActorSettings() {
 
 Hooks.on('renderSettingsConfig', (app, html, options) => {
   const moduleTab = html.find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
+  const actorTypes = game.documentTypes["Actor"].filter(t => t !== CONST.BASE_DOCUMENT_TYPE);
   moduleTab
-    .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${game.template.Actor.types[0]}Sheet]`)
+    .find(`input[name="${PDFCONFIG.MODULE_NAME}.${actorTypes[0]}Sheet"],file-picker[name="${PDFCONFIG.MODULE_NAME}.${actorTypes[0]}Sheet"]`)
     .closest('div.form-group')
     .before(
       '<h2 class="setting-header">' +
