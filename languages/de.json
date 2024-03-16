@@ -42,6 +42,8 @@
         "showMapTooltips.Hint": "Fügt einen Tooltip zu jedem editierbaren Feld eines ausfüllbaren Akteur/Gegenstand PDF hinzu. Weist dabei sowohl den Namen des PDF Feldes als auch des zugehörigen Akteur/Gegenstand Feldes aus auf das es verweist (falls ein Verweis vorhanden ist)",
         "showFieldMenus.Name": "Editiere die Feld Zuweisungen",
         "showFieldMenus.Hint": "Ersetzt jedes editierbare Feld mit einem drop-down Menu aus dem ein Feld des Akteurs/Gegenstandes ausgewählt werden kann. (Fall ein Feld bereits durch eine getter/setter function konfiguriert wurde dann ist das Feld nicht mehr editierbar)",
+        "showTitleBarButtons.Name": "Zeige Schaltflächen in der Titelleiste an",
+        "showTitleBarButtons.Hint": "Falls aktiviert werden in der Titelleiste Hinweise zu Schaltflächen von Akteure/Gegenstand PDF's angezeigt",
         "ChoosePdfForm" : {
             "Title": "Wähle das PDF Dokument für '{name}'",
             "Prompt": "Individuelles PDF:",
