@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.52.4
+
+- Latest German translations from @CePeU
+
 ## 0.52.3
 
 - Remove deprecation warnings on Foundry V12.318 (Development 1)
