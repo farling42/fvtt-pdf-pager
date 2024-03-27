@@ -110,16 +110,16 @@ export class PDFDataBrowser extends Application {
                             }
                         }
                     }
+                    else if (value === null || value === undefined) {
+                        results.push({
+                            key: path(current, key),
+                            danger: DangerLevel.High,
+                            value: wrap('Null/Undefined, be cautious!'),
+                        });
+                    }
                     else if (typeof value === 'object') {
                         // Case 2 : The value is an object
-                        if (value === null || value === undefined) {
-                            results.push({
-                                key: path(current, key),
-                                danger: DangerLevel.High,
-                                value: wrap('Null/Undefined, be cautious!'),
-                            });
-                        }
-                        else if (isEmpty(value)) {
+                        if (isEmpty(value)) {
                             results.push({
                                 key: path(current, key),
                                 danger: DangerLevel.Critical,
