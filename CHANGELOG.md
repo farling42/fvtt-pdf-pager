@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.52.5
+
+- Fix an issue with the "Inspect Data" window with dnd5e game system, so that it doesn't try to keep rendering the inspect data when it fails.
+
 ## 0.52.4
 
 - Latest German translations from @CePeU
