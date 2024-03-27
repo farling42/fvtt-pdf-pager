@@ -273,7 +273,10 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
             // and performs all normal pdf-embedded processing
             elem.dispatchEvent(new FocusEvent("focus"));
             elem.value = newvalue;
-            elem.dispatchEvent(new KeyboardEvent("keydown", {key: 'Tab'}));
+            if (elem.type === 'select-one')
+                elem.dispatchEvent(new KeyboardEvent("input", {target: elem}));
+            else
+                elem.dispatchEvent(new KeyboardEvent("keydown", {key: 'Tab'}));
             elem.dispatchEvent(new FocusEvent("blur", {relatedTarget: elem, target: elem}));  // target is used by setValue below
         }
     }

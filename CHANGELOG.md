@@ -4,6 +4,7 @@
 
 - Fix an issue with the "Inspect Data" window with dnd5e game system, so that it doesn't try to keep rendering the inspect data when it fails.
 - Allow an editable field in the PDF to be marked with `<<<Ignore This Field>>>` so that the field's value is not stored as part of the document's settings. (This is useful for those PDFs which have internally calculated values, but those fields have not been set to disabled within the PDF.)
+- Fix an issue with saved values for select fields aren't triggering the PDF's internal auto-calculations.
 
 ## 0.52.4
 
