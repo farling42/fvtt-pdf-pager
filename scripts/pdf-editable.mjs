@@ -37,9 +37,11 @@ import { PDFCONFIG } from './pdf-config.mjs'
 
 let map_pdf2actor;                   // key = pdf field name, value = actor field name
 let map_pdf2item;                    // key = pdf field name, value = item  field name
+let ignore_label;                   // The translated label for IGNORE_MARKER
 
 const NO_FIELD_SET = "";
 const OBJECT_FIELD = "\u1d453 accessors";
+const IGNORE_MARKER = "<<IGNORE>>";
 
 /**
  * Given the form for a window, return the PDFViewer embedded within the window
@@ -214,7 +216,12 @@ async function setFormFromDocument(pdfviewer, document, options={}) {
         }
 
         if (!docfield && foundry.utils.getProperty(document, elem.name) !== undefined) docfield = elem.name;
-        
+
+        if (docfield === IGNORE_MARKER) {
+            elem.disabled = true;
+            continue;
+        }
+
         let value;
         if (!docfield) {
             value = foundry.utils.getProperty(flags, elem.name);
@@ -293,6 +300,7 @@ async function setDocumentFromForm(pdfviewer, document, options) {
 
         if (element.disabled || element.readOnly) continue;
         // Don't allow editing while the PDF is in this mode
+
         element.readOnly = true;
         if (element.type === 'checkbox')
             modifyDocument(document, element.name, element.checked);
@@ -325,7 +333,7 @@ function modifyDocument(document, fieldname, value) {
     // If in edit mode, then modify the mapping
     if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FIELD_MAPPING_MODE)) {
         // Update the local mapping
-        mapping[fieldname] = (value === NO_FIELD_SET) ? undefined : value;
+        mapping[fieldname] = (value === NO_FIELD_SET) ? undefined : (value === ignore_label) ? IGNORE_MARKER : value;
         if (document instanceof Actor)
             game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ACTOR_CONFIG, map_pdf2actor);
         else
@@ -396,6 +404,8 @@ export async function initEditor(html, id_to_display) {
 
     const document = (id_to_display.includes('.') && await fromUuid(id_to_display)) || game.actors.get(id_to_display) || game.items.get(id_to_display);
     if (!document) return;
+
+    ignore_label = game.i18n.format(`${PDFCONFIG.MODULE_NAME}.ignoreField.label`);
 
     // Always reload the MAP on opening the window (in case it has changed since last time)
     let mapping = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ACTOR_CONFIG);
@@ -506,7 +516,7 @@ export async function initEditor(html, id_to_display) {
                             if (!field_mappings) field_mappings = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
                             if (!objkeys) {
                                 const flatdoc = flattenObject(document);
-                                objkeys = [];
+                                objkeys = [ ignore_label ];
                                 for (const fieldname of Object.keys(flatdoc)) {
                                     if (fieldname.startsWith(`flags.${PDFCONFIG.MODULE_NAME}`)) continue;
                                     let type = typeof flatdoc[fieldname];

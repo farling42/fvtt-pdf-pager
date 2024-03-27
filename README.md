@@ -41,6 +41,8 @@ Without setting up a mapping, any data entered into the sheet will be stored on 
 
 When the module option `Edit Field Mapping` is enabled, then all the editable fields in the displayed PDF display the name of the field to which they are mapped (if any). The fields have autocomplete enabled to allow quickly choosing one of the Actor/Item's known fields, or a manual text string can be entered (in order to pick something from the Actor/Item's items array). (If a getter/setter function has already been configured for a particular field, then that field will be disabled so that a field can't be chosen for it.)
 
+An additional option `<<<Ignore This Field>>>` value is available which will set the field to be read-only/disabled. This is useful for those PDFs which are badly formatted in not marking auto-calculated fields as read-only.
+
 ![Image of field Editing](https://raw.githubusercontent.com/farling42/fvtt-pdf-pager/master/images/pdfpager-fields.png)
 
 #### A manually created object mapping

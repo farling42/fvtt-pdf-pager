@@ -117,6 +117,9 @@
         },
         "noteConfig": {
             "pdfPagePrompt": "PDF Page Number"
+        },
+        "ignoreField": {
+            "label": "<<<Ignore This Field>>>"
         }
     }
 }
