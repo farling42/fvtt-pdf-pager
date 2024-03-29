@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.52.7
+
+- A better (proper) solution for allowing fields to be deleted.
+
 ## 0.52.6
 
 - Fix a bug so that the value in a field can be deleted (leaving an empty field).
