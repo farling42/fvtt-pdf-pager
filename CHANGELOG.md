@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.52.6
+
+- Fix a bug so that the value in a field can be deleted (leaving an empty field).
+
 ## 0.52.5
 
 - Fix an issue with the "Inspect Data" window with dnd5e game system, so that it doesn't try to keep rendering the inspect data when it fails.

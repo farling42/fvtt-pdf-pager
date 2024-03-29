@@ -604,7 +604,7 @@ export async function initEditor(html, id_to_display) {
                             // If there is extra validation, the 'blur' event returns the OLD value!
                             // so we also have to wait for new value from sandbox (but updatefromsandbox fires on every character change)
                             element.addEventListener('updatefromsandbox', (event) => {
-                                if (event.detail.formattedValue)
+                                if (event.detail.formattedValue !== undefined)
                                     setValue(event, "value", event.detail.formattedValue)
                                 });
                             // submit = press RETURN
