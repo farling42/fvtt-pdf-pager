@@ -465,6 +465,9 @@ export async function initEditor(html, id_to_display) {
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BORDER)) options.hideborder = true;
             if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.NO_SPELL_CHECK)) options.nospellcheck = true;
 
+            // Prevent reading "" values until setFormFromDocument has been called at least once.
+            if (editable) document.pdfpagerignoreupdate = true;
+
             // Wait until the scripting engine is ready before doing either setDocumentFromForm or setFormFromDocument
             if (timeout) {
                 console.debug(`pdf-pager: disabling previous load timeout`);
@@ -506,17 +509,17 @@ export async function initEditor(html, id_to_display) {
             // Register listeners to all the editable fields
             if (editable) {        
                 // Only the inputs on this page, rather than the entire form.
-                let field_mappings, objkeys;
+                const field_mappings = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
+                let objkeys;
                 let pdfpageview = layerevent.source;
                 let annotations = await pdfpageview.annotationLayer.pdfPage?.getAnnotations();
 
                 for (let element of pdfpageview.div.querySelectorAll('input,select,textarea,a,button')) {
                     // disabled fields are presumably automatically calculated values, so don't listen for changes to them.
-                    if (!element.disabled && !element.getAttribute('pdfpager')) {
+                    if (!element.disabled && !element.getAttribute('pdfpager') && (editor_menus || field_mappings?.[element.name] !== IGNORE_MARKER)) {
 
                         // Firstly, replace the element with a mapping editor field
                         if (editor_menus) {
-                            if (!field_mappings) field_mappings = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
                             if (!objkeys) {
                                 const flatdoc = flattenObject(document);
                                 objkeys = [ ignore_label ];
