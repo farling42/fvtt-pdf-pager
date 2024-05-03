@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.52.8
+
+- Fix an issue that broke OmniSearch where no TOC has been created for a PDF page.
+
 ## 0.52.7
 
 - A better (proper) solution for allowing fields to be deleted.
