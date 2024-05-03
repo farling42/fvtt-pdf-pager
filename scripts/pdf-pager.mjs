@@ -52,7 +52,7 @@ Hooks.once('ready', async () => {
 // JournalEntryPage#toc only works when type === 'text'
 function JournalEntryPage_toc(wrapped) {
     if (this.type !== 'pdf') return wrapped();
-    if (!this._toc) this._toc = JSON.parse(this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC));
+    if (!this._toc) this._toc = JSON.parse(this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC) ?? "{}");
     return this._toc;
 }
 
