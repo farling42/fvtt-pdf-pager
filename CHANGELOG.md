@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.53.0
+
+- Update `verified` version to `12.324` to indicate it supports Foundry V12 (as well as the existing V10 and V11).
+
 ## 0.52.8
 
 - Fix an issue that broke OmniSearch where no TOC has been created for a PDF page.
