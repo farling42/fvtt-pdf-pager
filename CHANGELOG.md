@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.53.1
+
+- Provide the correct sorting of duplicated numerical headers, as implemented in Foundry V12 (the fix only works in V12).
+- Update 'verified' to '12.325'
+
 ## 0.53.0
 
 - Update `verified` version to `12.324` to indicate it supports Foundry V12 (as well as the existing V10 and V11).

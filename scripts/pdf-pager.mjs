@@ -336,6 +336,7 @@ async function JournalSheet_renderHeadings(pageNode, toc) {
     const tocNode = this.element[0].querySelector(`.directory-item[data-page-id="${pageId}"]`);
     if ( !tocNode || !toc ) return;
     const headings = Object.values(toc);
+    if (foundry.utils.isNewerVersion (game.version, 12)) headings.sort((a, b) => a.order - b.order);
     if ( page.title.show ) headings.shift();
     const minLevel = Math.min(...headings.map(node => node.level));
     tocNode.querySelector(":scope > ol")?.remove();
