@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.53.2
+
+- Prevent error about exceeding JS stack when editing PDF fields or using the data field inspector (Primarily an issue with the data structures in Foundry V12 for dnd5e and pf2e).
+- Update to reference foundry.utils.isEmpty
+- Update verified to 12.327.
+
 ## 0.53.1
 
 - Provide the correct sorting of duplicated numerical headers, as implemented in Foundry V12 (the fix only works in V12).

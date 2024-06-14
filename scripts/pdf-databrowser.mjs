@@ -61,6 +61,7 @@ export class PDFDataBrowser extends Application {
             DangerLevel[DangerLevel["High"] = 2] = "High";
             DangerLevel[DangerLevel["Critical"] = 3] = "Critical";
         })(DangerLevel || (DangerLevel = {}));
+        const flattenStack = new Set();
         const flatten = (data, current = '', danger = DangerLevel.Safe) => {
             let results = [];
             window['actorData'] = this.doc.system;
@@ -93,6 +94,12 @@ export class PDFDataBrowser extends Application {
                     console.warn('Embedded Actor found in data, excluding the embedded Actor from the list of fields')
                     return results;
                 }
+                if (flattenStack.has(data)) {
+                    console.warn('Nested Embedded Object found in data, excluding the embedded Object from the list of fields', data)
+                    return results;
+                }
+                flattenStack.add(data);
+
                 for (const [key, value] of Object.entries(data)) {
                     if (Array.isArray(value)) {
                         // Case 1 : The value is an array
@@ -119,7 +126,7 @@ export class PDFDataBrowser extends Application {
                     }
                     else if (typeof value === 'object') {
                         // Case 2 : The value is an object
-                        if (isEmpty(value)) {
+                        if (foundry.utils.isEmpty(value)) {
                             results.push({
                                 key: path(current, key),
                                 danger: DangerLevel.Critical,
@@ -148,7 +155,8 @@ export class PDFDataBrowser extends Application {
                             value: value.toString(),
                         });
                     }
-                }
+                } // for
+                flattenStack.delete(data);
             }
             else if (typeof data === 'function') {
                 // Case 3 : Base Case : The value is a function
