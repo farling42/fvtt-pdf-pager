@@ -181,7 +181,7 @@ function storeFieldText(document, value) {
  * @param {Object} options  Can contain any of { disabled : true , hidebg : true, hideborder: true, nospellcheck: false }
  */
 async function setFormFromDocument(pdfviewer, document, options = {}) {
-  console.debug(`Loading PDF from ${document.documentName} '${document.name}'`);
+  if (CONFIG.debug.pdfpager) console.debug(`Loading PDF from ${document.documentName} '${document.name}'`);
   let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {}
   let buttonvalues;  // support for radio buttons
 
@@ -422,11 +422,10 @@ function myFlattenObject(obj, _d = 0) {
         // Prevent infinite looping
         stack.add(v);
         let inner = recurse(v, _d + 1);
-        stack.delete(v);
-
         for (let [ik, iv] of Object.entries(inner)) {
           flat[`${k}.${ik}`] = iv;
         }
+        stack.delete(v);
       }
       else flat[k] = v;
     }
@@ -496,7 +495,7 @@ export async function initEditor(html, id_to_display) {
 
       const editor_menus = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FIELD_MAPPING_MODE);
       const map_tooltips = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_MAP_TOOLTIPS);
-      console.debug(`Loaded page ${layerevent.pageNumber} for '${document.name}'`);
+      if (CONFIG.debug.pdfpager) console.debug(`Loaded page ${layerevent.pageNumber} for '${document.name}'`);
       let options = {};
       if (!editable) options.disabled = true;
       if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HIDE_EDITABLE_BG)) options.hidebg = true;
@@ -536,7 +535,7 @@ export async function initEditor(html, id_to_display) {
         if (value == undefined) {
           value = target[fieldname] ?? target.getAttribute(fieldname);
         }
-        console.debug(`${event.type}: field='${target.name}', value = '${value}'`);
+        if (CONFIG.debug.pdfpager) console.debug(`${event.type}: field='${target.name}', value = '${value}'`);
         modifyDocument(document, target.name, value);
         if (editor_menus && map_tooltips) {
           const field_mappings = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
@@ -621,7 +620,7 @@ export async function initEditor(html, id_to_display) {
             // Prevent adding listeners more than once
             element.setAttribute('pdfpager', id_to_display);
 
-            console.log(`type '${element.type}', id '${element.id}'`)
+            if (CONFIG.debug.pdfpager) console.log(`type '${element.type}', id '${element.id}'`)
             if (element.type === 'checkbox') {
               element.addEventListener('click', event => setValue(event, "checked"));
             } else if (element.type === 'button') {
