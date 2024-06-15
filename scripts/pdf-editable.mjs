@@ -402,7 +402,7 @@ Hooks.on('updateItem', update_document)
  */
 
 function myFlattenObject(obj, _d = 0) {
-  const stack = new Set();
+  const stack = new Set([obj]);
 
   function recurse(obj, _d) {
     const flat = {};
@@ -411,7 +411,7 @@ function myFlattenObject(obj, _d = 0) {
     }
     for (let [k, v] of Object.entries(obj)) {
       let t = foundry.utils.getType(v);
-      if (t === "Object") {
+      if (t === "Object" || t === "Array") {
         if (foundry.utils.isEmpty(v)) flat[k] = v;
 
         if (stack.has(v)) {
@@ -548,9 +548,33 @@ export async function initEditor(html, id_to_display) {
       if (editable) {
         // Only the inputs on this page, rather than the entire form.
         const field_mappings = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
-        let objkeys;
+        let listname;
+        let datalist;
         let pdfpageview = layerevent.source;
         let annotations = await pdfpageview.annotationLayer.pdfPage?.getAnnotations();
+        if (editor_menus) {
+          const flatdoc = myFlattenObject(document);
+          const objkeys = [ignore_label];
+          for (const fieldname of Object.keys(flatdoc)) {
+            if (fieldname.startsWith(`flags.${PDFCONFIG.MODULE_NAME}`)) continue;
+            let type = typeof flatdoc[fieldname];
+            if (["string", "number", "boolean"].includes(type)) {
+              objkeys.push(fieldname);
+            }
+          }
+          listname = 'pdf-pager-fields';
+          // Create the datalist once within the DOM
+          const domdoc = pdfpageview.div.ownerDocument;
+          datalist = domdoc.createElement("datalist");
+          datalist.id = listname;
+          // fields from Actor/Item
+          for (const fieldname of objkeys) {
+            const option = domdoc.createElement('option');
+            option.value = fieldname;
+            datalist.appendChild(option);
+          }
+          pdfpageview.div.appendChild(datalist);
+        }
 
         for (let element of pdfpageview.div.querySelectorAll('input,select,textarea,a,button')) {
           // disabled fields are presumably automatically calculated values, so don't listen for changes to them.
@@ -558,20 +582,7 @@ export async function initEditor(html, id_to_display) {
 
             // Firstly, replace the element with a mapping editor field
             if (editor_menus) {
-              if (!objkeys) {
-                const flatdoc = myFlattenObject(document);
-                objkeys = [ignore_label];
-                for (const fieldname of Object.keys(flatdoc)) {
-                  if (fieldname.startsWith(`flags.${PDFCONFIG.MODULE_NAME}`)) continue;
-                  let type = typeof flatdoc[fieldname];
-                  if (["string", "number", "boolean"].includes(type)) {
-                    objkeys.push(fieldname);
-                  }
-                }
-              }
-
               const domdoc = element.ownerDocument;
-              const listname = `datalist-` + element.id;
 
               // Ensure that we always have a "input" field here.
               const input = domdoc.createElement("input");
@@ -581,21 +592,12 @@ export async function initEditor(html, id_to_display) {
                 input.name = element.name;
                 input.id = element.id;
               }
-
-              const datalist = domdoc.createElement("datalist");
-              datalist.id = listname;
               input.setAttribute("list", listname);
 
               const docfield = field_mappings?.[input.name];
               if (typeof field_mappings[input.name] === 'object') {
                 input.disabled = true;
               } else {
-                // fields from Actor/Item
-                for (const fieldname of objkeys) {
-                  const option = domdoc.createElement('option');
-                  option.value = fieldname;
-                  datalist.appendChild(option);
-                }
                 input.value = (typeof docfield === 'string') ? docfield : NO_FIELD_SET;
               }
               // Special handling for the "a" tags
@@ -605,7 +607,6 @@ export async function initEditor(html, id_to_display) {
 
               const parent = element.parentElement;
               element.replaceWith(input);
-              parent.appendChild(datalist);
               // Replace old WidgetAnnotation with textWidgetAnnotation
               for (const value of parent.classList.values())
                 if (value.endsWith('WidgetAnnotation'))

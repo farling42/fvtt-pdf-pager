@@ -62,9 +62,9 @@ export class PDFDataBrowser extends Application {
             DangerLevel[DangerLevel["Critical"] = 3] = "Critical";
         })(DangerLevel || (DangerLevel = {}));
         const flattenStack = new Set();
+        window['actorData'] = this.doc.system;
         const flatten = (data, current = '', danger = DangerLevel.Safe) => {
             let results = [];
-            window['actorData'] = this.doc.system;
             const path = (curr, ...next) => {
                 if (curr.length > 0) {
                     for (let i = 0; i < next.length; i++) {
