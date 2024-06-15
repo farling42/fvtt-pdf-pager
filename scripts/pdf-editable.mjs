@@ -403,37 +403,44 @@ Hooks.on('updateItem', update_document)
 
 function myFlattenObject(obj, _d = 0) {
   const stack = new Set();
+  const flat = {};
 
-  function recurse(obj, _d) {
-    const flat = {};
+  function recurse(obj, _d, path = "") {
     if (_d > 100) {
       throw new Error("Maximum depth exceeded");
     }
     for (let [k, v] of Object.entries(obj)) {
+      if (game.system.id === "pf2e" && _d > 0 && (k === "parent" || k === "actor")) continue;
       let t = foundry.utils.getType(v);
-      if (t === "Object") {
-        if (foundry.utils.isEmpty(v)) flat[k] = v;
-
+      if (t === "Object" || t === "Array") {
+        if (foundry.utils.isEmpty(v)) flat[`${path}${k}`] = v;
         if (stack.has(v)) {
-          flat[k] = v;
+          flat[`${path}${k}`] = v;
           continue;
         }
 
         // Prevent infinite looping
         stack.add(v);
-        let inner = recurse(v, _d + 1);
-        stack.delete(v);
-
-        for (let [ik, iv] of Object.entries(inner)) {
-          flat[`${k}.${ik}`] = iv;
-        }
+        recurse(v, _d + 1, `${path}${k}.`);
       }
-      else flat[k] = v;
+      else flat[`${path}${k}`] = v;
     }
-    return flat;
   }
-  return recurse(obj, _d);
+  recurse(obj, _d);
+  return flat;
 }
+
+/**
+ * Used to dynamically add options to datalist
+*/
+const addOptionstoDatalistwithSearch = foundry.utils.debounce(function (datalist, val, objkeys, domdoc) {
+  let new_objkeys = objkeys.filter((key) => key.toLowerCase().includes(val.toLowerCase()));
+  for (const fieldname of new_objkeys) {
+    const option = domdoc.createElement('option');
+    option.value = fieldname;
+    datalist.appendChild(option);
+  }
+}, 100);
 
 /**
  * Called from renderJournalPDFPageSheet
@@ -590,12 +597,32 @@ export async function initEditor(html, id_to_display) {
               if (typeof field_mappings[input.name] === 'object') {
                 input.disabled = true;
               } else {
-                // fields from Actor/Item
-                for (const fieldname of objkeys) {
-                  const option = domdoc.createElement('option');
-                  option.value = fieldname;
-                  datalist.appendChild(option);
-                }
+                //simulate what would happen if datalist was filled completely
+
+                input.addEventListener("mouseenter", event => {
+                  if (datalist.innerHTML === "") {
+                    const option = domdoc.createElement('option');
+                    option.value = ignore_label;
+                    datalist.appendChild(option);
+                  }
+                });
+
+                input.addEventListener("focus", event => {
+                  datalist.innerHTML = "";
+                  addOptionstoDatalistwithSearch(datalist, event.target.value, objkeys, domdoc);
+                });
+
+                input.addEventListener("change", event => {
+                  // reset the datalist
+                  datalist.innerHTML = "";
+                  addOptionstoDatalistwithSearch(datalist, event.target.value, objkeys, domdoc);
+                });
+
+                input.addEventListener("blur", _ => {
+                  datalist.innerHTML = "";
+                });
+
+                
                 input.value = (typeof docfield === 'string') ? docfield : NO_FIELD_SET;
               }
               // Special handling for the "a" tags
