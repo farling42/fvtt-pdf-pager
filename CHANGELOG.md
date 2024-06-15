@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.53.3
+
+- Ensure that the original actor/item is added to the list of objects which should prevent recursion.
+- Only create the list of fields once in the PDF window's DOM, and have all input fields reference that single datalist.
+- Add array elements to the list of available fields in the field editor.
+- Only output editor debugging when `CONFIG.debug.pdfpager=true`
+
 ## 0.53.2
 
 - Prevent error about exceeding JS stack when editing PDF fields or using the data field inspector (Primarily an issue with the data structures in Foundry V12 for dnd5e and pf2e).
