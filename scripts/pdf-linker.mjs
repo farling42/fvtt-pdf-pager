@@ -44,9 +44,11 @@ import { PDFCONFIG } from './pdf-config.mjs'
  const pattern = /@PDF\[(.+?)(?:#(.+?))?(?:\|(.+?))?\]{(.+?)}/g;
 
  Hooks.once('ready', () => {
-    // Fields on Actors and Items call enrichHTML with async=false
-	libWrapper.register(PDFCONFIG.MODULE_NAME, 'TextEditor.enrichHTML', TextEditor_enrichHTML, libWrapper.WRAPPER);
-	libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._createDocumentLink', JournalEntryPage_createDocumentLink, libWrapper.MIXED);
+    // Fields on Actors and Items call enrichHTML with async=false (only on Foundry versions prior to V12)
+    if (!foundry.utils.isNewerVersion(game.version, 11))
+      libWrapper.register(PDFCONFIG.MODULE_NAME, 'TextEditor.enrichHTML', TextEditor_enrichHTML, libWrapper.WRAPPER);
+
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._createDocumentLink', JournalEntryPage_createDocumentLink, libWrapper.MIXED);
 
     // The TextEditor.encrichers only works when enrichHTML is called with async=true
     CONFIG.TextEditor.enrichers.push({pattern, enricher});
