@@ -3,6 +3,7 @@
 ## 0.53.4
 
 - Ensure that the standard enricher method is used on Foundry V12 for converting `@PDF` links to HTML (since it is always async in V12).
+- Bump verified version to 12.328
 
 ## 0.53.3
 
