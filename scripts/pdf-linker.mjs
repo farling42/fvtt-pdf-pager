@@ -45,7 +45,7 @@ import { PDFCONFIG } from './pdf-config.mjs'
 
  Hooks.once('ready', () => {
     // Fields on Actors and Items call enrichHTML with async=false (only on Foundry versions prior to V12)
-    if (!foundry.utils.isNewerVersion(game.version, 11))
+    if (!foundry.utils.isNewerVersion(game.version, 12))
       libWrapper.register(PDFCONFIG.MODULE_NAME, 'TextEditor.enrichHTML', TextEditor_enrichHTML, libWrapper.WRAPPER);
 
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._createDocumentLink', JournalEntryPage_createDocumentLink, libWrapper.MIXED);
