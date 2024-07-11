@@ -66,8 +66,10 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
     }
   }
 
+  function flagName(pageNumber) { return `flags.${PDFCONFIG.MODULE_NAME}.objects.page${pageNumber}` }
+
   function setPageAnnotations(pageNumber) {
-    const value = foundry.utils.getProperty(document, `flags.${PDFCONFIG.MODULE_NAME}.objects.page${pageNumber}`);
+    const value = foundry.utils.getProperty(document, flagName(pageNumber));
     if (!value) return;
 
     console.log(`Loading annotations for page ${pageNumber}`)
@@ -134,7 +136,7 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
       console.log(`annotationeditorstateschanged: page ${pageNumber} = ${editors.length} annotations (${value.length} bytes)`);
 
       // setFlag without re-rendering
-      const flag = `flags.${PDFCONFIG.MODULE_NAME}.objects.page${pageNumber}`;
+      const flag = flagName(pageNumber);
       const oldvalue = foundry.utils.getProperty(document, flag);
 
       if (oldvalue != value) {
@@ -150,21 +152,22 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
 
 
   Hooks.on('updateJournalEntryPage', (document, changed, options, userId) => {
-    if (document.type === "pdf" && options.updatePdfEditors && game.userId != userId) {
+    if (document.type === "pdf" && options.updatePdfEditors && game.userId != userId && changed?.flags?.[PDFCONFIG.MODULE_NAME]?.objects) {
       console.log('updateJournalEntryPage', { document, changed, options, userId });
+
       // Just reload the annotations in the affected page
       const sheet = document.parent?.sheet;
       if (!sheet || !sheet.rendered) return;
 
-      const pageIndex = document.parent.pages.contents.indexOf(document);
-      if (pageIndex == -1) {
-        console.warn(`updateJournalEntryPage: Failed to find page ${document.id} in parent journal`);
-        return;
+      let changedPages = Object.keys(changed?.flags?.[PDFCONFIG.MODULE_NAME]?.objects ?? {});
+      let changes = changedPages.map(key => parseInt(key.slice(4)));  // strip leading "page" from "pageXX"
+
+      console.log('pages changed', changes);
+
+      for (const pageNumber of changes) {
+        removePageAnnotations(pageNumber);
+        setPageAnnotations(pageNumber);
       }
-  
-      const pageNumber = pageIndex + 1;
-      removePageAnnotations(pageNumber);
-      setPageAnnotations(pageNumber);
     }
   })
 
