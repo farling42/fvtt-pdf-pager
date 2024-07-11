@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.0.0
+
+- Use own packaged version of PDFJS (4.0.379), since Foundry removes the Print, Save, Ink and Text functionality in their shipped version.
+- Add the ability to use the PDF.JS annotation tools to draw lines and write text on top of the PDF. The annotations are stored inside the document that also contains the PDF. Changes are only saved when the relevant editor is DEselected from the toolbar. Changes are immediately synced with other players who have that PDF on display.
+
+
 ## 0.53.4
 
 - Ensure that the standard enricher method is used on Foundry V12 for converting `@PDF` links to HTML (since it is always async in V12).

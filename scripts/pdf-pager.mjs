@@ -237,7 +237,7 @@ function buildOutline(pdfoutline) {
 
             // as JournalPagePDFSheet#_onLoadPDF, but adding optional page-number
             const frame = document.createElement("iframe");
-            frame.src = `scripts/pdfjs/web/viewer.html?${this._getViewerParams()}${pdf_slug}`;
+            frame.src = `modules/pdf-pager/libs/pdfjs/web/viewer.html?${this._getViewerParams()}${pdf_slug}`;
             console.debug(frame.src);
             html[idx] = frame;
         }
