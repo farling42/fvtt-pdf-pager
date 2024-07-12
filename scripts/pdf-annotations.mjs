@@ -41,7 +41,7 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
 
   function getAnnotationEditors(pdfpageview, pageIndex) {
     let result = [];
-    const storage = pdfpageview.annotationLayer.annotationStorage.getAll();
+    const storage = pdfpageview.annotationLayer?.annotationStorage.getAll();
     if (!storage) return result;
 
     // As AnnotationEditorUIManager.copy(event)
@@ -67,7 +67,11 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
 
   function setPageAnnotations(pageNumber) {
     const value = foundry.utils.getProperty(document, flagName(pageNumber));
-    if (!value) return;
+    if (!value) {
+      // Allow annotationeditorstateschanged to possibly update the document's flags
+      pdfviewerapp.pdfViewer.pdfPagerMode = NOT_EDITED;
+      return;
+    }
 
     if (CONFIG.debug.pdfpager) console.debug(`Loading annotations for page ${pageNumber}`)
     const pasteevent = new ClipboardEvent("copy", { clipboardData: new DataTransfer() });
@@ -177,13 +181,12 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
     }) // eventBus.on('annotationeditorstateschanged')
   } // if (editable)
 
-
-  Hooks.on('updateJournalEntryPage', (document, changed, options, userId) => {
-    if (document.type === "pdf" && options.updatePdfEditors && game.userId != userId && changed?.flags?.[PDFCONFIG.MODULE_NAME]?.objects) {
-      if (CONFIG.debug.pdfpager) console.debug('updateJournalEntryPage', { document, changed, options, userId });
+  function updateAnnotations(document, changed, options, userId) {
+    if (options.updatePdfEditors && game.userId != userId && changed?.flags?.[PDFCONFIG.MODULE_NAME]?.objects) {
+      if (CONFIG.debug.pdfpager) console.debug('updateAnnotations', { document, changed, options, userId });
 
       // Just reload the annotations in the affected page
-      const sheet = document.parent?.sheet;
+      const sheet = document.parent?.sheet ?? document.sheet;
       if (!sheet || !sheet.rendered) return;
 
       let changedPages = Object.keys(changed?.flags?.[PDFCONFIG.MODULE_NAME]?.objects ?? {});
@@ -194,8 +197,10 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
         setPageAnnotations(pageNumber);
       }
     }
-  })
+  }
+
+  Hooks.on('updateJournalEntryPage', updateAnnotations);
+  Hooks.on('updateActor', updateAnnotations);
+  Hooks.on('updateItem', updateAnnotations);
 
 } // function initAnnotations
-
-
