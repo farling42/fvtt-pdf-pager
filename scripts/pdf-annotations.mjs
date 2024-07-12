@@ -36,7 +36,7 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
   let uimanager;  // to be filled by 
   pdfviewerapp.eventBus.on('annotationeditoruimanager', ev => {
     uimanager = ev.uiManager;
-    console.debug(`annotationeditoruimanager:`, uimanager);
+    if (CONFIG.debug.pdfpager) console.debug(`annotationeditoruimanager:`, uimanager);
   })
 
   function getAnnotationEditors(pdfpageview, pageIndex) {
@@ -68,7 +68,7 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
     const value = foundry.utils.getProperty(document, flagName(pageNumber));
     if (!value) return;
 
-    console.log(`Loading annotations for page ${pageNumber}`)
+    if (CONFIG.debug.pdfpager) console.debug(`Loading annotations for page ${pageNumber}`)
     const pasteevent = new ClipboardEvent("copy", { clipboardData: new DataTransfer() });
     pasteevent.clipboardData.setData("application/pdfjs", value);
 
@@ -104,19 +104,13 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
 
 
   pdfviewerapp.eventBus.on('annotationeditorlayerrendered', async event => {
-    // event:
-    //   source: PDFPageView
-    //   pageNumber: Integer
-    //   error: null
-    //console.log('annotationeditorlayerrendered', event)
-
     const pageNumber = event.pageNumber;
+    const pdfpageview = event.source;
 
     // Prevent loading annotations if editor layer rendered a second time
-    const pdfpageview = event.source; // pdfviewerapp.pdfViewer._pages[pageNumber - 1];
     const editors = getAnnotationEditors(pdfpageview, pageNumber - 1);
     if (editors.length > 0) {
-      console.log(`annotationeditorlayerrendered: already loaded annotations for page ${pageNumber} - ignoring`);
+      if (CONFIG.debug.pdfpager) console.debug(`annotationeditorlayerrendered: already loaded annotations for page ${pageNumber} - ignoring`);
       return;
     }
 
@@ -130,7 +124,6 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
 
     function updateFlags() {
       // Save any manual annotations made to this page.
-      //console.log(`annotationeditorstateschanged for page index ${ev.source.currentPageIndex} to ${JSON.stringify(ev.details)}`)
       let updates = {}
 
       for (const pdfpageview of pdfviewerapp.pdfViewer._pages) {
@@ -152,10 +145,9 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
         const oldvalue = foundry.utils.getProperty(document, flag);
 
         if (oldvalue != value) {
-          console.log(`annotationeditorstateschanged: page ${pageNumber} = ${editors.length} annotations (${value.length} bytes)`);
+          if (CONFIG.debug.pdfpager) console.debug(`annotationeditorstateschanged: page ${pageNumber} = ${editors.length} annotations (${value.length} bytes)`);
           foundry.utils.setProperty(updates, flag, value);
-        } else
-          console.log(`annotationeditorstateschanged: page ${pageNumber} = flag value unchanged`);
+        }
       }
 
       if (Object.keys(updates).length) document.update(updates, { render: false, updatePdfEditors: true });
@@ -168,11 +160,11 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
       if (pdfviewerapp.pdfViewer.pdfPagerMode == IGNORE_EDIT) return;
 
       if (ev.details.isEditing) {
-        console.log(`annotationeditorstateschanged: local editing has been detected`)
+        if (CONFIG.debug.pdfpager) console.debug(`annotationeditorstateschanged: local editing has been detected`)
         pdfviewerapp.pdfViewer.pdfPagerMode = HAS_LOCAL_EDITS;
         return;
       } else if (pdfviewerapp.pdfViewer.pdfPagerMode != HAS_LOCAL_EDITS) {
-        console.log(`annotationeditorstateschanged: no local edit performed yet`)
+        if (CONFIG.debug.pdfpager) console.debug(`annotationeditorstateschanged: no local edit performed yet`)
         return;      
       }
 
@@ -182,16 +174,12 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
       debounceUpdateFlags();
 
     }) // eventBus.on('annotationeditorstateschanged')
-
-    pdfviewerapp.eventBus.on('switchannotationeditormode', ev => {
-      //console.log(`switchannotationeditormode: ${ev.mode}`);
-    })
   } // if (editable)
 
 
   Hooks.on('updateJournalEntryPage', (document, changed, options, userId) => {
     if (document.type === "pdf" && options.updatePdfEditors && game.userId != userId && changed?.flags?.[PDFCONFIG.MODULE_NAME]?.objects) {
-      console.log('updateJournalEntryPage', { document, changed, options, userId });
+      if (CONFIG.debug.pdfpager) console.debug('updateJournalEntryPage', { document, changed, options, userId });
 
       // Just reload the annotations in the affected page
       const sheet = document.parent?.sheet;
