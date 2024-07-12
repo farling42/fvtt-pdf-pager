@@ -121,6 +121,15 @@ The Note Config window contains an optional "PDF Page Number" field. If a number
 
 Dragging an open PDF page onto the Canvas to create a Note will automatically populate the PDF Page Number field with the number of the currently open page in the PDF (adjusted by the "PDF Page Offset" defined for the PDF).
 
+## Ink/Text Annotations on PDF Pages
+
+From version 1.1.0 onwards, Ink and Text annotations can be added to Journal PDF pages as well as Actor/Item PDF sheets. These annotations are stored as part of the Foundry document in which they are displayed. This means that they will be restored when the page is next opened, and they will be transferred to other players for them to view these changes also.
+
+This has required bundling the standard PDF.JS library (version 4.4.168) since the core Foundry PDF.JS library (4.0.137) removes the ability to use annotations.
+
+**IMPORTANT NOTE**: You must _deselect_ the annotation tool after making changes in order for the annotations to get saved and sent to other players. (This does NOT automatically happen when you close the window.)
+
+
 ## Installation
 
 The module is available from the Foundry Module Management window, just search for "PDF Pager", or it can be manually added with the following link:
