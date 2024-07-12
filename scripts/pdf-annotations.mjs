@@ -23,46 +23,42 @@ SOFTWARE.
 
 import { PDFCONFIG } from './pdf-config.mjs';
 
+// Values for pdfPageMode
+const NOT_EDITED  = 0;
+const IGNORE_EDIT = 1;
+const CAN_UPDATE  = 2;
+
 export async function initAnnotations(document, pdfviewerapp, editable) {
+  
+  pdfviewerapp.pdfViewer.pdfPagerMode = IGNORE_EDIT;
 
   // The UIManager is created very early on, and is needed for later loading of manual annotations.
   let uimanager;  // to be filled by 
   pdfviewerapp.eventBus.on('annotationeditoruimanager', ev => {
-    console.log(`annotationeditoruimanager:`, ev);
     uimanager = ev.uiManager;
+    console.debug(`annotationeditoruimanager:`, uimanager);
   })
 
   function getAnnotationEditors(pdfpageview, pageIndex) {
     let result = [];
     const storage = pdfpageview.annotationLayer.annotationStorage.getAll();
-    if (storage) {
-      // As AnnotationbEditorUIManager.copy(event)
-      for (const [k, v] of Object.entries(storage)) {
-        //console.log(`${k}`, v);
-        if (k.startsWith("pdfjs_internal_editor_") &&
-          !v.deleted &&
-          v.pageIndex == pageIndex) {
-          result.push(v);
-        }
+    if (!storage) return result;
+
+    // As AnnotationEditorUIManager.copy(event)
+    for (const [key, editor] of Object.entries(storage)) {
+      if (key.startsWith("pdfjs_internal_editor_") &&
+        !editor.deleted &&
+        editor.pageIndex == pageIndex) {
+        result.push(editor);
       }
     }
     return result;
   }
 
-  function removePageAnnotations(pageNumber) {
-    const pageIndex = pageNumber - 1;
+  function removePageAnnotations(pageIndex) {
     const pdfpageview = pdfviewerapp.pdfViewer._pages[pageIndex];
-    const storage = pdfpageview.annotationLayer.annotationStorage.getAll();
-    if (!storage) return;
-
-    for (const [key, editor] of Object.entries(storage)) {
-      //console.log(`${k}`, v);
-      if (key.startsWith("pdfjs_internal_editor_") &&
-        !editor.deleted &&
-        editor.pageIndex == pageIndex) {
-        console.log(`Removing editor ${key} from page ${pageNumber}`);
-        editor.remove();
-      }
+    for (const editor of getAnnotationEditors(pdfpageview, pageIndex)) {
+      editor.remove();
     }
   }
 
@@ -75,25 +71,50 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
     console.log(`Loading annotations for page ${pageNumber}`)
     const pasteevent = new ClipboardEvent("copy", { clipboardData: new DataTransfer() });
     pasteevent.clipboardData.setData("application/pdfjs", value);
+
+    // Prevent annotationeditorstateschanged from updating the document's flags
+    pdfviewerapp.pdfViewer.pdfPagerMode = IGNORE_EDIT;
     uimanager.updateToolbar(15);
 
     // paste() always adds them to the current page/layer
     // Position is OFFSET each time that the PDF is opened.
     const oldpage = uimanager.currentPageIndex + 1;
     uimanager.onPageChanging({ pageNumber })
-    /*
-    // maybe rebuild(editor)?
-    // AnnotationEditorLayer.deserialize()
-    // AnnotationEditorLayer.addorrebuild(editor)
-    for (const editor in JSON.parse(value)) {
-      const layer = pdfviewerapp.pdfViewer._pages[ev.source.pageNumber-1].annotationEditorLayer;
-      layer.addOrRebuild(event.source.getLayer(layer).deserialize(editor))
-    }
-      */
-    // Make sure we do NOT allow undo
+    // TODO: Make sure we do NOT allow undo
     uimanager.paste(pasteevent);
+
+    // Perform a fake "drag" to get the editors in the correct place.
+    // The below call scrollIntoView(), messing up the current view.
+
+    //const saveScroller = HTMLElement.prototype.scrollIntoView = function() {};
+    //HTMLElement.prototype.scrollIntoView = function() {};
+
+    uimanager.setUpDragSession();
+    uimanager.dragSelectedEditors(0, 0);   // calls editor.drag(tx,ty) - which calls scrollIntoView()
+    uimanager.endDragSession();
+
+    //HTMLElement.prototype.scrollIntoView = saveScroller;
+
+    //uimanager.translateSelectedEditors(0,0); - DOESN'T WORK  (also calls scrollIntoView)
+
+    // Ideally we would be able to access uimanager.#selectedEditors
+    /*
+    const pageIndex = pageNumber - 1;
+    for (const editor of getAnnotationEditors(pdfviewerapp.pdfViewer._pages[pageIndex], pageIndex)) {
+      if (uimanager.isSelected(editor) && editor.pageIndex === pageIndex) {
+        //console.log(`translating ${editor.name}.${editor.id}`)
+        //editor.translate(0,0);
+
+        const parent = uimanager.getLayer(pageIndex);
+        editor._setParentAndPosition(parent, 0, 0);
+      }
+    }*/
+    //uimanager.unselectAll();
     uimanager.onPageChanging({ pageNumber: oldpage });
     uimanager.updateToolbar(0);
+
+    // Allow annotationeditorstateschanged to possibly update the document's flags
+    pdfviewerapp.pdfViewer.pdfPagerMode = NOT_EDITED;
   }
 
 
@@ -118,31 +139,60 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
   }); // eventBus.on('annotationeditorlayerrendered')
 
   if (editable) {
-    pdfviewerapp.eventBus.on('annotationeditorstateschanged', async ev => {
+
+    // Register the debounceUpdates only once
+    const debounceUpdateFlags = foundry.utils.debounce(updateFlags, 250);
+
+    function updateFlags() {
       // Save any manual annotations made to this page.
       //console.log(`annotationeditorstateschanged for page index ${ev.source.currentPageIndex} to ${JSON.stringify(ev.details)}`)
+      let updates = {}
 
-      if (ev.details.isEditing) return;
-      const pdfpageview = pdfviewerapp.pdfViewer._pages[ev.source.currentPageIndex];
+      for (const pdfpageview of pdfviewerapp.pdfViewer._pages) {
+        if (!pdfpageview.pdfPage || !pdfpageview.annotationLayer) continue;  // during startup
 
-      const editors = [];
-      const pageNumber = pdfpageview.pdfPage.pageNumber;
+        const editors = [];
+        const pageNumber = pdfpageview.pdfPage.pageNumber;
 
-      for (const editor of getAnnotationEditors(pdfpageview, ev.source.currentPageIndex)) {
-        const serialized = editor.serialize(/*isForCopying*/ true);
-        if (serialized) editors.push(serialized);
+        for (const editor of getAnnotationEditors(pdfpageview, pageNumber - 1)) {
+          const serialized = editor.serialize(/*isForCopying*/ true);
+          if (serialized) editors.push(serialized);
+        }
+        const value = editors.length ? JSON.stringify(editors) : "";
+
+        // setFlag without re-rendering
+        const flag = flagName(pageNumber);
+        const oldvalue = foundry.utils.getProperty(document, flag);
+
+        if (oldvalue != value) {
+          console.log(`annotationeditorstateschanged: page ${pageNumber} = ${editors.length} annotations (${value.length} bytes)`);
+          foundry.utils.setProperty(updates, flag, value);
+        } else
+          console.log(`annotationeditorstateschanged: page ${pageNumber} = flag value unchanged`);
       }
-      const value = editors.length ? JSON.stringify(editors) : "";
-      console.log(`annotationeditorstateschanged: page ${pageNumber} = ${editors.length} annotations (${value.length} bytes)`);
 
-      // setFlag without re-rendering
-      const flag = flagName(pageNumber);
-      const oldvalue = foundry.utils.getProperty(document, flag);
+      if (Object.keys(updates).length) document.update(updates, { render: false, updatePdfEditors: true });
+    }
 
-      if (oldvalue != value) {
-        document.update({ [flag]: value }, { render: false, updatePdfEditors: true });
-      } else
-        console.log('flag value unchanged');
+    pdfviewerapp.eventBus.on('annotationeditorstateschanged', async ev => {
+
+      // Don't update the flags if the user hasn't performed any edits yet.
+      if (pdfviewerapp.pdfViewer.pdfPagerMode == IGNORE_EDIT) return;
+
+      if (ev.details.isEditing) {
+        console.log(`annotationeditorstateschanged: editing has been detected`)
+        pdfviewerapp.pdfViewer.pdfPagerMode = CAN_UPDATE;
+        return;
+      } else if (pdfviewerapp.pdfViewer.pdfPagerMode != CAN_UPDATE) {
+        console.log(`annotationeditorstateschanged: no edit performed yet`)
+        return;      
+      }
+
+      // The event is generated once, and lists only the currently displayed PDF page.
+      // It doesn't account for changes made on other pages of the PDF page,
+      // so we have to iterate over all the pages to see which contain actual changes.
+      debounceUpdateFlags();
+
     }) // eventBus.on('annotationeditorstateschanged')
 
     pdfviewerapp.eventBus.on('switchannotationeditormode', ev => {
@@ -162,10 +212,8 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
       let changedPages = Object.keys(changed?.flags?.[PDFCONFIG.MODULE_NAME]?.objects ?? {});
       let changes = changedPages.map(key => parseInt(key.slice(4)));  // strip leading "page" from "pageXX"
 
-      console.log('pages changed', changes);
-
       for (const pageNumber of changes) {
-        removePageAnnotations(pageNumber);
+        removePageAnnotations(pageNumber - 1);
         setPageAnnotations(pageNumber);
       }
     }
