@@ -57,6 +57,7 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
 
   function removePageAnnotations(pageIndex) {
     const pdfpageview = pdfviewerapp.pdfViewer._pages[pageIndex];
+    if (!pdfpageview) return;
     for (const editor of getAnnotationEditors(pdfpageview, pageIndex)) {
       editor.remove();
     }
