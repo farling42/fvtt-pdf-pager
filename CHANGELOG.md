@@ -3,10 +3,7 @@
 ## 1.0.0
 
 - Use own packaged version of PDFJS (4.4.168), since Foundry removes the Print, Save, Ink and Text functionality in their shipped version.
-- Add the ability to use the PDF.JS annotation tools to draw lines and write text on top of the PDF. The annotations are stored inside the document that also contains the PDF. Changes are only saved when the relevant editor is DEselected from the toolbar. Changes are immediately synced with other players who have that PDF on display.
-- TODO - fix the wrong placement of editors on a reload.
-- TODO - reduce the number of updates between clients.
-- TODO - check when two people have ownership that there isn't a race condition of updates pinging around.
+- Add the ability to use the PDF.JS annotation tools to draw lines and write text on top of the PDF. The annotations are stored inside the JournalEntryPage document that also contains the PDF. Changes are only saved when the relevant editor is DEselected from the toolbar. Changes are immediately synced with other players who have that PDF open for display.
 
 ## 0.53.4
 

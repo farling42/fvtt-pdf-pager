@@ -489,8 +489,9 @@ export async function initEditor(html, id_to_display) {
 
     let timeout = false;
 
-    // Initialise the annotations syncing system.      
-    initAnnotations(document, pdfviewerapp, editable);
+    // Initialise the annotations syncing system.     
+    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.EDITABLE_ANNOTATIONS)) 
+      initAnnotations(document, pdfviewerapp, editable);
 
     // Wait for the AnnotationLayer to get drawn before populating all the fields with data from the Document.
     // TODO - how to only do these ONCE for each page (or ONCE for the whole document).
