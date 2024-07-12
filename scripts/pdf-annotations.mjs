@@ -26,7 +26,7 @@ import { PDFCONFIG } from './pdf-config.mjs';
 // Values for pdfPageMode
 const NOT_EDITED  = 0;
 const IGNORE_EDIT = 1;
-const CAN_UPDATE  = 2;
+const HAS_LOCAL_EDITS = 2;
 
 export async function initAnnotations(document, pdfviewerapp, editable) {
   
@@ -74,44 +74,29 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
 
     // Prevent annotationeditorstateschanged from updating the document's flags
     pdfviewerapp.pdfViewer.pdfPagerMode = IGNORE_EDIT;
-    uimanager.updateToolbar(15);
+    uimanager.updateToolbar(15);    // AnnotationEditorType.INK
 
     // paste() always adds them to the current page/layer
-    // Position is OFFSET each time that the PDF is opened.
     const oldpage = uimanager.currentPageIndex + 1;
     uimanager.onPageChanging({ pageNumber })
-    // TODO: Make sure we do NOT allow undo
-    uimanager.paste(pasteevent);
 
-    // Perform a fake "drag" to get the editors in the correct place.
-    // The below call scrollIntoView(), messing up the current view.
-
-    //const saveScroller = HTMLElement.prototype.scrollIntoView = function() {};
-    //HTMLElement.prototype.scrollIntoView = function() {};
-
-    uimanager.setUpDragSession();
-    uimanager.dragSelectedEditors(0, 0);   // calls editor.drag(tx,ty) - which calls scrollIntoView()
-    uimanager.endDragSession();
-
-    //HTMLElement.prototype.scrollIntoView = saveScroller;
-
-    //uimanager.translateSelectedEditors(0,0); - DOESN'T WORK  (also calls scrollIntoView)
-
-    // Ideally we would be able to access uimanager.#selectedEditors
-    /*
-    const pageIndex = pageNumber - 1;
-    for (const editor of getAnnotationEditors(pdfviewerapp.pdfViewer._pages[pageIndex], pageIndex)) {
-      if (uimanager.isSelected(editor) && editor.pageIndex === pageIndex) {
-        //console.log(`translating ${editor.name}.${editor.id}`)
-        //editor.translate(0,0);
-
-        const parent = uimanager.getLayer(pageIndex);
-        editor._setParentAndPosition(parent, 0, 0);
+    // As per AnnotationEditorUIManager.paste
+    const data = JSON.parse(value);
+    const layer = uimanager.getLayer(pageNumber-1);
+    for (const editor of data) {
+      const deserializedEditor = layer.deserialize(editor);
+      if (deserializedEditor) {
+        // PDFJS will think that this is a paste, and so offset it based on width/height,
+        // so fudge the opposite of what rebuild will do because it thinks we are doing a copy/paste.
+        // PDFJS, Ink.render() doing `if (this.width) ... setAt <with offset>`
+        deserializedEditor.x -= deserializedEditor.width;
+        deserializedEditor.y -= deserializedEditor.height;
+        uimanager.rebuild(deserializedEditor)
       }
-    }*/
-    //uimanager.unselectAll();
+    }
+    
     uimanager.onPageChanging({ pageNumber: oldpage });
-    uimanager.updateToolbar(0);
+    uimanager.updateToolbar(0);    // AnnotationEditorType.NONE
 
     // Allow annotationeditorstateschanged to possibly update the document's flags
     pdfviewerapp.pdfViewer.pdfPagerMode = NOT_EDITED;
@@ -156,7 +141,9 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
 
         for (const editor of getAnnotationEditors(pdfpageview, pageNumber - 1)) {
           const serialized = editor.serialize(/*isForCopying*/ true);
-          if (serialized) editors.push(serialized);
+          if (serialized) {
+            editors.push(serialized);
+          }
         }
         const value = editors.length ? JSON.stringify(editors) : "";
 
@@ -172,6 +159,7 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
       }
 
       if (Object.keys(updates).length) document.update(updates, { render: false, updatePdfEditors: true });
+      pdfviewerapp.pdfViewer.pdfPagerMode = NOT_EDITED;
     }
 
     pdfviewerapp.eventBus.on('annotationeditorstateschanged', async ev => {
@@ -180,11 +168,11 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
       if (pdfviewerapp.pdfViewer.pdfPagerMode == IGNORE_EDIT) return;
 
       if (ev.details.isEditing) {
-        console.log(`annotationeditorstateschanged: editing has been detected`)
-        pdfviewerapp.pdfViewer.pdfPagerMode = CAN_UPDATE;
+        console.log(`annotationeditorstateschanged: local editing has been detected`)
+        pdfviewerapp.pdfViewer.pdfPagerMode = HAS_LOCAL_EDITS;
         return;
-      } else if (pdfviewerapp.pdfViewer.pdfPagerMode != CAN_UPDATE) {
-        console.log(`annotationeditorstateschanged: no edit performed yet`)
+      } else if (pdfviewerapp.pdfViewer.pdfPagerMode != HAS_LOCAL_EDITS) {
+        console.log(`annotationeditorstateschanged: no local edit performed yet`)
         return;      
       }
 
