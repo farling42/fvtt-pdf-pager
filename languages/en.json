@@ -26,6 +26,8 @@
         "hideFieldBg.Hint" : "Disable the setting of an explicit background colour for editable fields (overrides a default PDFJS styling)",
         "hideFieldBorder.Name" : "Hide Editable Field Border",
         "hideFieldBorder.Hint" : "Disable the box that is drawn around editable fields (overrides a default PDFJS styling)",
+        "editableAnnotations.Name": "Allow Annotations on PDF Pages",
+        "editableAnnotations.Hint": "Allows players with ownership permission to add INK and TEXT annotations on top of normal PDF pages. The annotations are stored on the JournalEntryPage so are viewable by any player viewing that PDF page",
         "noSpellCheck.Name": "Disable Spell Checking",
         "noSpellCheck.Hint": "When checked, spell checking will be disabled within editable fields of PDFs",
         "readPdfFields.Name": "Read Fields from PDF",

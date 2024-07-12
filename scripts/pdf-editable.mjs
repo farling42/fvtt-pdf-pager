@@ -33,7 +33,8 @@ SOFTWARE.
 // AnnotationStorage.setValue is called for each individual character change in a field.
 // let hasjsactions = await pdfviewerapp.pdfDocument.hasJSActions();
 
-import { PDFCONFIG } from './pdf-config.mjs'
+import { PDFCONFIG } from './pdf-config.mjs';
+import { initAnnotations } from './pdf-annotations.mjs';
 
 let map_pdf2actor;                   // key = pdf field name, value = actor field name
 let map_pdf2item;                    // key = pdf field name, value = item  field name
@@ -488,11 +489,15 @@ export async function initEditor(html, id_to_display) {
 
     let timeout = false;
 
+    // Initialise the annotations syncing system.     
+    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.EDITABLE_ANNOTATIONS)) 
+      initAnnotations(document, pdfviewerapp, editable);
+
     // Wait for the AnnotationLayer to get drawn before populating all the fields with data from the Document.
     // TODO - how to only do these ONCE for each page (or ONCE for the whole document).
     //        Resizing the window causes this to be called again for each page!
     pdfviewerapp.eventBus.on('annotationlayerrendered', async layerevent => {   // from PdfPageView
-
+      
       const editor_menus = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FIELD_MAPPING_MODE);
       const map_tooltips = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_MAP_TOOLTIPS);
       if (CONFIG.debug.pdfpager) console.debug(`Loaded page ${layerevent.pageNumber} for '${document.name}'`);
