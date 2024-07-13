@@ -41,22 +41,22 @@ import { PDFCONFIG } from './pdf-config.mjs'
  * Enrich the generated HTML to show a link or just plain text
  */
 
- const pattern = /@PDF\[(.+?)(?:#(.+?))?(?:\|(.+?))?\]{(.+?)}/g;
+const pattern = /@PDF\[(.+?)(?:#(.+?))?(?:\|(.+?))?\]{(.+?)}/g;
 
- Hooks.once('ready', () => {
+Hooks.once('ready', () => {
     // Fields on Actors and Items call enrichHTML with async=false (only on Foundry versions prior to V12)
-    if (!foundry.utils.isNewerVersion(game.version, 12))
-      libWrapper.register(PDFCONFIG.MODULE_NAME, 'TextEditor.enrichHTML', TextEditor_enrichHTML, libWrapper.WRAPPER);
+    if (game.release.generation < 12)
+        libWrapper.register(PDFCONFIG.MODULE_NAME, 'TextEditor.enrichHTML', TextEditor_enrichHTML, libWrapper.WRAPPER);
 
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._createDocumentLink', JournalEntryPage_createDocumentLink, libWrapper.MIXED);
 
     // The TextEditor.encrichers only works when enrichHTML is called with async=true
-    CONFIG.TextEditor.enrichers.push({pattern, enricher});
+    CONFIG.TextEditor.enrichers.push({ pattern, enricher });
 })
 
 function getAnchor(match) {
     // the pattern will put the page into p2 if only bookname is provided
-    const [ matches, journalname, pagename=journalname, pagenum, label] = match;
+    const [matches, journalname, pagename = journalname, pagenum, label] = match;
 
     // Find the relevant PAGE in the relevant JOURNAL ENTRY
     let page;
@@ -65,10 +65,10 @@ function getAnchor(match) {
         if (page) break;
     }
     // Look for a PDF code that matches journalname (if an explicit page name was given, then obviously they didn't provide a PDF code)
-    if (!page && journalname===pagename) page = getPDFByCode(journalname);
+    if (!page && journalname === pagename) page = getPDFByCode(journalname);
     // Return the anchor of the found page (if any)
     if (page) {
-        let attrs = {draggable: true};
+        let attrs = { draggable: true };
         if (pagenum) attrs["data-hash"] = pagenum;
         return page.toAnchor({
             classes: ["content-link"],
@@ -89,7 +89,7 @@ function getAnchor(match) {
  * @param {*} options 
  * @returns 
  */
-function TextEditor_enrichHTML(wrapped, content, options={}) {
+function TextEditor_enrichHTML(wrapped, content, options = {}) {
     let text = content;
     if (!options.async && text?.length && text.includes('@PDF[')) {
         text = text.replaceAll(pattern, (match, p1, p2, /*p3*/pagenum, /*p4*/label, moptions, mgroups) => {
@@ -124,36 +124,35 @@ function JournalEntryPage_createDocumentLink(wrapped, eventData, args) {
     if (this.type === 'pdf' && eventData?.anchor?.slug)
         eventData.anchor.slug = encodeURIComponent(eventData.anchor.slug);
 
-    if (this.type !== 'pdf' || !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.CREATE_PDF_LINK_ON_DROP)) 
+    if (this.type !== 'pdf' || !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.CREATE_PDF_LINK_ON_DROP))
         return wrapped(eventData, args);
-    else {
-        let slug,label;
-        if (eventData?.anchor?.slug) {
-            // Use slug of section name
-            label = eventData.anchor.name;
-            slug = eventData.anchor.slug;
-        } else {
-            // Use page=xxx as slug
-            let pagenum=1;
-            let sheet = this.parent?.sheet;  // JournalEntry
-            let iframe;
 
-            if (game.MonksEnhancedJournal)
-                iframe = game.MonksEnhancedJournal.journal?.element?.find('iframe');
-            else if (sheet && sheet._pages && sheet._pages[sheet.pageIndex]._id == this.id)
-                iframe = sheet.element?.find('iframe');
+    let slug, label;
+    if (eventData?.anchor?.slug) {
+        // Use slug of section name
+        label = eventData.anchor.name;
+        slug = eventData.anchor.slug;
+    } else {
+        // Use page=xxx as slug
+        let pagenum = 1;
+        let sheet = this.parent?.sheet;  // JournalEntry
+        let iframe;
 
-            if (iframe?.length>0) {
-                // Read current page from PDF viewer, then remove the user-configured offset from that number.
-                pagenum = iframe[0].contentWindow.PDFViewerApplication.page - (this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0);
-            }
-            slug = `page=${pagenum}`
-            label = this.name;
+        if (game.MonksEnhancedJournal)
+            iframe = game.MonksEnhancedJournal.journal?.element?.find('iframe');
+        else if (sheet && sheet._pages && sheet._pages[sheet.pageIndex]._id == this.id)
+            iframe = sheet.element?.find('iframe');
+
+        if (iframe?.length > 0) {
+            // Read current page from PDF viewer, then remove the user-configured offset from that number.
+            pagenum = iframe[0].contentWindow.PDFViewerApplication.page - (this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0);
         }
-        // If journal and page have same name, only put the name in once.
-        const fullname = (this.parent.name === this.name) ? this.name : `${this.parent.name}#${this.name}`;
-        return `@PDF[${fullname}|${slug}]{${label}}`;
+        slug = `page=${pagenum}`
+        label = this.name;
     }
+    // If journal and page have same name, only put the name in once.
+    const fullname = (this.parent.name === this.name) ? this.name : `${this.parent.name}#${this.name}`;
+    return `@PDF[${fullname}|${slug}]{${label}}`;
 }
 
 // Key = PDFCODE; Value = UUID of JournalPage(PDF)
