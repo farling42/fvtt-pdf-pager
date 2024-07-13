@@ -2,6 +2,7 @@
 
 ## 1.1.1
 
+- Use legacy-dist version of pdfjs, so that it works on Foundry V10+ (and older browsers).
 - Reduce download size by removing the *.mjs.map files from the pdfjs/build folder.
 - Use `game.release.generation` instead of `isNewerVersion`
 
