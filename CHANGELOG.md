@@ -3,6 +3,7 @@
 ## 1.1.1
 
 - Reduce download size by removing the *.mjs.map files from the pdfjs/build folder.
+- Use `game.release.generation` instead of `isNewerVersion`
 
 ## 1.1.0
 
