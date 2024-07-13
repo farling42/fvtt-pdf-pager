@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.1
+
+- Reduce download size by removing the *.mjs.map files from the pdfjs/build folder.
+
 ## 1.1.0
 
 - Use own packaged version of PDFJS (4.4.168), since Foundry removes the Print, Save, Ink and Text functionality in their shipped version.
