@@ -269,25 +269,8 @@ function buildOutline(pdfoutline) {
                     } else if (oldflag !== undefined) {
                             this.object.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
                     }
-                    //this.pdfviewerapp.pdfDocument.getDestinations().then(destinations => console.log("PDF Destinations =", destinations));
                 })
-                /* - working on ensuring window width is good
-                // Set iframe width
-                let iframe = event.target;
-                // PDF.js sets div.textLayer to the actual width of the document (excluding PDF.js borders)
-                let textLayer = iframe.contentWindow.document.body.querySelector('div.textLayer');
-                console.log(textLayer);
-                iframe.style.width = textLayer.scrollWidth + 'px';
-                */
             })
-            /*
-            this.pdfviewerapp.eventBus.on('scalechanged', docevent => {   // from PdfPageView
-                // docevent:
-                //  source: Toolbar
-                //  value:  either a numeric multiplier (1 = 100%, 1.5 = 150%) or a string ('page-fit', 'auto', 'page-actual'. 'page-width', 'page-height')
-                console.log('scalechanged', docevent)
-                // can also be read from this.pdfviewerapp.pdfViewer.currentScale
-            })*/
         }
     })
     
@@ -297,8 +280,7 @@ function buildOutline(pdfoutline) {
 Hooks.on("renderJournalPDFPageSheet", function(sheet, html, data) {
     // Initialising the editor MUST be done after the button has been replaced by the IFRAME.
     if (!sheet.isEditable && game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FORM_FILL_PDF)) {
-        const uuid = data.document.pdfpager_show_uuid || sheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
-        initEditor(html, uuid || data.document.uuid);
+        initEditor(html, data.document.pdfpager_show_uuid ?? data.document.uuid);
     }
 })
 
