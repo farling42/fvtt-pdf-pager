@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.4
+
+- Fixes an issue where a PDF defined with a "PDF Code" did not allow annotations to be saved.
+
 ## 1.1.3
 
 - Remove OPEN, DOWNLOAD and PRINT options in PDF.JS (to match Foundry's functionality).
