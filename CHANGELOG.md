@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.2
+
+- Remove the call to validateFileURL in viewer.mjs of pdfjs. This should allow PDFs to be loaded on Forge VTT.
+
 ## 1.1.1
 
 - Use legacy-dist version of pdfjs, so that it works on Foundry V10+ (and older browsers).
