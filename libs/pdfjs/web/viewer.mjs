@@ -10904,13 +10904,6 @@ function renderProgress(index, total) {
     progress
   }));
 }
-window.addEventListener("keydown", function (event) {
-  if (event.keyCode === 80 && (event.ctrlKey || event.metaKey) && !event.altKey && (!event.shiftKey || window.chrome || window.opera)) {
-    window.print();
-    event.preventDefault();
-    event.stopImmediatePropagation();
-  }
-}, true);
 if ("onbeforeprint" in window) {
   const stopPropagationIfNeeded = function (event) {
     if (event.detail !== "custom") {
@@ -15515,14 +15508,6 @@ class SecondaryToolbar {
       eventName: "presentationmode",
       close: true
     }, {
-      element: options.printButton,
-      eventName: "print",
-      close: true
-    }, {
-      element: options.downloadButton,
-      eventName: "download",
-      close: true
-    }, {
       element: options.viewBookmarkButton,
       eventName: null,
       close: true
@@ -15610,11 +15595,6 @@ class SecondaryToolbar {
       eventName: "documentproperties",
       close: true
     }];
-    buttons.push({
-      element: options.openFileButton,
-      eventName: "openfile",
-      close: true
-    });
     this.eventBus = eventBus;
     this.opened = false;
     this.#bindListeners(buttons);
@@ -15796,12 +15776,6 @@ class Toolbar {
     }, {
       element: options.zoomOut,
       eventName: "zoomout"
-    }, {
-      element: options.print,
-      eventName: "print"
-    }, {
-      element: options.download,
-      eventName: "download"
     }, {
       element: options.editorFreeTextButton,
       eventName: "switchannotationeditormode",
@@ -16514,7 +16488,6 @@ const PDFViewerApplication = {
     const queryString = document.location.search.substring(1);
     const params = parseQueryString(queryString);
     file = params.get("file") ?? AppOptions.get("defaultUrl");
-    //validateFileURL(file);
     const fileInput = this._openFileInput = document.createElement("input");
     fileInput.id = "fileInput";
     fileInput.hidden = true;
@@ -17636,29 +17609,6 @@ initCom(PDFViewerApplication);
 {
   PDFPrintServiceFactory.initGlobals(PDFViewerApplication);
 }
-{
-  const HOSTED_VIEWER_ORIGINS = ["null", "http://mozilla.github.io", "https://mozilla.github.io"];
-  var validateFileURL = function (file) {
-    if (!file) {
-      return;
-    }
-    try {
-      const viewerOrigin = new URL(window.location.href).origin || "null";
-      if (HOSTED_VIEWER_ORIGINS.includes(viewerOrigin)) {
-        return;
-      }
-      const fileOrigin = new URL(file, window.location.href).origin;
-      if (fileOrigin !== viewerOrigin) {
-        throw new Error("file origin does not match viewer's");
-      }
-    } catch (ex) {
-      PDFViewerApplication._documentError("pdfjs-loading-error", {
-        message: ex.message
-      });
-      throw ex;
-    }
-  };
-}
 function webViewerPageRender({
   pageNumber
 }) {
@@ -18189,24 +18139,6 @@ function webViewerKeyDown(evt) {
           PDFViewerApplication.page = PDFViewerApplication.pagesCount;
           handled = true;
           ensureViewerFocused = true;
-        }
-        break;
-    }
-  }
-  if (cmd === 1 || cmd === 8) {
-    switch (evt.keyCode) {
-      case 83:
-        eventBus.dispatch("download", {
-          source: window
-        });
-        handled = true;
-        break;
-      case 79:
-        {
-          eventBus.dispatch("openfile", {
-            source: window
-          });
-          handled = true;
         }
         break;
     }

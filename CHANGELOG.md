@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.3
+
+- Remove OPEN, DOWNLOAD and PRINT options in PDF.JS (to match Foundry's functionality).
+
 ## 1.1.2
 
 - Remove the call to validateFileURL in viewer.mjs of pdfjs. This should allow PDFs to be loaded on Forge VTT.
