@@ -24,12 +24,22 @@ SOFTWARE.
 import { PDFCONFIG } from './pdf-config.mjs';
 
 // Values for pdfPageMode
-const NOT_EDITED  = 0;
+const NOT_EDITED = 0;
 const IGNORE_EDIT = 1;
 const HAS_LOCAL_EDITS = 2;
 
+// Values for uimanager.updateToolbar (pdfjs: src/shared/util.js)
+const AnnotationEditorType = {
+  DISABLE: -1,
+  NONE: 0,
+  FREETEXT: 3,
+  HIGHLIGHT: 9,
+  STAMP: 13,
+  INK: 15,
+};
+
 export async function initAnnotations(document, pdfviewerapp, editable) {
-  
+
   pdfviewerapp.pdfViewer.pdfPagerMode = IGNORE_EDIT;
 
   // The UIManager is created very early on, and is needed for later loading of manual annotations.
@@ -79,7 +89,7 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
 
     // Prevent annotationeditorstateschanged from updating the document's flags
     pdfviewerapp.pdfViewer.pdfPagerMode = IGNORE_EDIT;
-    uimanager.updateToolbar(15);    // AnnotationEditorType.INK
+    uimanager.updateToolbar(AnnotationEditorType.INK);    // AnnotationEditorType.INK
 
     // paste() always adds them to the current page/layer
     const oldpage = uimanager.currentPageIndex + 1;
@@ -87,7 +97,7 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
 
     // As per AnnotationEditorUIManager.paste
     const data = JSON.parse(value);
-    const layer = uimanager.getLayer(pageNumber-1);
+    const layer = uimanager.getLayer(pageNumber - 1);
     for (const editor of data) {
       const deserializedEditor = layer.deserialize(editor);
       if (deserializedEditor) {
@@ -99,9 +109,17 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
         uimanager.rebuild(deserializedEditor)
       }
     }
-    
+
     uimanager.onPageChanging({ pageNumber: oldpage });
-    uimanager.updateToolbar(0);    // AnnotationEditorType.NONE
+    uimanager.updateToolbar(AnnotationEditorType.NONE);
+    if (!document.isOwner) {
+      // See pdf.js : PDFViewerApplication._initializeViewerComponents
+      // in else part of "annotationEditorMode !== AnnotationEditorType.DISABLE"
+      const domdoc = pdfviewerapp.pdfViewer.container.ownerDocument;
+      for (const id of ["editorModeButtons", "editorModeSeparator"]) {
+        domdoc.getElementById(id)?.classList.add("hidden");
+      }
+    }
 
     // Allow annotationeditorstateschanged to possibly update the document's flags
     pdfviewerapp.pdfViewer.pdfPagerMode = NOT_EDITED;
@@ -170,7 +188,7 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
         return;
       } else if (pdfviewerapp.pdfViewer.pdfPagerMode != HAS_LOCAL_EDITS) {
         if (CONFIG.debug.pdfpager) console.debug(`annotationeditorstateschanged: no local edit performed yet`)
-        return;      
+        return;
       }
 
       // The event is generated once, and lists only the currently displayed PDF page.

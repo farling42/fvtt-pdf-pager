@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.5
+
+- Hide the annotation editors if the user does not have OWNER permission on the PDF (i.e. the user has read-only permission).
+
 ## 1.1.4
 
 - Fixes an issue where a PDF defined with a "PDF Code" did not allow annotations to be saved.
