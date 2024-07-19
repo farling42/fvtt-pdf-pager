@@ -112,19 +112,17 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
 
     uimanager.onPageChanging({ pageNumber: oldpage });
     uimanager.updateToolbar(AnnotationEditorType.NONE);
-    if (!document.isOwner) {
-      // See pdf.js : PDFViewerApplication._initializeViewerComponents
-      // in else part of "annotationEditorMode !== AnnotationEditorType.DISABLE"
-      const domdoc = pdfviewerapp.pdfViewer.container.ownerDocument;
-      for (const id of ["editorModeButtons", "editorModeSeparator"]) {
-        domdoc.getElementById(id)?.classList.add("hidden");
-      }
+
+    const domdoc = pdfviewerapp.pdfViewer.container.ownerDocument;
+    // See pdf.js : PDFViewerApplication._initializeViewerComponents
+    // in else part of "annotationEditorMode !== AnnotationEditorType.DISABLE"
+    for (const id of ["editorModeButtons", "editorModeSeparator"]) {
+      domdoc.getElementById(id)?.classList.toggle("hidden", !editable);
     }
 
     // Allow annotationeditorstateschanged to possibly update the document's flags
     pdfviewerapp.pdfViewer.pdfPagerMode = NOT_EDITED;
   }
-
 
   pdfviewerapp.eventBus.on('annotationeditorlayerrendered', async event => {
     const pageNumber = event.pageNumber;
@@ -222,3 +220,26 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
   Hooks.on('updateItem', updateAnnotations);
 
 } // function initAnnotations
+
+/**
+ * When initEditor isn't being used (because editing of form-fillable PDFs is disabled),
+ * this function will initialize annotation editing separately.
+ * @param {*} html 
+ * @param {*} id_to_display 
+ * @returns 
+ */
+export async function setupAnnotations(html, id_to_display) {
+
+  const document = (id_to_display.includes('.') && await fromUuid(id_to_display)) || game.actors.get(id_to_display) || game.items.get(id_to_display);
+  if (!document) return;
+
+  html.on('load', async (event) => {
+
+    // Wait for PDF to initialise before attaching to event bus.
+    const pdfviewerapp = event.target.contentWindow.PDFViewerApplication;
+    await pdfviewerapp.initializedPromise;
+    
+    initAnnotations(document, pdfviewerapp, /*editable*/ document.canUserModify(game.user, "update"));
+  })
+
+}

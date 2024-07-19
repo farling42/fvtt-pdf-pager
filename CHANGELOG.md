@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.1.6
+
+- Hide annotation tools by default (in case the option is disabled in the pdf-pager module settings).
+- Ensure that annotations can be edited and saved when "Support Form-Fillable PDFs" is disabled.
+
 ## 1.1.5
 
 - Hide the annotation editors if the user does not have OWNER permission on the PDF (i.e. the user has read-only permission).
