@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.2.0
+
+- Provide option to set SPREAD separately for each Journal Page, which will override the general module setting.
+
 ## 1.1.6
 
 - Hide annotation tools by default (in case the option is disabled in the pdf-pager module settings).

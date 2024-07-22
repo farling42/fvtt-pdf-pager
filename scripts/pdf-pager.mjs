@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { PDFCONFIG } from './pdf-config.mjs';
+import { PDFCONFIG, ScrollMode, SpreadMode, SpreadChoices } from './pdf-config.mjs';
 import { initEditor } from './pdf-editable.mjs';
 import { getPDFByCode } from './pdf-linker.mjs';
 import { setupAnnotations } from './pdf-annotations.mjs';
@@ -181,7 +181,23 @@ async function JournalPDFPageSheet_renderInner(wrapper, sheetData) {
     const label_code = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Code.Label`);
     const elem_code = `<div class="form-group"><label>${label_code}</label><input class="pageCode" type="text" name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_CODE}"${value_code}/></div>`;
 
-    html.find('div.picker').after(elem_offset + elem_code);
+    /*
+    const zoom_selectid = `${pagedoc.id}.zoom`;
+    const label_zoom = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.defaultZoom.Name`);
+    let zoom_options=Object.entries(ZoomChoices).map(values => `<option value="${values[0]}">${values[1]}</option>`).join('');
+    let zoom_select=`<select name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_ZOOM}" id=${zoom_selectid}>${zoom_options}</select>`;
+    const elem_zoom = `<div class="form-group"><label for=${zoom_selectid}>${label_zoom}</label>${zoom_select}</div>`;
+    */
+
+    const spread_selectid = `${pagedoc.id}.zoom`;
+    const label_spread = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.defaultSpread.Name`);
+    const cur_spread = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_SPREAD) ?? SpreadMode.UNKNOWN;
+    let spread_options = Object.entries(SpreadChoices).map(values => `<option value=${values[0]} ${cur_spread == values[0] ? "selected" : ""}>${values[1]}</option>`).join('');
+    let spread_select = `<select name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_SPREAD}" id=${spread_selectid}>${spread_options}</select>`;
+    const elem_spread = `<div class="form-group"><label for=${spread_selectid}>${label_spread}</label>${spread_select}</div>`;
+
+
+    html.find('div.picker').after(elem_offset + elem_code + elem_spread);
     // Add hook to allow drop of Actor or Item into the 'PDF Code' field
     html.find('.pageCode').on('dragover', false).on('drop', function (event) {
       event.preventDefault();
@@ -192,7 +208,9 @@ async function JournalPDFPageSheet_renderInner(wrapper, sheetData) {
       if (!data) return;
       if (data.type === 'Actor' || data.type === 'Item') this.value = data.uuid;
     })
+
   } else {
+
     // Not editting, so maybe replace button with actual PDF
     let anchor = pagedoc.pdfpager_anchor;
     if (anchor || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
@@ -273,6 +291,20 @@ async function JournalPDFPageSheet_renderInner(wrapper, sheetData) {
         })
       })
     }
+
+    // Need to wait for "documentinit" event, otherwise the default options from the Viewer are loaded.
+    this.pdfviewerapp.eventBus.on("documentinit", event => {
+
+      let value = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_SCROLL);
+      if (value !== ScrollMode.UNKNOWN) this.pdfviewerapp.pdfViewer.scrollMode = Number(value);
+
+      // Set spread mode (might be String or Number)
+      value = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_SPREAD) ?? SpreadMode.UNKNOWN;
+      if (value == SpreadMode.UNKNOWN) value = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_SPREAD);
+      console.log(`existing spread mode = ${this.pdfviewerapp.pdfViewer.spreadMode}`);
+      if (value != SpreadMode.UNKNOWN) this.pdfviewerapp.pdfViewer.spreadMode = Number(value);
+      console.log(`new spread mode = ${this.pdfviewerapp.pdfViewer.spreadMode}`);
+    })
   })
 
   return html;
@@ -350,6 +382,8 @@ let webviewerloaded_set = false;
 function JournalSheet_render(wrapper, force, options) {
 
   if (!webviewerloaded_set) {
+    // Add to the window only ONCE!
+    // Even though it is triggered for every PDF page load.
     webviewerloaded_set = true;
 
     window.document.addEventListener("webviewerloaded", event => {
@@ -360,18 +394,9 @@ function JournalSheet_render(wrapper, force, options) {
       const default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
       const ignore = always_ignore || (default_zoom && default_zoom !== 'none');
 
-      console.log(`Setting ignoreDestinationZoom=${ignore}`);
+      if (CONFIG.debug.pdfpager) console.debug(`Setting ignoreDestinationZoom=${ignore}`);
       source.PDFViewerApplicationOptions.set("disablePreferences", true);
       source.PDFViewerApplicationOptions.set("ignoreDestinationZoom", ignore);
-      // defaultZoomValue
-
-      // scrollModeOnLoad
-      let value = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_SCROLL);
-      source.PDFViewerApplicationOptions.set("scrollModeOnLoad", value);
-      // spreadModeOnLoad
-      value = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_SPREAD);
-      source.PDFViewerApplicationOptions.set("spreadModeOnLoad", value);
-      // sidebarViewOnLoad
     });
   }
 
