@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.2.1
+
+- Ensure the annotation tools are enabled when opening a PDF which contains no current annotations.
+
 ## 1.2.0
 
 - Provide option to set SPREAD separately for each Journal Page, which will override the general module setting.

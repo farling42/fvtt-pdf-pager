@@ -113,13 +113,6 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
     uimanager.onPageChanging({ pageNumber: oldpage });
     uimanager.updateToolbar(AnnotationEditorType.NONE);
 
-    const domdoc = pdfviewerapp.pdfViewer.container.ownerDocument;
-    // See pdf.js : PDFViewerApplication._initializeViewerComponents
-    // in else part of "annotationEditorMode !== AnnotationEditorType.DISABLE"
-    for (const id of ["editorModeButtons", "editorModeSeparator"]) {
-      domdoc.getElementById(id)?.classList.toggle("hidden", !editable);
-    }
-
     // Allow annotationeditorstateschanged to possibly update the document's flags
     pdfviewerapp.pdfViewer.pdfPagerMode = NOT_EDITED;
   }
@@ -133,6 +126,13 @@ export async function initAnnotations(document, pdfviewerapp, editable) {
     if (editors.length > 0) {
       if (CONFIG.debug.pdfpager) console.debug(`annotationeditorlayerrendered: already loaded annotations for page ${pageNumber} - ignoring`);
       return;
+    }
+
+    // See pdf.js : PDFViewerApplication._initializeViewerComponents
+    // in else part of "annotationEditorMode !== AnnotationEditorType.DISABLE"
+    const domdoc = event.source.div.ownerDocument;
+    for (const id of ["editorModeButtons", "editorModeSeparator"]) {
+      domdoc.getElementById(id)?.classList.toggle("hidden", !editable);
     }
 
     setPageAnnotations(pageNumber);
