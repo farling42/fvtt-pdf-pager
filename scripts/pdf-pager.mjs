@@ -75,6 +75,8 @@ function updatePdfView(pdfsheet, anchor) {
 
   console.debug(`updatePdfView(sheet='${pdfsheet.object.name}', anchor='${anchor}')\n=>'${dest}'`);
   linkService.setHash(dest);
+  // Bring window to front
+  pdfsheet.document?.parent?.sheet?.render(true, {focus:true});
   return true;
 }
 

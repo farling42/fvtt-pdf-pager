@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.3.1
+
+- When clicking on a link, move focus to the PDF sheet even if it is already open (like clicking on normal Journal links).
+
 ## 1.3.0
 
 - Add button in Actor/Item sheet title to modify the Actor/Item Portrait image.
