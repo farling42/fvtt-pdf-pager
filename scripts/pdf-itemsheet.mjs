@@ -32,20 +32,20 @@ import { initEditor, logPdfFields, getPdfViewer } from './pdf-editable.mjs';
 import { PDFSheetConfig } from './pdf-actorsheet.mjs';
 import { PDFDataBrowser } from './pdf-databrowser.mjs';
 
-export class PDFItemSheet extends ItemSheet {    
+export class PDFItemSheet extends ItemSheet {
 
   constructor(item, options) {
-    super(item,options);
+    super(item, options);
     let winsize = item.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_WINDOW_SIZE);
     if (winsize) {
-      this.position.width  = winsize.width;
+      this.position.width = winsize.width;
       this.position.height = winsize.height;
     }
   }
 
   get template() {
     return `modules/${PDFCONFIG.MODULE_NAME}/templates/pdf-sheet.hbs`;
-  }    
+  }
 
   getData() {
     const context = super.getData();
@@ -62,15 +62,15 @@ export class PDFItemSheet extends ItemSheet {
     context.zoomLevel = "";
     let default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
     if (default_zoom && default_zoom !== 'none') {
-        console.log(`displaying item PDF with default zoom of ${default_zoom}%`);
-        if (default_zoom === 'number') default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM_NUMBER)
-        context.zoomLevel = `#zoom=${default_zoom}`;
+      console.log(`displaying item PDF with default zoom of ${default_zoom}%`);
+      if (default_zoom === 'number') default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM_NUMBER)
+      context.zoomLevel = `#zoom=${default_zoom}`;
     }
     return context;
   }
 
   activateListeners(html) {
-    super.activateListeners(html);      
+    super.activateListeners(html);
     initEditor(html.find('iframe'), this.object.uuid);
   }
 
@@ -87,23 +87,46 @@ export class PDFItemSheet extends ItemSheet {
     console.log('choose a custom PDF')
   }
 
+  /**
+   * Choose an image for the item/actor
+   */
+  async _onChooseImage(event) {
+    let filePicker = new FilePicker({
+      type: "image",
+      current: this.document.img,
+      callback: path => {
+        this.document.update({img: path})
+      },
+    });
+    filePicker.render();
+  }
+
   _getHeaderButtons() {
     let buttons = super._getHeaderButtons();
 
+    buttons.unshift({
+      class: "configure-image",
+      icon: "fas fa-user",
+      label: `${PDFCONFIG.MODULE_NAME}.itemSheetButton.chooseImage`,
+      onclick: event => {
+        this._onChooseImage(event);
+      }
+    })
+
     // No extra buttons if we can't edit the item.
     if (this.document.permission < CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER ||
-       !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_TITLE_BAR_BUTTONS)) return buttons;
+      !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_TITLE_BAR_BUTTONS)) return buttons;
 
     buttons.unshift({
       label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.itemSheetButton.CustomPDF`),
       class: "configure-custom-pdf",
-      icon:  "fas fa-file-pdf",
+      icon: "fas fa-file-pdf",
       onclick: event => {
         this._onChoosePdf(event);
       }
     })
 
-    if (game.user.isGM) {
+    if (game.user.isGM && game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_GM_BUTTONS)) {
       buttons.unshift({
         icon: 'fas fa-search',
         class: 'pdf-browse-data',
@@ -137,8 +160,8 @@ export class PDFItemSheet extends ItemSheet {
    * @param {Boolean} force 
    * @param {Object} context 
    */
-  render(force=false, context={}) {
-    if (!this.rendered && this.document.permission >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER) super.render(force,context);
+  render(force = false, context = {}) {
+    if (!this.rendered && this.document.permission >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER) super.render(force, context);
   }
 
   /**
@@ -147,7 +170,7 @@ export class PDFItemSheet extends ItemSheet {
    */
   _onResize(event) {
     super._onResize(event);
-    this.item.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_WINDOW_SIZE, {width: this.position.width, height: this.position.height});
+    this.item.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_WINDOW_SIZE, { width: this.position.width, height: this.position.height });
   }
 }
 
@@ -177,29 +200,29 @@ export function configureItemSettings() {
 
       // Add new list of registered sheets
       if (types.length) {
-          let options = {
-            makeDefault: false,
-            label: game.i18n.format(`${modulename}.PDFSheetName`)
-          }
-          // Simple World Building doesn't set the 'types' field, and on Foundry 11 it won't work if WE set the 'types' field.
-          if (itemTypes.length > 1) options.types = types;
-          Items.registerSheet(modulename, PDFItemSheet, options)
+        let options = {
+          makeDefault: false,
+          label: game.i18n.format(`${modulename}.PDFSheetName`)
+        }
+        // Simple World Building doesn't set the 'types' field, and on Foundry 11 it won't work if WE set the 'types' field.
+        if (itemTypes.length > 1) options.types = types;
+        Items.registerSheet(modulename, PDFItemSheet, options)
       }
     }
   }
 
-  for (let [type,label] of Object.entries(CONFIG.Item.typeLabels)) {
+  for (let [type, label] of Object.entries(CONFIG.Item.typeLabels)) {
     let itemname = game.i18n.has(label) ? game.i18n.localize(label) : type;
     game.settings.register(modulename, `${type}Sheet`, {
-		  name: game.i18n.format(`${modulename}.itemSheet.Name`, {name: itemname}),
-		  hint: game.i18n.format(`${modulename}.itemSheet.Hint`, {name: itemname}),
-		  scope: "world",
-		  type:  String,
-		  default: "",
+      name: game.i18n.format(`${modulename}.itemSheet.Name`, { name: itemname }),
+      hint: game.i18n.format(`${modulename}.itemSheet.Hint`, { name: itemname }),
+      scope: "world",
+      type: String,
+      default: "",
       filePicker: true,
       onChange: value => { updateSheets() },
-		  config: true
-	  });
+      config: true
+    });
   }
 
   updateSheets();
@@ -214,7 +237,7 @@ Hooks.on('renderSettingsConfig', (app, html, options) => {
     .closest('div.form-group')
     .before(
       '<h2 class="setting-header">' +
-        game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleItemPDFs`) +
-        '</h2>'
+      game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleItemPDFs`) +
+      '</h2>'
     )
 })

@@ -140,8 +140,31 @@ export class PDFActorSheet extends ActorSheet {
     console.log('choose a custom PDF')
   }
 
+  /**
+   * Choose an image for the item/actor
+   */
+  async _onChooseImage(event) {
+    let filePicker = new FilePicker({
+      type: "image",
+      current: this.document.img,
+      callback: path => {
+        this.document.update({img: path})
+      },
+    });
+    filePicker.render();
+  }
+
   _getHeaderButtons() {
     let buttons = super._getHeaderButtons();
+
+    buttons.unshift({
+      class: "configure-image",
+      icon:  "fas fa-user",
+      label: `${PDFCONFIG.MODULE_NAME}.actorSheetButton.chooseImage`,
+      onclick: event => {
+        this._onChooseImage(event);
+      }
+    })
 
     // No extra buttons if we can't edit the actor.
     if (this.document.permission < CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER ||
@@ -156,7 +179,7 @@ export class PDFActorSheet extends ActorSheet {
       }
     })
 
-    if (game.user.isGM) {
+    if (game.user.isGM && game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_GM_BUTTONS)) {
       buttons.unshift({
         icon: 'fas fa-search',
         class: 'pdf-browse-data',
@@ -167,7 +190,7 @@ export class PDFActorSheet extends ActorSheet {
       });
 
       buttons.unshift({
-        icon: 'fas fa-search',
+        icon: 'fas fa-clipboard-list',
         class: 'pdf-list-fields',
         label: `${PDFCONFIG.MODULE_NAME}.actorSheetButton.ShowPdfFields`,
         onclick: (event) => {

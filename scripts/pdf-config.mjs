@@ -51,6 +51,7 @@ export let PDFCONFIG = {
   SHOW_MAP_TOOLTIPS: "showMapTooltips",
   FIELD_MAPPING_MODE: "showFieldMenus",
   SHOW_TITLE_BAR_BUTTONS: "showTitleBarButtons",
+  SHOW_GM_BUTTONS: "showGmButtons",
   // Flags on an Actor
   FLAG_OFFSET: "pageOffset",
   FLAG_CODE: "code",
@@ -116,6 +117,16 @@ Hooks.once('ready', () => {
   });
 
   param = PDFCONFIG.SHOW_TITLE_BAR_BUTTONS;
+  game.settings.register(name, param, {
+    name: game.i18n.localize(`${name}.${param}.Name`),
+    hint: game.i18n.localize(`${name}.${param}.Hint`),
+    scope: "world",
+    type: Boolean,
+    default: true,
+    config: true
+  });
+
+  param = PDFCONFIG.SHOW_GM_BUTTONS;
   game.settings.register(name, param, {
     name: game.i18n.localize(`${name}.${param}.Name`),
     hint: game.i18n.localize(`${name}.${param}.Hint`),
