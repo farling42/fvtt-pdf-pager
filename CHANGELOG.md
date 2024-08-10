@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.3.0
+
+- Add button in Actor/Item sheet title to modify the Actor/Item Portrait image.
+- Add module setting to optionally hide the 'Inspect Data' and 'Log PDF Fields' buttons in the sheet title bar.
+- Change icon for "Log PDF Fields" button (for when labels are hidden by another module).
+
 ## 1.2.1
 
 - Ensure the annotation tools are enabled when opening a PDF which contains no current annotations.
