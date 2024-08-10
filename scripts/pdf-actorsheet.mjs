@@ -123,7 +123,7 @@ export class PDFActorSheet extends ActorSheet {
    * @param {jQuery} html 
    */
   activateListeners(html) {
-    super.activateListeners(html);      
+    super.activateListeners(html);
     initEditor(html.find('iframe'), this.object.uuid);
   }
 
