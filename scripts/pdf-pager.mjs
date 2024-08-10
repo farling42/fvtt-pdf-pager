@@ -143,7 +143,8 @@ function buildOutline(pdfoutline) {
         slug: JournalEntryPage.slugifyHeading(outlineNode.title),
         children: [],
         // Our data below:
-        pdfslug: JSON.stringify(outlineNode.dest)
+        pdfslug: JSON.stringify(outlineNode.dest),
+        pdfanchor: `#${encodeURIComponent((typeof outlineNode.dest === "string") ? outlineNode.dest : JSON.stringify(outlineNode.dest))}`
       };
       parent.children.push(tocNode);
       // Add children after the parent
@@ -153,6 +154,51 @@ function buildOutline(pdfoutline) {
   iterate(pdfoutline, root);
   return JournalEntryPage._flattenTOC(root.children);
 }
+
+/**
+ * Updates the TOC to show the item currently being viewed in the PDF.
+ * 
+ * @param {JournalPDFPageSheet} pdfsheet 
+ * @param {*} location 
+ */
+async function updateOutline(pdfsheet, location) {
+  console.log("updateviewarea", location);
+  let outline = pdfsheet.pdfviewerapp.pdfOutlineViewer;
+
+  // as per pdf.js: PDFOutlineViewer._currentOutlineItem()
+  if (!outline._isPagesLoaded || !outline._outline || !outline._pdfDocument) {
+    return;
+  }
+  const pageNumberToDestHash = await outline._getPageNumberToDestHash(outline._pdfDocument);
+  if (!pageNumberToDestHash) {
+    return;
+  }
+  for (let i = outline._currentPageNumber; i > 0; i--) {
+    const destHash = pageNumberToDestHash.get(i);
+    if (!destHash) {
+      continue;
+    }
+    // See if destHash is in our TOC
+    let linkElement;
+    for (const value of Object.values(pdfsheet.toc))
+      if (value.pdfanchor === destHash) {
+        linkElement = value;
+        break;
+      }
+    if (!linkElement) {
+      continue;
+    }
+    console.log(`scrolling to TOC element for ${destHash}`)
+    let jsheet = pdfsheet?.document?.parent?.sheet;
+    let tocitem = jsheet?.element[0].querySelector(`ol.headings li.heading[data-anchor="${linkElement.slug}"]`);
+    if (tocitem) tocitem.scrollIntoView({block:"center"});
+    //outline._scrollToCurrentTreeItem(linkElement.parentNode);
+    break;
+  }
+
+  //doc.pdfviewerapp.pdfOutlineViewer._currentOutlineItem();
+}
+
 
 /**
  * Adds the "Page Offset" field to the JournalPDFPageSheet EDITOR window.
@@ -308,6 +354,14 @@ async function JournalPDFPageSheet_renderInner(wrapper, sheetData) {
       if (value != SpreadMode.UNKNOWN) this.pdfviewerapp.pdfViewer.spreadMode = Number(value);
       console.log(`new spread mode = ${this.pdfviewerapp.pdfViewer.spreadMode}`);
     })
+
+    // Keep the TOC inline with the current visible page
+    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.AUTO_SCROLL_TOC)) {
+      this.pdfviewerapp.eventBus.on("updateviewarea", location => {
+        if (!this.pdfviewerapp.pdfOutlineViewer._isPagesLoaded) return;
+        updateOutline(this, location);
+      })
+    }
   })
 
   return html;
@@ -348,7 +402,7 @@ Hooks.on("closeJournalPDFPageSheet", (sheet, element) => {
 })
 
 /**
- * An exact copy of JournalSheeet#_renderHeading from foundry.js,
+ * An exact copy of JournalSheet#_renderHeading from foundry.js,
  * with the only change to set MAX_NESTING depending on whether the page is a PDF or not.
  */
 

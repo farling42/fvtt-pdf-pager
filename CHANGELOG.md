@@ -2,7 +2,8 @@
 
 ## 1.3.1
 
-- When clicking on a link, move focus to the PDF sheet even if it is already open (like clicking on normal Journal links).
+- When clicking on a link, bring the PDF sheet to the front (like when clicking on normal journal links).
+- Add option (default enabled) to scroll the TOC to show the headings for the currently visible part of the PDF.
 
 ## 1.3.0
 

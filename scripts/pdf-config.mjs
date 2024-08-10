@@ -52,6 +52,7 @@ export let PDFCONFIG = {
   FIELD_MAPPING_MODE: "showFieldMenus",
   SHOW_TITLE_BAR_BUTTONS: "showTitleBarButtons",
   SHOW_GM_BUTTONS: "showGmButtons",
+  AUTO_SCROLL_TOC: "autoScrollToc",
   // Flags on an Actor
   FLAG_OFFSET: "pageOffset",
   FLAG_CODE: "code",
@@ -183,6 +184,16 @@ Hooks.once('ready', () => {
     scope: "world",
     type: Boolean,
     default: false,
+    config: true
+  });
+
+  param = PDFCONFIG.AUTO_SCROLL_TOC;
+  game.settings.register(name, param, {
+    name: game.i18n.localize(`${name}.${param}.Name`),
+    hint: game.i18n.localize(`${name}.${param}.Hint`),
+    scope: "world",
+    type: Boolean,
+    default: true,
     config: true
   });
 

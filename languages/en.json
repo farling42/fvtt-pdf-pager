@@ -48,6 +48,8 @@
         "showTitleBarButtons.Hint": "When checked, display helpful buttons in the title bar of Actor/Item PDF Sheets",
         "showGmButtons.Name": "Show GM buttons in Title Bar",
         "showGmButtons.Hint": "Show 'Log PDF Fields' and 'Inspect Data' buttons in title bar",
+        "autoScrollToc.Name": "Scroll TOC automatically",
+        "autoScrollToc.Hint": "When the view in the PDF is changed, automatically scroll the journal's TOC to ensure the current view is visible",
         "ChoosePdfForm" : {
             "Title": "Choose PDF for '{name}'",
             "Prompt": "Custom PDF:",
