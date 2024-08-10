@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.4.1
+
+- Switch from using `page.canUserModify(game.user, "update")` to `page.isOwner` and additional check for documents in compendium packs. (isOwner is used to determine if the page edit button can appear at the top of the page in the journal sheet)
+
 ## 1.4.0
 
 - When clicking on a link, bring the PDF sheet to the front (like when clicking on normal journal links).

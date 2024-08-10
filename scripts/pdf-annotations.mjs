@@ -239,7 +239,10 @@ export async function setupAnnotations(html, id_to_display) {
     const pdfviewerapp = event.target.contentWindow.PDFViewerApplication;
     await pdfviewerapp.initializedPromise;
     
-    initAnnotations(document, pdfviewerapp, /*editable*/ document.canUserModify(game.user, "update"));
+    const editable = document.isOwner &&
+      (!document.pack || !game.packs.get(document.pack)?.locked) &&
+      (!document.parent?.pack || !game.packs.get(document.parent.pack)?.locked);
+    initAnnotations(document, pdfviewerapp, editable);
   })
 
 }

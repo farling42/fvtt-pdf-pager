@@ -472,7 +472,9 @@ export async function initEditor(html, id_to_display) {
   html.on('load', async (event) => {
     console.debug(`PDF frame loaded for '${document.name}'`);
     let read_pdf = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF);
-    let editable = !read_pdf && document.canUserModify(game.user, "update");
+    let editable = !read_pdf && document.isOwner && 
+      (!document.pack || !game.packs.get(document.pack)?.locked) &&
+      (!document.parent?.pack || !game.packs.get(document.parent.pack)?.locked);
 
     // Wait for the PDFViewer to be fully initialized
     const contentWindow = event.target.contentWindow;
