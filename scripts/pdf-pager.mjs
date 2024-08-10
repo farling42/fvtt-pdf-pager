@@ -75,8 +75,9 @@ function updatePdfView(pdfsheet, anchor) {
 
   console.debug(`updatePdfView(sheet='${pdfsheet.object.name}', anchor='${anchor}')\n=>'${dest}'`);
   linkService.setHash(dest);
-  // Bring window to front
-  pdfsheet.document?.parent?.sheet?.render(true, {focus:true});
+  // Do the journal.sheet(false, {focus: true}) without re-rendering the app,
+  // otherwise we lose the selected page.
+  pdfsheet.document?.parent?.sheet?.bringToTop();
   return true;
 }
 
