@@ -148,9 +148,9 @@ export class PDFActorSheet extends ActorSheet {
         !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_TITLE_BAR_BUTTONS)) return buttons;
 
     buttons.unshift({
-      label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.CustomPDF`),
       class: "configure-custom-pdf",
       icon:  "fas fa-file-pdf",
+      label: `${PDFCONFIG.MODULE_NAME}.actorSheetButton.CustomPDF`,
       onclick: event => {
         this._onChoosePdf(event);
       }
@@ -160,7 +160,7 @@ export class PDFActorSheet extends ActorSheet {
       buttons.unshift({
         icon: 'fas fa-search',
         class: 'pdf-browse-data',
-        label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.InspectData`),
+        label: `${PDFCONFIG.MODULE_NAME}.actorSheetButton.InspectData`,
         onclick: () => {
           new PDFDataBrowser(this.document).render(true);
         },
@@ -169,7 +169,7 @@ export class PDFActorSheet extends ActorSheet {
       buttons.unshift({
         icon: 'fas fa-search',
         class: 'pdf-list-fields',
-        label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.actorSheetButton.ShowPdfFields`),
+        label: `${PDFCONFIG.MODULE_NAME}.actorSheetButton.ShowPdfFields`,
         onclick: (event) => {
           const pdfviewer = getPdfViewer(this.form);
           if (pdfviewer)
