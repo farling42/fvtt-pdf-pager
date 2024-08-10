@@ -162,7 +162,6 @@ function buildOutline(pdfoutline) {
  * @param {*} location 
  */
 async function updateOutline(pdfsheet, location) {
-  console.log("updateviewarea", location);
   let outline = pdfsheet.pdfviewerapp.pdfOutlineViewer;
 
   // as per pdf.js: PDFOutlineViewer._currentOutlineItem()
@@ -186,9 +185,9 @@ async function updateOutline(pdfsheet, location) {
         break;
       }
     if (!linkElement) {
+      console.log(`TOC is missing`, linkElement);
       continue;
     }
-    console.log(`scrolling to TOC element for ${destHash}`)
     let jsheet = pdfsheet?.document?.parent?.sheet;
     let tocitem = jsheet?.element[0].querySelector(`ol.headings li.heading[data-anchor="${linkElement.slug}"]`);
     if (tocitem) tocitem.scrollIntoView({block:"center"});
