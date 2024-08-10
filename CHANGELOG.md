@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.3.1
+## 1.4.0
 
 - When clicking on a link, bring the PDF sheet to the front (like when clicking on normal journal links).
 - Add option (default enabled) to scroll the TOC to show the headings for the currently visible part of the PDF.
