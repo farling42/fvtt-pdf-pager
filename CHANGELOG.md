@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.4.2
+
+- Better handling of Annotations (hopefully never leaving edit tools on-screen when PDF is not editable).
+- Slight improvement to TOC scrolling (to prevent errors being reported).
+
 ## 1.4.1
 
 - Switch from using `page.canUserModify(game.user, "update")` to `page.isOwner` and additional check for documents in compendium packs. (isOwner is used to determine if the page edit button can appear at the top of the page in the journal sheet)
