@@ -172,6 +172,9 @@ async function updateOutline(pdfsheet, location) {
   if (!pageNumberToDestHash) {
     return;
   }
+  const html = pdfsheet?.document?.parent?.sheet?.element[0];
+  if (!html) return;
+
   for (let i = outline._currentPageNumber; i > 0; i--) {
     const destHash = pageNumberToDestHash.get(i);
     if (!destHash) {
@@ -185,17 +188,19 @@ async function updateOutline(pdfsheet, location) {
         break;
       }
     if (!linkElement) {
-      console.log(`TOC is missing`, linkElement);
       continue;
     }
-    let jsheet = pdfsheet?.document?.parent?.sheet;
-    let tocitem = jsheet?.element[0].querySelector(`ol.headings li.heading[data-anchor="${linkElement.slug}"]`);
-    if (tocitem) tocitem.scrollIntoView({block:"center"});
-    //outline._scrollToCurrentTreeItem(linkElement.parentNode);
+    const tocitem = html.querySelector(`ol.headings li.heading[data-anchor="${linkElement.slug}"]`);
+    if (!tocitem) {
+      // The actual TOC entry is too deep to be displayed on the Journal sheet,
+      // so we need to look for the earliest parent.
+      // see JournalSheet_renderHeadings later.
+      //console.log(`updateOutline: no tocitem for "${linkElement.slug}" to match "${destHash}"`)
+      continue;
+    }
+    tocitem.scrollIntoView({block:"center"});
     break;
   }
-
-  //doc.pdfviewerapp.pdfOutlineViewer._currentOutlineItem();
 }
 
 
