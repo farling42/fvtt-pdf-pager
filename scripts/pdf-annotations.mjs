@@ -21,6 +21,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+/*
+ * When adding a STAMP (image), there a subsequent telemetry report of "inserted_image" which
+ * is required to be received before setting the tooltip mode to NONE. 
+ */
+
 import { PDFCONFIG } from './pdf-config.mjs';
 
 // Values for pdfPageMode
@@ -53,6 +58,7 @@ class AnnotationManager {
     this.editable = editable;
     //this.uimanager = undefined;
 
+    // Prevent generating events until we've loaded all the pages.
     this.pdfViewer.pdfPagerMode = IGNORE_EDIT;
     mapping.set(doc, this);
 
@@ -66,7 +72,7 @@ class AnnotationManager {
     pdfviewerapp.eventBus.on('annotationeditoruimanager', this.bound_annotationeditoruimanager)
     pdfviewerapp.eventBus.on('reporttelemetry', this.bound_reporttelemetry);
     pdfviewerapp.eventBus.on('annotationeditorlayerrendered', this.bound_annotationeditorlayerrendered);
-    if (editable) pdfviewerapp.eventBus.on('annotationeditorstateschanged', this.bound_annotationeditorstateschanged)
+    if (this.editable) pdfviewerapp.eventBus.on('annotationeditorstateschanged', this.bound_annotationeditorstateschanged)
   } // constructor
 
   delete() {
@@ -74,8 +80,9 @@ class AnnotationManager {
     this.pdfviewerapp.eventBus.off('annotationeditoruimanager', this.bound_annotationeditoruimanager);
     this.pdfviewerapp.eventBus.off('reporttelemetry', this.bound_reporttelemetry);
     this.pdfviewerapp.eventBus.off('annotationeditorlayerrendered', this.bound_annotationeditorlayerrendered);
-    this.pdfviewerapp.eventBus.off('annotationeditorstateschanged', this.bound_annotationeditorstateschanged);
+    if (this.editable) this.pdfviewerapp.eventBus.off('annotationeditorstateschanged', this.bound_annotationeditorstateschanged);
     // Now this object can be safely deleted
+    mapping.delete(this.document);
   }
 
   #setUiManager(ev) {
@@ -83,19 +90,13 @@ class AnnotationManager {
     if (CONFIG.debug.pdfpager) console.debug(`annotationeditoruimanager:`, this.uimanager);
   }
 
-  #reporttelemetry(ev) {
-    if (ev.details.type !== "editing") return;
-    console.log(`reporttelemetry: pageIndex ${ev.source.parent.pageIndex}, ${ev.source.id}: ${ev.details.data.type} ${ev.details.data.action}`)
-  }
-
   #annotationeditorlayerrendered(event) {
     const pageNumber = event.pageNumber;
-    const pdfpageview = event.source;
 
     if (CONFIG.debug.pdfpager) console.debug(`annotationeditorlayerrendered: page ${pageNumber}`)
 
     // Prevent loading annotations if editor layer rendered a second time
-    const editors = this.getAnnotationEditors(pdfpageview, pageNumber - 1);
+    const editors = this.uimanager.getEditors(pageNumber - 1);
     if (editors.length > 0) {
       if (CONFIG.debug.pdfpager) console.debug(`annotationeditorlayerrendered: already loaded annotations for page ${pageNumber} - ignoring`);
       return;
@@ -108,7 +109,11 @@ class AnnotationManager {
       domdoc.getElementById(id)?.classList.toggle("hidden", !this.editable);
     }
 
+    // Prevent #annotationeditorstateschanged from triggering changes
+    this.pdfViewer.pdfPagerMode = IGNORE_EDIT;
     this.setPageAnnotations(pageNumber);
+    // Allow annotationeditorstateschanged to possibly update the Document's flags
+    this.pdfViewer.pdfPagerMode = NOT_EDITED;
   }
 
   #updateFlags() {
@@ -121,7 +126,7 @@ class AnnotationManager {
       const editors = [];
       const pageNumber = pdfpageview.pdfPage.pageNumber;
 
-      for (const editor of this.getAnnotationEditors(pdfpageview, pageNumber - 1)) {
+      for (const editor of this.uimanager.getEditors(pageNumber - 1)) {
         const serialized = editor.serialize(/*isForCopying*/ true);
         if (serialized) {
           editors.push(serialized);
@@ -131,7 +136,7 @@ class AnnotationManager {
 
       // setFlag without re-rendering
       const flag = flagName(pageNumber);
-      const oldvalue = foundry.utils.getProperty(doc, flag);
+      const oldvalue = foundry.utils.getProperty(this.document, flag);
 
       if (oldvalue != value) {
         if (CONFIG.debug.pdfpager) console.debug(`annotationeditorstateschanged: page ${pageNumber} = ${editors.length} annotations (${value.length} bytes)`);
@@ -140,7 +145,7 @@ class AnnotationManager {
     }
 
     if (CONFIG.debug.pdfpager) console.debug("Annotation updateFlags");
-    if (Object.keys(updates).length) doc.update(updates, { render: false, updatePdfEditors: true });
+    if (Object.keys(updates).length) this.document.update(updates, { render: false, updatePdfEditors: true });
     this.pdfViewer.pdfPagerMode = NOT_EDITED;
   } // updateFlags
 
@@ -163,41 +168,21 @@ class AnnotationManager {
     // The event is generated once, and lists only the currently displayed PDF page.
     // It doesn't account for changes made on other pages of the PDF page,
     // so we have to iterate over all the pages to see which contain actual changes.
-
-    debounceUpdateFlags();
-  }
-
-  getAnnotationEditors(pdfpageview, pageIndex) {
-    let result = [];
-    const storage = pdfpageview.annotationLayer?.annotationStorage.getAll();
-    if (!storage) return result;
-
-    // As AnnotationEditorUIManager.copy(event)
-    for (const [key, editor] of Object.entries(storage)) {
-      if (key.startsWith("pdfjs_internal_editor_") &&
-        !editor.deleted &&
-        editor.pageIndex == pageIndex) {
-        result.push(editor);
-      }
-    }
-    return result;
+    if (CONFIG.debug.pdfpager) console.debug(`annotationeditorstateschanged: setting delay for updateFlags`)
+    this.debounceUpdateFlags();
   }
 
   removePageAnnotations(pageIndex) {
     const pdfpageview = this.pdfViewer._pages[pageIndex];
     if (!pdfpageview) return;
-    for (const editor of this.getAnnotationEditors(pdfpageview, pageIndex)) {
+    for (const editor of this.uimanager.getEditors(pageIndex)) {
       editor.remove();
     }
   }
 
   setPageAnnotations(pageNumber) {
     const value = foundry.utils.getProperty(this.document, flagName(pageNumber));
-    if (!value) {
-      // Allow annotationeditorstateschanged to possibly update the Document's flags
-      this.pdfViewer.pdfPagerMode = NOT_EDITED;
-      return;
-    }
+    if (!value) return;
 
     if (CONFIG.debug.pdfpager) console.debug(`Loading annotations for page ${pageNumber}`)
     const pasteevent = new ClipboardEvent("copy", { clipboardData: new DataTransfer() });
@@ -207,42 +192,54 @@ class AnnotationManager {
     if (!layer) return; // They will be loaded when that layer is rendered
 
     // Prevent annotationeditorstateschanged from updating the Document's flags
-    this.pdfViewer.pdfPagerMode = IGNORE_EDIT;
-    layer.updateMode(AnnotationEditorType.INK);
+    //this.uimanager.updateToolbar(AnnotationEditorType.STAMP);
+    this.uimanager.updateMode(AnnotationEditorType.STAMP);
 
     // As per AnnotationEditorUIManager.paste
     const data = JSON.parse(value);
 
-    for (const editor of data) {
-      const deserializedEditor = layer.deserialize(editor);
-      if (deserializedEditor) {
+    for (const editordata of data) {
+      const editor = layer.deserialize(editordata);
+      if (editor) {
         // PDFJS will think that this is a paste, and so offset it based on width/height,
         // so fudge the opposite of what rebuild will do because it thinks we are doing a copy/paste.
         // PDFJS, Ink.render() doing `if (this.width) ... setAt <with offset>`
-        deserializedEditor.x -= deserializedEditor.width;
-        deserializedEditor.y -= deserializedEditor.height;
-        console.log("rebuilding editor", deserializedEditor);
-        layer.addOrRebuild(deserializedEditor);
+        editor.x -= editor.width;
+        editor.y -= editor.height;
+        if (CONFIG.debug.pdfpager) console.log("adding editor", editor);
+        layer.add(editor);
       }
     }
+    this.debounceEndEdit();
+  }
 
-    setTimeout(() => {
-      if (CONFIG.debug.pdfpager) console.debug(`Finished updating annotations for page ${pageNumber}`);
-      this.uimanager.unselectAll();
-      layer.updateMode(AnnotationEditorType.NONE);
-      // Allow annotationeditorstateschanged to possibly update the Document's flags
-      this.pdfViewer.pdfPagerMode = NOT_EDITED;
-    }, 3000);
+  #endEdit() {
+    if (CONFIG.debug.pdfpager) console.debug(`endEdit`);
+    this.uimanager.unselectAll();
+    //this.uimanager.updateToolbar(AnnotationEditorType.NONE);
+    this.uimanager.updateMode(AnnotationEditorType.NONE);
+  }
+  debounceEndEdit = foundry.utils.debounce(this.#endEdit.bind(this), 250);
+
+  #reporttelemetry(ev) {
+    // Triggered when items are being added, removed from the annotation layer
+    //if (ev.details.type !== "editing") return;
+    if (CONFIG.debug.pdfpager) console.log(`reporttelemetry: pageIndex ${ev.source.parent.pageIndex}, ${ev.details.type} ${ev.source.id}: ${ev.details.data.type} ${ev.details.data.action}`)
+    this.debounceEndEdit();
   }
 
   updateAnnotations(changed) {
     let changedPages = Object.keys(changed?.flags?.[PDFCONFIG.MODULE_NAME]?.objects ?? {});
     let changes = changedPages.map(key => parseInt(key.slice(4)));  // strip leading "page" from "pageXX"
 
+    // Prevent #annotationeditorstateschanged from triggering changes
+    this.pdfViewer.pdfPagerMode = IGNORE_EDIT;
     for (const pageNumber of changes) {
       this.removePageAnnotations(pageNumber - 1);
       this.setPageAnnotations(pageNumber);
     }
+    // Allow annotationeditorstateschanged to possibly update the Document's flags
+    this.pdfViewer.pdfPagerMode = NOT_EDITED;
   }
 } // class AnnotationManager
 
@@ -261,7 +258,7 @@ function updateAnnotations(doc, changed, options, userId) {
     // No longer rendered, so remove from the mapping (and delete the handler?)
     if (mapping.has(doc)) {
       if (CONFIG.debug.pdfpager) console.debug(`updateAnnotations: removing AnnotationManager for "${doc.name}"`);
-      mapping.delete(doc);
+      mapping.get(doc).delete();
     }
     return;
   }
@@ -284,7 +281,6 @@ function pageClosed(sheet, html) {
     if (sheet.object === doc || sheet.object == doc.parent) {
       if (CONFIG.debug.pdfpager) console.debug('pageClosed: deleting AnnotationManager');
       app.delete();
-      mapping.delete(doc);
       break;
     }
   }
