@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.4.3
+
+- If the PDF does NOT have any JSactions defined inside it, then trigger text change with an "input" event rather than a "TAB" key event.
+
 ## 1.4.2
 
 - Better handling of Annotations (hopefully never leaving edit tools on-screen when PDF is not editable).

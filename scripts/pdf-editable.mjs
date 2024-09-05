@@ -274,7 +274,10 @@ async function setFormFromDocument(pdfviewer, document, options = {}) {
       // and performs all normal pdf-embedded processing
       elem.dispatchEvent(new FocusEvent("focus"));
       elem.value = newvalue;
-      if (elem.type === 'select-one')
+
+      // PDFs which do not have any JSactions must receive an "input" event to set the correct string. (Abena.-.Lvl1.Hunter.-.charsheet.pdf)
+      // PDFs with JSactions require a TAB key event to set the correct value.
+      if (elem.type === 'select-one' || !await pdfviewer.pdfDocument.hasJSActions())
         elem.dispatchEvent(new KeyboardEvent("input", { target: elem }));
       else
         elem.dispatchEvent(new KeyboardEvent("keydown", { key: 'Tab' }));
@@ -324,7 +327,7 @@ async function setDocumentFromForm(pdfviewer, document, options) {
 /**
  * Handle the event which fired when the user changed a value in a field.
  * @param {Document} document An Actor or Item
- * @param {string} fieldname  The PDF NAME of the field
+ * @param {string} fieldname  The PDF NAME of the field (might include ".")
  * @param {string} value      The value to be stored in the document
  */
 function modifyDocument(document, fieldname, value) {
