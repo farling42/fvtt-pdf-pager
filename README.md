@@ -52,7 +52,11 @@ When field editing is enabled, it is possible to click on normal text within the
 
 Currently, the mapping is stored based on the text string that was selected, so if the same text appears in multiple places within the PDF then all occurrences will trigger the configured Macro.
 
+The macro is passed the `label` parameter which corresponds to the clicked text that triggered the macro.
+
 If the [Color Picker](https://foundryvtt.com/packages/color-picker) module is enabled, then it will be used to configure the colours of the label interactions.
+
+The mapping to Macros can be set when the "Edit Field Mapping" option is enabled. The mapping can also be defined in the field mapping object where the field name is `LABEL.text` (where text is the trimmed text of the span) and the value is the UUID of the macro to be triggered.
 
 #### A manually created object mapping
 
