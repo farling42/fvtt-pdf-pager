@@ -320,9 +320,13 @@ Hooks.once('ready', () => {
     config: true
   });
 
+  let colorhandler = game.settings;
+  if (game.modules.get("color-picker").active)
+    colorhandler = ColorPicker;
+
   // Clickable Text colours
   param = PDFCONFIG.LABEL_CLICKABLE_COLOR;
-  ColorPicker.register(name, param, {
+  colorhandler.register(name, param, {
     name: game.i18n.localize(`${name}.${param}.Name`),
     hint: game.i18n.localize(`${name}.${param}.Hint`),
     scope: "world",
@@ -336,7 +340,7 @@ Hooks.once('ready', () => {
     });
 
   param = PDFCONFIG.LABEL_HOVERED_COLOR;
-  ColorPicker.register(name, param, {
+  colorhandler.register(name, param, {
     name: game.i18n.localize(`${name}.${param}.Name`),
     hint: game.i18n.localize(`${name}.${param}.Hint`),
     scope: "world",
@@ -350,7 +354,7 @@ Hooks.once('ready', () => {
     });
 
   param = PDFCONFIG.LABEL_PRESSED_COLOR;
-  ColorPicker.register(name, param, {
+  colorhandler.register(name, param, {
     name: game.i18n.localize(`${name}.${param}.Name`),
     hint: game.i18n.localize(`${name}.${param}.Hint`),
     scope: "world",

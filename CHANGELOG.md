@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.5.1
+
+- Ensure that the "label" parameter passed to the invoked Macro works.
+- Revert to the color-picker module being optional.
+
 ## 1.5.0
 
 - Add the ability to set arbitrary text within a PDF to be clickable, triggering a preconfigured Macro.

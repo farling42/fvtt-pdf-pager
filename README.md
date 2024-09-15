@@ -52,6 +52,8 @@ When field editing is enabled, it is possible to click on normal text within the
 
 Currently, the mapping is stored based on the text string that was selected, so if the same text appears in multiple places within the PDF then all occurrences will trigger the configured Macro.
 
+If the [Color Picker](https://foundryvtt.com/packages/color-picker) module is enabled, then it will be used to configure the colours of the label interactions.
+
 #### A manually created object mapping
 
 To map the PDF fields to Actor fields (such as hit points or armour class), a mapping is required. This can be prepared outside of Foundry and then pasted into the corresponding "Field Mappings..." box of the module settings window. The simple case is to have something like:
