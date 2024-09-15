@@ -24,9 +24,13 @@
       {
         "id": "lib-wrapper",
         "type": "module",
-        "manifest": "https://github.com/ruipin/fvtt-lib-wrapper/releases/latest/download/module.json",
-        "compatibility": {}
-      }      
+        "manifest": "https://github.com/ruipin/fvtt-lib-wrapper/releases/latest/download/module.json"
+      },
+      {
+        "id": "color-picker",
+        "type": "module",
+        "manifest": "https://github.com/Larkinabout/fvtt-color-picker/releases/latest/download/module.json"
+      }
     ]
   },
   "esmodules": [

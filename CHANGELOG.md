@@ -3,6 +3,7 @@
 ## 1.5.0
 
 - Add the ability to set arbitrary text within a PDF to be clickable, triggering a preconfigured Macro.
+- Add dependency on Color Picker module to support defining the colour of label interactions.
 
 ## 1.4.3
 

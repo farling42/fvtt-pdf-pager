@@ -322,35 +322,47 @@ Hooks.once('ready', () => {
 
   // Clickable Text colours
   param = PDFCONFIG.LABEL_CLICKABLE_COLOR;
-  game.settings.register(name, param, {
+  ColorPicker.register(name, param, {
     name: game.i18n.localize(`${name}.${param}.Name`),
     hint: game.i18n.localize(`${name}.${param}.Hint`),
     scope: "world",
     type: String,
     default: "#ff000020",
     config: true
-  });
+    },
+    {
+      format: 'hexa',
+      alphaChannel: true
+    });
 
   param = PDFCONFIG.LABEL_HOVERED_COLOR;
-  game.settings.register(name, param, {
+  ColorPicker.register(name, param, {
     name: game.i18n.localize(`${name}.${param}.Name`),
     hint: game.i18n.localize(`${name}.${param}.Hint`),
     scope: "world",
     type: String,
     default: "#0000ff40",
     config: true
-  });
+    },
+    {
+      format: 'hexa',
+      alphaChannel: true
+    });
 
   param = PDFCONFIG.LABEL_PRESSED_COLOR;
-  game.settings.register(name, param, {
+  ColorPicker.register(name, param, {
     name: game.i18n.localize(`${name}.${param}.Name`),
     hint: game.i18n.localize(`${name}.${param}.Hint`),
     scope: "world",
     type: String,
     default: "#0000ff80",
     config: true
-  });
-  
+    },
+    {
+      format: 'hexa',
+      alphaChannel: true
+    });
+
   // Ideally ACTOR_CONFIG and ITEM_CONFIG would use a TextArea.
   // We can't simply patch the SettingsConfig.prototype._renderInner to swap "<input" for "<textarea" because
   // the value is stored differently (and so would have to be retrieved in a different manner):
