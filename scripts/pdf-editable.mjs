@@ -475,7 +475,7 @@ export async function initEditor(html, id_to_display) {
   html.on('load', async (event) => {
     console.debug(`PDF frame loaded for '${document.name}'`);
     let read_pdf = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF);
-    let editable = !read_pdf && document.isOwner && 
+    let editable = !read_pdf && document.isOwner &&
       (!document.pack || !game.packs.get(document.pack)?.locked) &&
       (!document.parent?.pack || !game.packs.get(document.parent.pack)?.locked);
 
@@ -495,14 +495,14 @@ export async function initEditor(html, id_to_display) {
     let timeout = false;
 
     // Initialise the annotations syncing system.     
-    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.EDITABLE_ANNOTATIONS)) 
+    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.EDITABLE_ANNOTATIONS))
       initAnnotations(document, pdfviewerapp, editable);
 
     // Wait for the AnnotationLayer to get drawn before populating all the fields with data from the Document.
     // TODO - how to only do these ONCE for each page (or ONCE for the whole document).
     //        Resizing the window causes this to be called again for each page!
     pdfviewerapp.eventBus.on('annotationlayerrendered', async layerevent => {   // from PdfPageView
-      
+
       const editor_menus = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FIELD_MAPPING_MODE);
       const map_tooltips = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_MAP_TOOLTIPS);
       if (CONFIG.debug.pdfpager) console.debug(`Loaded page ${layerevent.pageNumber} for '${document.name}'`);
@@ -665,6 +665,40 @@ export async function initEditor(html, id_to_display) {
         }
       }
     })
+
+    if (editable) {
+      pdfviewerapp.eventBus.on('textlayerrendered', async layerevent => {   // from PdfPageView
+
+        //if (CONFIG.debug.pdfpager) 
+        console.debug(`textlayerrendered for page ${layerevent.pageNumber}`);
+        const editor_menus = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FIELD_MAPPING_MODE);
+        const map_tooltips = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_MAP_TOOLTIPS);
+        const pdfpageview = layerevent.source;
+        const field_mappings = (document instanceof Actor) ? map_pdf2actor : map_pdf2item;
+
+        for (const span of pdfpageview.textLayer.div.querySelectorAll('span')) {
+          if (span.children.length > 0) continue;
+          const text = span.textContent.trim();
+          if (text) {
+            // Look for a macro that is currently attached to this 
+            const macrouuid = field_mappings?.[spanMappingKey(span)];
+            //const macrouuid = (span.textContent === "INITIATIVE") ? "Macro.JEro3z6FrztdKRPI" : undefined;
+
+            if (map_tooltips) {
+              // Add tooltip if a macro is currently mapped to the field.
+              span.setAttribute("title", (macrouuid && (await fromUuid(macrouuid))?.name) ?? game.i18n.localize("pdf-pager.noMacroMapping"));
+            }
+            if (editor_menus) {
+              // let the user choose which fields can actually be clicked.
+              add_clickable_text(span, macrouuid, span_click_edit, (document instanceof Actor) ? LABEL_DOCTYPE_ACTOR : LABEL_DOCTYPE_ITEM);
+            } else {
+              // Only highlight the fields which have macros mapped to them.
+              if (macrouuid) add_clickable_text(span, macrouuid, span_click);
+            }
+          }
+        }
+      })
+    }
   })
 }
 
@@ -739,3 +773,123 @@ export async function logPdfFields(pdfviewer) {
   }
 }
 
+/*
+ * Handle clicking on pure text fields
+ */
+
+const LABEL_ATTRIBUTE_MACRO = "pdfpager-macro";
+const LABEL_ATTRIBUTE_DOCTYPE = "pdfpager-doctype";
+const LABEL_DOCTYPE_ACTOR = "actor";
+const LABEL_DOCTYPE_ITEM = "item";
+
+function getSpan(event) {
+  const span = event.target;
+  if (span.children.length > 0 || span.nodeName !== "SPAN") return null;
+  event.stopPropagation();
+  return span;
+}
+function spanMappingKey(span) {
+  return `LABEL.${span.textContent.trim()}`;
+}
+
+function span_pointerenter(event) {
+  const span = getSpan(event);
+  if (!span) return;
+  //console.log(event);
+  span.style.backgroundColor = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.LABEL_HOVERED_COLOR);
+}
+function span_pointerleave(event) {
+  const span = getSpan(event);
+  if (!span) return;
+  //console.log(event);
+  span.style.backgroundColor = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.LABEL_CLICKABLE_COLOR);
+}
+
+function span_pointerdown(event) {
+  const span = getSpan(event);
+  if (!span) return;
+  //console.log(event);
+  span.style.backgroundColor = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.LABEL_PRESSED_COLOR);
+}
+function span_pointerup(event) {
+  const span = getSpan(event);
+  if (!span) return;
+  //console.log(event);
+  span.style.backgroundColor = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.LABEL_HOVERED_COLOR);
+}
+
+async function span_click(event) {
+  const span = getSpan(event);
+  if (!span) return;
+  //console.log(`span_click: "${span.textContent}"`);
+  // Trigger the macro stored on the field.
+  const uuid = event.target.getAttribute(LABEL_ATTRIBUTE_MACRO);
+  if (!uuid) return;
+  const macro = await fromUuid(uuid);
+  if (!macro) {
+    console.error(`Macro ${uuid} does not exist`);
+    return;
+  }
+  if (CONFIG.debug.pdfpager) console.log(`Trigger Macro '${macro.name}'`);
+  // FVTT 10 has actor and token fields.
+  // FVTT 12 has actor, token, speaker, event fields.
+  // Invoke _executeScript ourselves!
+  macro.execute({ event, label: span.textContext });
+}
+
+async function span_click_edit(event) {
+  const span = getSpan(event);
+  if (!span) return;
+  //console.log(`span_click_edit: "${event}"`);
+  // Open a DIALOG window to allow a macro UUID to be entered for the field.
+  const uuid = span.getAttribute(LABEL_ATTRIBUTE_MACRO);
+  console.log(`EDIT LABEL MACRO: initial value = "${uuid ?? ''}"`)
+
+  const macros = game.macros.values().toArray().reduce(
+    (acc, value) => { acc[value.uuid] = value.name; return acc },
+    { [""]: null }
+  );
+
+  let html = `<p>Select the Macro to be triggered when this text is clicked:</p><select>${HandlebarsHelpers.selectOptions(macros, { hash: { selected: uuid } })}</select>`;
+
+  await Dialog.prompt({
+    title: `Choose Macro for '${span.textContent}'`,
+    content: html,
+    label: "Set Macro",
+    callback: async html => {
+      const newuuid = html[0].querySelector("select").value;
+      console.log(`Selected Macro = "${newuuid}"`);
+      const isActor = (span.getAttribute(LABEL_ATTRIBUTE_DOCTYPE) == LABEL_DOCTYPE_ACTOR);
+      const field_mappings = isActor ? map_pdf2actor : map_pdf2item;
+      const key = spanMappingKey(span);
+      if (field_mappings[key] !== newuuid) {
+        if (newuuid) {
+          span.setAttribute(LABEL_ATTRIBUTE_MACRO, newuuid);
+          field_mappings[key] = newuuid;
+        } else {
+          span.removeAttribute(LABEL_ATTRIBUTE_MACRO);
+          delete field_mappings[key];
+        }
+        span.setAttribute("title", (newuuid && (await fromUuid(newuuid))?.name) || game.i18n.localize("pdf-pager.noMacroMapping"));
+
+        if (isActor)
+          game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ACTOR_CONFIG, map_pdf2actor);
+        else
+          game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ITEM_CONFIG, map_pdf2item);
+      }
+    },
+    rejectClose: false
+  });
+}
+
+function add_clickable_text(span, macrouuid, clickfunc, doctype) {
+  console.log(`add_clickable_text: "${span.textContent}"`);
+  span.addEventListener("pointerenter", span_pointerenter);
+  span.addEventListener("pointerleave", span_pointerleave);
+  span.addEventListener("pointerdown", span_pointerdown);
+  span.addEventListener("pointerup", span_pointerup);
+  span.addEventListener("click", clickfunc);
+  span.style.backgroundColor = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.LABEL_CLICKABLE_COLOR);
+  if (doctype) span.setAttribute(LABEL_ATTRIBUTE_DOCTYPE, doctype);
+  if (macrouuid) span.setAttribute(LABEL_ATTRIBUTE_MACRO, macrouuid);
+}

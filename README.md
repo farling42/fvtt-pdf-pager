@@ -46,6 +46,12 @@ An additional option `<<<Ignore This Field>>>` value is available which will set
 
 ![Image of field Editing](https://raw.githubusercontent.com/farling42/fvtt-pdf-pager/master/images/pdfpager-fields.png)
 
+#### Invoke Macro From Label
+
+When field editing is enabled, it is possible to click on normal text within the fillable PDF in order to specify a Macro which should be triggered when that text is clicked.
+
+Currently, the mapping is stored based on the text string that was selected, so if the same text appears in multiple places within the PDF then all occurrences will trigger the configured Macro.
+
 #### A manually created object mapping
 
 To map the PDF fields to Actor fields (such as hit points or armour class), a mapping is required. This can be prepared outside of Foundry and then pasted into the corresponding "Field Mappings..." box of the module settings window. The simple case is to have something like:

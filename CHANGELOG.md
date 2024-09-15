@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.5.0
+
+- Add the ability to set arbitrary text within a PDF to be clickable, triggering a preconfigured Macro.
+
 ## 1.4.3
 
 - If the PDF does NOT have any JSactions defined inside it, then trigger text change with an "input" event rather than a "TAB" key event.

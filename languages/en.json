@@ -50,6 +50,18 @@
         "showGmButtons.Hint": "Show 'Log PDF Fields' and 'Inspect Data' buttons in title bar",
         "autoScrollToc.Name": "Scroll TOC automatically",
         "autoScrollToc.Hint": "When the view in the PDF is changed, automatically scroll the journal's TOC to ensure the current view is visible",
+        "labelClickableColor": {
+            "Name": "Color for Clickable Text",
+            "Hint": "Define the backgound colour for labels which are clickable (It should have a low alpha)"
+        },
+        "labelHoverColor": {
+            "Name": "Hover Color for Clickable Text",
+            "Hint": "Define the background colour when hovering over clickable text (It should have a low alpha)"
+        },
+        "labelClickColor": {
+            "Name": "Click Color for Clickable Text",
+            "Hint": "Define the background colour when clicking on clickable text (It should have a low alpha)"
+        },
         "ChoosePdfForm" : {
             "Title": "Choose PDF for '{name}'",
             "Prompt": "Custom PDF:",
@@ -128,6 +140,7 @@
         },
         "ignoreField": {
             "label": "<<<Ignore This Field>>>"
-        }
+        },
+        "noMacroMapping": "--NO MAPPING--"
     }
 }
