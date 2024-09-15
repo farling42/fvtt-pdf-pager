@@ -669,8 +669,7 @@ export async function initEditor(html, id_to_display) {
     if (editable) {
       pdfviewerapp.eventBus.on('textlayerrendered', async layerevent => {   // from PdfPageView
 
-        //if (CONFIG.debug.pdfpager) 
-        console.debug(`textlayerrendered for page ${layerevent.pageNumber}`);
+        if (CONFIG.debug.pdfpager) console.debug(`textlayerrendered for page ${layerevent.pageNumber}`);
         const editor_menus = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FIELD_MAPPING_MODE);
         const map_tooltips = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.SHOW_MAP_TOOLTIPS);
         const pdfpageview = layerevent.source;
@@ -883,7 +882,7 @@ async function span_click_edit(event) {
 }
 
 function add_clickable_text(span, macrouuid, clickfunc, doctype) {
-  console.log(`add_clickable_text: "${span.textContent}"`);
+  //console.log(`add_clickable_text: "${span.textContent}"`);
   span.addEventListener("pointerenter", span_pointerenter);
   span.addEventListener("pointerleave", span_pointerleave);
   span.addEventListener("pointerdown", span_pointerdown);
