@@ -3,7 +3,7 @@
 ## 1.5.1
 
 - Ensure that the "label" parameter passed to the invoked Macro works.
-- Revert to the color-picker module being optional.
+- Revert to the color-picker module being optional (recommends).
 
 ## 1.5.0
 
