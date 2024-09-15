@@ -833,7 +833,7 @@ async function span_click(event) {
   // FVTT 10 has actor and token fields.
   // FVTT 12 has actor, token, speaker, event fields.
   // Invoke _executeScript ourselves!
-  macro.execute({ event, label: span.textContext });
+  macro.execute({ event, label: span.textContent.trim() });
 }
 
 async function span_click_edit(event) {
