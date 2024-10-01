@@ -227,7 +227,7 @@ async function setFormFromDocument(pdfviewer, document, options = {}) {
     if (!docfield) {
       value = foundry.utils.getProperty(flags, elem.name);
     } else {
-      if (docfield instanceof Object && docfield.getValue) {
+      if (docfield instanceof Object && typeof docfield.getValue === 'function') {
         value = await docfield.getValue(document);
         if (!docfield.setValue) elem.readOnly = true;
       } else if (typeof docfield === 'string') {
@@ -268,7 +268,7 @@ async function setFormFromDocument(pdfviewer, document, options = {}) {
       elem.dispatchEvent(new Event("change"));
     } else {
       // plain text "type==textarea" OR rich text (type===?)
-      let newvalue = value || "";
+      let newvalue = value ?? "";
       if (elem.value === newvalue) continue;
       // Ensure pdfjs is notified of the change,
       // and performs all normal pdf-embedded processing
@@ -466,7 +466,7 @@ export async function initEditor(html, id_to_display) {
         game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ACTOR_CONFIG, Obj2String(map_pdf2actor));
         game.settings.set(PDFCONFIG.MODULE_NAME, PDFCONFIG.ITEM_CONFIG, Obj2String(map_pdf2item));
       })
-      .catch(error => null)  // Don't worry if the file can't be laoded
+      .catch(error => console.warn(error))  // Don't worry if the file can't be laoded
   }
   if (!map_pdf2actor) map_pdf2actor = {};
   if (!map_pdf2item) map_pdf2item = {};
@@ -772,6 +772,19 @@ export async function logPdfFields(pdfviewer) {
   }
 }
 
+export async function logPdfFieldsObj(pdfviewer) {
+  console.log(game.i18n.format(`${PDFCONFIG.MODULE_NAME}.logPdfFields.introduction`));
+  let obj = {};
+  for (const pdfpageview of pdfviewer._pages) {
+    let annotations = await pdfpageview.pdfPage?.getAnnotations();
+    if (annotations) {
+      console.log(game.i18n.format(`${PDFCONFIG.MODULE_NAME}.logPdfFields.pageNumber`, { pageNumber: pdfpageview.pdfPage.pageNumber }))
+      for (const annotation of annotations.filter(an => an.subtype === 'Widget'))
+        obj[annotation.fieldName] = `${annotation.fieldType}`
+    }
+  }
+  console.log(`MAPPING OBJECT`, obj);
+}
 /*
  * Handle clicking on pure text fields
  */
