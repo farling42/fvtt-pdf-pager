@@ -38,10 +38,21 @@ class pf2e_modifier{
     return `${modifier ? modifier.modifier : 0}`;
   }
 }
+class pf2e_item{
+  constructor(field, index) {
+    this.field = field;
+    this.type  = type;
+  }
+  getValue(actor) {
+    const value = foundry.utils.getProperty(actor, this.field);
+    const modifier = value.find(e => e.enabled && (e.type === this.type || e.slug === this.type));
+    return `${modifier ? modifier.modifier : 0}`;
+  }
+}
 
 export let actormap = {
   "textarea_1mgbu": "name", // Name
-  "textarea_2fdvi":  { getValue(actor) { return "Tx" }},  // Player Name
+  "textarea_2fdvi": "Tx",  // Player Name
   "textarea_3ovje": "system.details.xp.value",  // XP
   "textarea_4pzs":  "system.details.level.value",  // level
   "checkbox_5xofc": new pf2e_btnge("heroPoints.value", 1), // hero1
@@ -139,11 +150,11 @@ export let actormap = {
   "textarea_98nqed": "Tx", // Senses and Notes
   "textarea_99qcfn": { getValue(actor) { return actor.system.attributes.speed.otherSpeeds.map(c => c.breakdown).join() }}, // Special Movement
   "textarea_100weee": "Tx", // Skill Notes
-  "text_101elkf": "_itemTypes.weapon.0.name", // Weapon1 name
-  "text_102hko":  "_itemTypes.weapon.1.name", // Weapon2 name
-  "text_103iqhr": "_itemTypes.weapon.2.name", // Weapon3 name
-  "text_104osck": "_itemTypes.weapon.3.name", // Weapon4 name
-  "text_105zorp": "_itemTypes.weapon.4.name", // Weapon5 name
+  "text_101elkf": "_itemTypes.weapon.0.name", // Weapon1 name (melee)
+  "text_102hko":  "_itemTypes.weapon.1.name", // Weapon2 name (melee)
+  "text_103iqhr": "_itemTypes.weapon.2.name", // Weapon3 name (melee)
+  "text_104osck": "_itemTypes.weapon.3.name", // Weapon4 name (ranged)
+  "text_105zorp": "_itemTypes.weapon.4.name", // Weapon5 name (ranged)
   "text_106kl": "Tx",   // Weapon1 Traits and Notes
   "text_107zudg": "Tx", // Weapon2 Traits and Notes
   "text_108wvva": "Tx", // Weapon3 Traits and Notes
@@ -369,7 +380,7 @@ export let actormap = {
 // PAGE TWO
   "textarea_330vrxa": "Tx", // Held Items list
   "textarea_331jggx": "Tx", // Held Items Bulk
-  "textarea_332vztk": { getValue(actor) { return actor.feats.get("class").feats.concat(actor.feats.get("classfeature")).filter(f => f.level == 1).map(f => f.feat.name) } }, // Class Feats & Features
+  "textarea_332vztk": { getValue(actor) { return actor.feats.get("class").feats.concat(actor.feats.get("classfeature").feats).filter(f => f.feat.level == 1).map(f => f.feat.name) } }, // Class Feats & Features
   "textarea_333llv":  { getValue(actor) { return actor.feats.get("ancestry").feats.filter(f => f.level == 1).map(f => f.feat.name) } }, // L1-Ancestry and Heritage Abilities
   "textarea_334ehgk": { getValue(actor) { return actor.feats.get("ancestry").feats.filter(f => f.level == 1).map(f => f.feat.name) } }, // L1-Ancestry Feat
   "textarea_335xpjq": { getValue(actor) { return actor.feats.get("skill").feats.filter(f => f.level == 1).map(f => f.feat.name) } }, // L1-Background skill feat
@@ -391,7 +402,7 @@ export let actormap = {
   "textarea_351ahxr": { getValue(actor) { return actor.feats.get("skill").feats.filter(f => f.level == 4).map(f => f.feat.name) } }, // L4-Skill feat
   "textarea_352oqsr": { getValue(actor) { return actor.feats.get("ancestry").feats.filter(f => f.level == 5).map(f => f.feat.name) } }, // L5-Ancestry feat
   "textarea_353qycb": { getValue(actor) { return actor.feats.get("skill").feats.filter(f => f.level == 6).map(f => f.feat.name) } }, // L6-Skill feat
-  "textarea_354gmxy": { getValue(actor) { return actor.feats.get("general").feats.filter(f => f.level == 3).map(f => f.feat.name) } }, // L7-General feat
+  "textarea_354gmxy": { getValue(actor) { return actor.feats.get("general").feats.filter(f => f.level == 7).map(f => f.feat.name) } }, // L7-General feat
   "textarea_355wprz": { getValue(actor) { return actor.feats.get("skill").feats.filter(f => f.level == 8).map(f => f.feat.name) } }, // L8-Skill feat
   "textarea_356nftr": { getValue(actor) { return actor.feats.get("skill").feats.filter(f => f.level == 20).map(f => f.feat.name) } }, // L20-Skill feat
   "textarea_357amcg": { getValue(actor) { return actor.feats.get("general").feats.filter(f => f.level == 19).map(f => f.feat.name) } }, // L19-General feat
@@ -406,23 +417,23 @@ export let actormap = {
   "textarea_366etrj": { getValue(actor) { return actor.feats.get("skill").feats.filter(f => f.level == 10).map(f => f.feat.name) } }, // L10-Skill feat
   "textarea_367ieb":  { getValue(actor) { return actor.feats.get("ancestry").feats.filter(f => f.level == 9).map(f => f.feat.name) } }, // L9-Ancestry feat
   "textarea_368mcmh": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 2).map(f => f.feat.name) } }, // L2-Class feat
-  "textarea_369arky": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.level == 3).map(f => f.feat.name) } }, // L3-Class feature
+  "textarea_369arky": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.feat.level == 3).map(f => f.feat.name) } }, // L3-Class feature
   "textarea_370ucdg": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 4).map(f => f.feat.name) } }, // L4-Class feat
-  "textarea_371mpfw": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.level == 5).map(f => f.feat.name) } }, // L5-Class feature
+  "textarea_371mpfw": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.feat.level == 5).map(f => f.feat.name) } }, // L5-Class feature
   "textarea_372wduo": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 6).map(f => f.feat.name) } }, // L6-Class feat
-  "textarea_373kpha": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.level == 7).map(f => f.feat.name) } }, // L7-Class feature
+  "textarea_373kpha": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.feat.level == 7).map(f => f.feat.name) } }, // L7-Class feature
   "textarea_374fuef": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 8).map(f => f.feat.name) } }, // L8-Class feat
-  "textarea_375acui": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.level == 9).map(f => f.feat.name) } }, // L9-Class feature
+  "textarea_375acui": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.feat.level == 9).map(f => f.feat.name) } }, // L9-Class feature
   "textarea_376iaaz": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 10).map(f => f.feat.name) } }, // L10-Class feat
-  "textarea_377iiyp": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.level == 11).map(f => f.feat.name) } }, // L11-Class feature
+  "textarea_377iiyp": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.feat.level == 11).map(f => f.feat.name) } }, // L11-Class feature
   "textarea_378btkh": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 12).map(f => f.feat.name) } }, // L12-Class feat
-  "textarea_379urqd": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.level == 13).map(f => f.feat.name) } }, // L13-Class feature
+  "textarea_379urqd": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.feat.level == 13).map(f => f.feat.name) } }, // L13-Class feature
   "textarea_380ufki": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 14).map(f => f.feat.name) } }, // L14-Class feat
-  "textarea_381ikfg": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.level == 15).map(f => f.feat.name) } }, // L15-Class feature
+  "textarea_381ikfg": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.feat.level == 15).map(f => f.feat.name) } }, // L15-Class feature
   "textarea_382mpwo": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 16).map(f => f.feat.name) } }, // L16-Class feat
-  "textarea_383lcfn": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.level == 17).map(f => f.feat.name) } }, // L17-Class feature
+  "textarea_383lcfn": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.feat.level == 17).map(f => f.feat.name) } }, // L17-Class feature
   "textarea_384qsoq": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 18).map(f => f.feat.name) } }, // L18-Class feat
-  "textarea_385judo": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.level == 19).map(f => f.feat.name) } }, // L19-Class feature
+  "textarea_385judo": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.feat.level == 19).map(f => f.feat.name) } }, // L19-Class feature
   "textarea_386hfib": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 20).map(f => f.feat.name) } }, // L20-Class feat
 // PAGE THREE
   "textarea_387ozwo": "img", // character sketch (image)
@@ -445,11 +456,11 @@ export let actormap = {
   "textarea_404zmiz": "system.details.biography.allies", // campaign Allies
   "textarea_405vdjj": "system.details.biography.enemies", // campaign Enemies
   "textarea_406zera": "system.details.biography.organizations", // campaign Organizations
-  "text_407ftzb": "Tx", // Action1 name
+  "text_407ftzb": "_itemTypes.action.0.name", // Action1 name
   "text_408mhfr": "Tx", // Free Action1 name
-  "text_409bfwj": "Tx", // Action2 name
-  "text_410miry": "Tx", // Action3 name
-  "text_411nnfy": "Tx", // Action4 name
+  "text_409bfwj": "_itemTypes.action.1.name", // Action2 name
+  "text_410miry": "_itemTypes.action.2.name", // Action3 name
+  "text_411nnfy": "_itemTypes.action.3.name", // Action4 name
   "text_412wkmi": "Tx", // Free Action2 name
   "text_413hkgy": "Tx", // Free Action3 name
   "text_414bdju": "Tx", // Free Action4 name
@@ -477,75 +488,75 @@ export let actormap = {
   "checkbox_436gxtm": "Btn", // Free Action3 isReaction
   "checkbox_437ayes": "Btn", // Free Action4 isFree
   "checkbox_438gfjv": "Btn", // Free Action4 isReaction
-  "text_439iolx": "Tx", // Action1 numactions
-  "text_440wryw": "Tx", // Action2 numactions
-  "text_441nvfv": "Tx", // Action3 numactions
-  "text_442cwdd": "Tx", // Action4 numactions
-  "textarea_443qoya": "Tx", // Action1 effects
-  "textarea_444dxm":  "Tx", // Action2 effects
-  "textarea_445fmzt": "Tx", // Action3 effects
-  "textarea_446ugjv": "Tx", // Action4 effects
-  "text_447djix": "Tx", // Action1 traits
-  "text_448wcyu": "Tx", // Action2 traits
-  "text_449sryh": "Tx", // Action3 traits
-  "text_450jkvr": "Tx", // Action4 traits
+  "text_439iolx": "_itemTypes.action.0.actionCost.value", // Action1 numactions
+  "text_440wryw": "_itemTypes.action.1.actionCost.value", // Action2 numactions
+  "text_441nvfv": "_itemTypes.action.2.actionCost.value", // Action3 numactions
+  "text_442cwdd": "_itemTypes.action.3.actionCost.value", // Action4 numactions
+  "textarea_443qoya": "_itemTypes.action.0.description", // Action1 effects
+  "textarea_444dxm":  "_itemTypes.action.1.description", // Action2 effects
+  "textarea_445fmzt": "_itemTypes.action.2.description", // Action3 effects
+  "textarea_446ugjv": "_itemTypes.action.3.description", // Action4 effects
+  "text_447djix": { getValue(actor) { return actor._itemTypes.action?.[0] ? Array.from(actor._itemTypes.action[0].traits).join() : undefined }}, // Action1 traits
+  "text_448wcyu": { getValue(actor) { return actor._itemTypes.action?.[1] ? Array.from(actor._itemTypes.action[1].traits).join() : undefined }}, // Action2 traits
+  "text_449sryh": { getValue(actor) { return actor._itemTypes.action?.[2] ? Array.from(actor._itemTypes.action[2].traits).join() : undefined }}, // Action3 traits
+  "text_450jkvr": { getValue(actor) { return actor._itemTypes.action?.[3] ? Array.from(actor._itemTypes.action[3].traits).join() : undefined }}, // Action4 traits
   "text_451kmfd": "Tx", // Action1 page
   "text_452ddtc": "Tx", // Action2 page
   "text_453ukeb": "Tx", // Action3 page
   "text_454zwl":  "Tx", // Action4 page
 // PAGE FOUR
-  "checkbox_455jffm": "Btn", // Magical Tradition Arcane
-  "checkbox_456jtfi": "Btn", // Magical Tradition Occult
-  "checkbox_457gzjp": "Btn", // Magical Tradition Divine
-  "checkbox_458xfce": "Btn", // Magical Tradition Primal
-  "checkbox_459zwon": "Btn", // Prepared Caster
-  "checkbox_460fmwa": "Btn", // Spontaneous Caster
-  "checkbox_461qpof": "Btn", // Spell Attack T
-  "checkbox_462zlaw": "Btn", // Spell Attack E
-  "checkbox_463ysfu": "Btn", // Spell Attack M
-  "checkbox_464qtjr": "Btn", // Spell Attack L
-  "checkbox_465ysxx": "Btn", // Spell DC T
+  "checkbox_455jffm": new pf2e_btneq("_itemTypes.spellcastingEntry.0.tradition", "arcane"), // Magical Tradition Arcane
+  "checkbox_456jtfi": new pf2e_btneq("_itemTypes.spellcastingEntry.0.tradition", "occult"), // Magical Tradition Occult
+  "checkbox_457gzjp": new pf2e_btneq("_itemTypes.spellcastingEntry.0.tradition", "divine"), // Magical Tradition Divine
+  "checkbox_458xfce": new pf2e_btneq("_itemTypes.spellcastingEntry.0.tradition", "primal"), // Magical Tradition Primal
+  "checkbox_459zwon": "_itemTypes.spellcastingEntry.0.isPrepared", // Prepared Caster
+  "checkbox_460fmwa": "_itemTypes.spellcastingEntry.0.isSpontaneous", // Spontaneous Caster
+  "checkbox_461qpof": new pf2e_btneq("_itemTypes.spellcastingEntry.0.statistic.rank", 1), // Spell Attack T
+  "checkbox_462zlaw": new pf2e_btneq("_itemTypes.spellcastingEntry.0.statistic.rank", 2), // Spell Attack E
+  "checkbox_463ysfu": new pf2e_btneq("_itemTypes.spellcastingEntry.0.statistic.rank", 3), // Spell Attack M
+  "checkbox_464qtjr": new pf2e_btneq("_itemTypes.spellcastingEntry.0.statistic.rank", 4), // Spell Attack L
+  "checkbox_465ysxx": "Btn", // Spell DC T  (DC doesn't have a rank?)
   "checkbox_466ndpi": "Btn", // Spell DC E
   "checkbox_467yjkq": "Btn", // Spell DC M
   "checkbox_468hasa": "Btn", // Spell DC L
-  "text_469usdj": "spellcasting.base.mod", // Spell Attack total
-  "text_470bahu": "spellcasting.base.dc.value", // Spell DC total
-  "text_471tmjg": "Tx", // Spell Attack prof
-  "text_472ppwy": "Tx", // Spell Attack Key
-  "text_473bjbp": "Tx", // Spell DC key
-  "text_474hxib": "Tx", // Spell DC prof
+  "text_469usdj": "_itemTypes.spellcastingEntry.0.statistic.mod", // Spell Attack total
+  "text_470bahu": "_itemTypes.spellcastingEntry.0.statistic.dc.value", // Spell DC total
+  "text_471tmjg": new pf2e_modifier("_itemTypes.spellcastingEntry.0.statistic.modifiers", "proficiency"), // Spell Attack prof
+  "text_472ppwy": new pf2e_modifier("_itemTypes.spellcastingEntry.0.statistic.modifiers", "ability"), // Spell Attack Key
+  "text_473bjbp": new pf2e_modifier("_itemTypes.spellcastingEntry.0.statistic.dc.modifiers", "ability"), // Spell DC key
+  "text_474hxib": new pf2e_modifier("_itemTypes.spellcastingEntry.0.statistic.dc.modifiers", "proficiency"), // Spell DC prof
   "text_475qaob": "Tx", // Cantrip Rank
-  "text_476epjq": "Tx", // Cantrips per Day
-  "text_477bizq": "Tx", // Spells per Day L1
-  "text_478ymen": "Tx", // Spells per Day L2
-  "text_479grql": "Tx", // Spells per Day L3
-  "text_480iivx": "Tx", // Spells per Day L4
-  "text_481df":   "Tx", // Spells per Day L5
-  "text_482txib": "Tx", // Spells per Day L6
-  "text_483hpaj": "Tx", // Spells per Day L7
-  "text_484bzr":  "Tx", // Spells per Day L8
-  "text_485rhnw": "Tx", // Spells per Day L9
-  "text_486ij":   "Tx", // Spells per Day L10
-  "text_487tilh": "Tx", // Spells remaining L1
-  "text_488tcji": "Tx", // Spells remaining L2
-  "text_489opb":  "Tx", // Spells remaining L3
-  "text_490essc": "Tx", // Spells remaining L4
-  "text_491uqhm": "Tx", // Spells remaining L5
-  "text_492bmbp": "Tx", // Spells remaining L6
-  "text_493jfus": "Tx", // Spells remaining L7
-  "text_494ecdm": "Tx", // Spells remaining L8
-  "text_495euld": "Tx", // Spells remaining L9
-  "text_496lnen": "Tx", // Spells remaining L10
+  "text_476epjq": "_itemTypes.spellcastingEntry.0.system.slots.slot0.max", // Cantrips per Day
+  "text_477bizq": "_itemTypes.spellcastingEntry.0.system.slots.slot1.max", // Spells per Day L1
+  "text_478ymen": "_itemTypes.spellcastingEntry.0.system.slots.slot2.max", // Spells per Day L2
+  "text_479grql": "_itemTypes.spellcastingEntry.0.system.slots.slot3.max", // Spells per Day L3
+  "text_480iivx": "_itemTypes.spellcastingEntry.0.system.slots.slot4.max", // Spells per Day L4
+  "text_481df":   "_itemTypes.spellcastingEntry.0.system.slots.slot5.max", // Spells per Day L5
+  "text_482txib": "_itemTypes.spellcastingEntry.0.system.slots.slot6.max", // Spells per Day L6
+  "text_483hpaj": "_itemTypes.spellcastingEntry.0.system.slots.slot7.max", // Spells per Day L7
+  "text_484bzr":  "_itemTypes.spellcastingEntry.0.system.slots.slot8.max", // Spells per Day L8
+  "text_485rhnw": "_itemTypes.spellcastingEntry.0.system.slots.slot9.max", // Spells per Day L9
+  "text_486ij":   "_itemTypes.spellcastingEntry.0.system.slots.slot10.max", // Spells per Day L10
+  "text_487tilh": "_itemTypes.spellcastingEntry.0.system.slots.slot1.value", // Spells remaining L1
+  "text_488tcji": "_itemTypes.spellcastingEntry.0.system.slots.slot2.value", // Spells remaining L2
+  "text_489opb":  "_itemTypes.spellcastingEntry.0.system.slots.slot3.value", // Spells remaining L3
+  "text_490essc": "_itemTypes.spellcastingEntry.0.system.slots.slot4.value", // Spells remaining L4
+  "text_491uqhm": "_itemTypes.spellcastingEntry.0.system.slots.slot5.value", // Spells remaining L5
+  "text_492bmbp": "_itemTypes.spellcastingEntry.0.system.slots.slot6.value", // Spells remaining L6
+  "text_493jfus": "_itemTypes.spellcastingEntry.0.system.slots.slot7.value", // Spells remaining L7
+  "text_494ecdm": "_itemTypes.spellcastingEntry.0.system.slots.slot8.value", // Spells remaining L8
+  "text_495euld": "_itemTypes.spellcastingEntry.0.system.slots.slot9.value", // Spells remaining L9
+  "text_496lnen": "_itemTypes.spellcastingEntry.0.system.slots.slot10.value", // Spells remaining L10
   "checkbox_497nalp": "Btn", // Focus Point 1
   "checkbox_498vzol": "Btn", // Focus Point 2
   "checkbox_499vcvw": "Btn", // Focus Point 3
   "text_500fem":      "Tx", // Focus Spell Rank
-  "textarea_501fwoj": "Tx", // Cantrip Names
-  "textarea_502c":    "Tx", // Cantrip Actions
+  "textarea_501fwoj": { getValue(actor) {  return actor._itemTypes.spellcastingEntry?.[0].spells.filter(s => s.isCantrip).map(s => s.name).join("\n") }}, // Cantrip Names
+  "textarea_502c":    { getValue(actor) {  return actor._itemTypes.spellcastingEntry?.[0].spells.filter(s => s.isCantrip).map(s => s.actionGlyph).join("\n") }}, // Cantrip Actions
   "textarea_503nyfs": "Tx", // Cantrip Prep
-  "textarea_504zkkz": "Tx", // Spells1 Actions
+  "textarea_504zkkz": { getValue(actor) {  return actor._itemTypes.spellcastingEntry?.[0].spells.map(s => `${s.name} (${s.actionGlyph})`).join("\n") }}, // Spells1 Actions
   "textarea_505pwgp": "Tx", // Spells2 Actions
-  "textarea_506nwja": "Tx", // Spells1 Rank
+  "textarea_506nwja": { getValue(actor) {  return actor._itemTypes.spellcastingEntry?.[0].spells.map(s => s.rank).join("\n") }}, // Spells1 Rank
   "textarea_507kpxe": "Tx", // Spells2 Rank
   "textarea_508pqrd": "Tx", // Rituals1 Rank
   "textarea_509iknk": "Tx", // Rituals2 Rank
