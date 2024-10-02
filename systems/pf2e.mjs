@@ -18,43 +18,23 @@ class pf2e_btnge {
     return value >= this.value;
   }
 }
-class pf2e_prof {
-  constructor(field) {
-    this.field = field;
-  }
-  getValue(actor) {
-    const value = foundry.utils.getProperty(actor, this.field);
-    return `${value ? (2 * value + actor.system.details.level.value) : 0}`;
-  }
-}
-class pf2e_modifier{
+class pf2e_modifier {
   constructor(field, type) {
     this.field = field;
-    this.type  = type;
+    this.type = type;
   }
   getValue(actor) {
     const value = foundry.utils.getProperty(actor, this.field);
-    const modifier = value.find(e => e.enabled && (e.type === this.type || e.slug === this.type));
-    return `${modifier ? modifier.modifier : 0}`;
-  }
-}
-class pf2e_item{
-  constructor(field, index) {
-    this.field = field;
-    this.type  = type;
-  }
-  getValue(actor) {
-    const value = foundry.utils.getProperty(actor, this.field);
-    const modifier = value.find(e => e.enabled && (e.type === this.type || e.slug === this.type));
-    return `${modifier ? modifier.modifier : 0}`;
+    const modifier = value?.find(e => e.enabled && (e.type === this.type || e.slug === this.type));
+    return modifier ? modifier.modifier : 0;
   }
 }
 
 export let actormap = {
   "textarea_1mgbu": "name", // Name
-  "textarea_2fdvi": "Tx",  // Player Name
+  //"textarea_2fdvi": "Tx",  // Player Name
   "textarea_3ovje": "system.details.xp.value",  // XP
-  "textarea_4pzs":  "system.details.level.value",  // level
+  "textarea_4pzs": "system.details.level.value",  // level
   "checkbox_5xofc": new pf2e_btnge("heroPoints.value", 1), // hero1
   "checkbox_6hrfm": new pf2e_btnge("heroPoints.value", 2), // hero2
   "checkbox_7kodx": new pf2e_btnge("heroPoints.value", 3), // hero3
@@ -62,8 +42,8 @@ export let actormap = {
   "textarea_9hqub": "background.name", // Background
   "textarea_10wvlg": "system.details.ancestry.name",  // Ancestry
   "textarea_11xkjd": "system.details.heritage.name", // Heritage and Traits
-  "textarea_13zexb": "Tx", // Background Notes
-  "textarea_14dsra": "Tx", // Class Notes
+  //"textarea_13zexb": "Tx", // Background Notes
+  //"textarea_14dsra": "Tx", // Class Notes
   "text_15gujr": "system.abilities.str.mod", // STR
   "text_16qanz": "system.abilities.dex.mod", // DEX
   "text_17gvzw": "system.abilities.con.mod", // CON
@@ -82,11 +62,11 @@ export let actormap = {
   "checkbox_30mata": new pf2e_btneq("saves.reflex.rank", 4), // Ref Save L
   "checkbox_31nubu": new pf2e_btneq("saves.fortitude.rank", 1), // Fort Save T
   "checkbox_32kxvm": new pf2e_btneq("saves.fortitude.rank", 2), // Fort Save E
-  "checkbox_33rqu":  new pf2e_btneq("saves.fortitude.rank", 3),  // Fort Save M
+  "checkbox_33rqu": new pf2e_btneq("saves.fortitude.rank", 3),  // Fort Save M
   "checkbox_34zbhl": new pf2e_btneq("saves.fortitude.rank", 4), // Fort Save L
   "text_35baby": "system.shield.hardness", // Shield Hardness
   "text_36ccwn": "system.shield.hp.max",   // Shield Max HP
-  "text_37jfu":  "system.shield.brokenThreshold", // Shield BT
+  "text_37jfu": "system.shield.brokenThreshold", // Shield BT
   "text_38yxhc": "system.shield.hp.value", // Shield HP
   "text_39mwlp": "system.shield.ac", // AC shield
   "text_40dugs": "armorClass.value",  // AC total
@@ -120,12 +100,12 @@ export let actormap = {
   "text_68jgip": "saves.will.mod", // WILL save
   "checkbox_69kbwv": new pf2e_btneq("system.proficiencies.defenses.heavy.rank", 1), // Armor Prof: Heavy T
   "checkbox_70aqce": new pf2e_btneq("system.proficiencies.defenses.heavy.rank", 2), // Armor Prof: Heavy E
-  "checkbox_71vjy":  new pf2e_btneq("system.proficiencies.defenses.heavy.rank", 3), // Armor Prof: Heavy M
-  "checkbox_72ub":   new pf2e_btneq("system.proficiencies.defenses.heavy.rank", 4), // Armor Prof: Heavy L
+  "checkbox_71vjy": new pf2e_btneq("system.proficiencies.defenses.heavy.rank", 3), // Armor Prof: Heavy M
+  "checkbox_72ub": new pf2e_btneq("system.proficiencies.defenses.heavy.rank", 4), // Armor Prof: Heavy L
   "checkbox_73ntxl": new pf2e_btneq("system.proficiencies.defenses.medium.rank", 1), // Armor Prof: Medium T
   "checkbox_74iuay": new pf2e_btneq("system.proficiencies.defenses.medium.rank", 2), // Armor Prof: Medium E
   "checkbox_75smam": new pf2e_btneq("system.proficiencies.defenses.medium.rank", 3), // Armor Prof: Medium M
-  "checkbox_76ddq":  new pf2e_btneq("system.proficiencies.defenses.medium.rank", 4), // Armor Prof: Medium L
+  "checkbox_76ddq": new pf2e_btneq("system.proficiencies.defenses.medium.rank", 4), // Armor Prof: Medium L
   "checkbox_77aekt": new pf2e_btneq("system.proficiencies.defenses.light.rank", 1), // Armor Prof: Light T
   "checkbox_78yugv": new pf2e_btneq("system.proficiencies.defenses.light.rank", 2), // Armor Prof: Light E
   "checkbox_79osmb": new pf2e_btneq("system.proficiencies.defenses.light.rank", 3), // Armor Prof: Light M
@@ -135,23 +115,23 @@ export let actormap = {
   "checkbox_83tbtz": new pf2e_btneq("system.proficiencies.defenses.unarmored.rank", 3), // Armor Prof: Unarmored M
   "checkbox_84alhq": new pf2e_btneq("system.proficiencies.defenses.unarmored.rank", 4), // Armor Prof: Unarmored L
   "textarea_85chme": "Tx",  // Defenses Notes
-  "textarea_86oxoo": { getValue(actor) { return actor.system.attributes.resistances.map(c => c.name).concat(actor.system.attributes.immunities.map(c => c.name)).join() }},  // Resistance & Immunities
-  "textarea_87nkni": { getValue(actor) { return actor.conditions.map(c => c.name).join() }},  // Conditions
-  "textarea_88pngh": "Tx",  // Languages
+  "textarea_86oxoo": { getValue(actor) { return actor.system.attributes.resistances.map(c => c.name).concat(actor.system.attributes.immunities.map(c => c.name)).join() } },  // Resistance & Immunities
+  "textarea_87nkni": { getValue(actor) { return actor.conditions.map(c => c.name).join() } },  // Conditions
+  "textarea_88pngh": { getValue(actor) { return actor.system.details.languages.value.map(language => game.i18n.localize(CONFIG.PF2E.languages[language])).join("\n") } },  // Languages
   "text_89fwcj": new pf2e_modifier("perception.modifiers", "ability"), // Perception WIS bonus
   "text_90nhda": new pf2e_modifier("perception.modifiers", "proficiency"), // Perception Prof Bonus
   "text_91skpg": new pf2e_modifier("perception.modifiers", "item"), // Perception Item Bonus
-  "text_92cge":  "system.attributes.speed.value", // Speed
+  "text_92cge": "system.attributes.speed.value", // Speed
   "text_93soao": "perception.mod", // Perception Score
   "checkbox_94iccy": new pf2e_btneq("perception.rank", 1), // Perception Prof T
   "checkbox_95psap": new pf2e_btneq("perception.rank", 2), // Perception Prof E
   "checkbox_96zwyo": new pf2e_btneq("perception.rank", 3), // Perception Prof M
   "checkbox_97dmxm": new pf2e_btneq("perception.rank", 4), // Perception Prof L
-  "textarea_98nqed": "Tx", // Senses and Notes
-  "textarea_99qcfn": { getValue(actor) { return actor.system.attributes.speed.otherSpeeds.map(c => c.breakdown).join() }}, // Special Movement
+  "textarea_98nqed": { getValue(actor) { return actor.perception.senses.map(c => c.label).join() } }, // Senses and Notes
+  "textarea_99qcfn": { getValue(actor) { return actor.system.attributes.speed.otherSpeeds.map(c => c.breakdown).join() } }, // Special Movement
   "textarea_100weee": "Tx", // Skill Notes
   "text_101elkf": "_itemTypes.weapon.0.name", // Weapon1 name (melee)
-  "text_102hko":  "_itemTypes.weapon.1.name", // Weapon2 name (melee)
+  "text_102hko": "_itemTypes.weapon.1.name", // Weapon2 name (melee)
   "text_103iqhr": "_itemTypes.weapon.2.name", // Weapon3 name (melee)
   "text_104osck": "_itemTypes.weapon.3.name", // Weapon4 name (ranged)
   "text_105zorp": "_itemTypes.weapon.4.name", // Weapon5 name (ranged)
@@ -169,19 +149,19 @@ export let actormap = {
   "text_118xvhm": "Tx", // Weapon2 prof bonus
   "text_119hjtz": "Tx", // Weapon2 item bonus
   "text_120nfgn": "Tx", // Weapon3 str bonus
-  "text_121krf":  "Tx", // Weapon3 prof bonus
+  "text_121krf": "Tx", // Weapon3 prof bonus
   "text_122qefv": "Tx", // Weapon3 item bonus
   "text_123fgvx": "Tx", // Weapon4 str bonus
   "text_124boin": "Tx", // Weapon4 prof bonus
   "text_125klxi": "Tx", // Weapon4 item bonus
   "text_126diuu": "Tx", // Weapon5 str bonus
   "text_127cptg": "Tx", // Weapon5 prof bonus
-  "text_128eza":  "Tx", // Weapon5 item bonus
+  "text_128eza": "Tx", // Weapon5 item bonus
   "text_129myfs": new pf2e_modifier("classDC.modifiers", "ability"), // class DC key
   "text_130ifxl": new pf2e_modifier("classDC.modifiers", "proficiency"), // class DC prof bonus
   "text_131yqxz": new pf2e_modifier("classDC.modifiers", "item"), // class DC item bonus
   "text_132fjev": new pf2e_modifier("skills.acrobatics.modifiers", "ability"), // Acrobatics DEX bonus
-  "text_133lgl":  new pf2e_modifier("skills.acrobatics.modifiers", "proficiency"), // Acrobatics Prof bonus
+  "text_133lgl": new pf2e_modifier("skills.acrobatics.modifiers", "proficiency"), // Acrobatics Prof bonus
   "text_134zleo": new pf2e_modifier("skills.acrobatics.modifiers", "item"), // Acrobatics Item bonus
   "text_135vtls": new pf2e_modifier("skills.acrobatics.modifiers", "armor-check-penalty"), // Acrobatics Armor penalty
   "text_136xoeq": new pf2e_modifier("skills.arcana.modifiers", "ability"), // Arcana INT bonus
@@ -197,7 +177,7 @@ export let actormap = {
   "text_146nold": new pf2e_modifier("skills.deception.modifiers", "ability"), // Deception CHA
   "text_147ekvl": new pf2e_modifier("skills.deception.modifiers", "proficiency"), // Deceptoin prof
   "text_148dduu": new pf2e_modifier("skills.deception.modifiers", "item"), // Deception item
-  "text_149dvo":  new pf2e_modifier("skills.diplomacy.modifiers", "ability"), // Diplomacy CHA
+  "text_149dvo": new pf2e_modifier("skills.diplomacy.modifiers", "ability"), // Diplomacy CHA
   "text_150fobz": new pf2e_modifier("skills.diplomacy.modifiers", "proficiency"), // Diplomacy prof
   "text_151xcas": new pf2e_modifier("skills.diplomacy.modifiers", "item"), // Diplomacy item
   "text_152yzxc": new pf2e_modifier("skills.intimidation.modifiers", "ability"), // Intimidation CHA
@@ -211,11 +191,11 @@ export let actormap = {
   "text_160fwnt": "Tx", // Lore2 item
   "text_161kopr": new pf2e_modifier("skills.medicine.modifiers", "ability"), // Medicine WIS
   "text_162kakl": new pf2e_modifier("skills.medicine.modifiers", "proficiency"), // Medicine prof
-  "text_163els":  new pf2e_modifier("skills.medicine.modifiers", "item"), // Medicine item
+  "text_163els": new pf2e_modifier("skills.medicine.modifiers", "item"), // Medicine item
   "text_164elvp": new pf2e_modifier("skills.nature.modifiers", "ability"), // Nature WIS
   "text_165leru": new pf2e_modifier("skills.nature.modifiers", "proficiency"), // Nature prof
   "text_166cpld": new pf2e_modifier("skills.nature.modifiers", "item"), // Nature item
-  "text_167sj":   new pf2e_modifier("skills.occultism.modifiers", "ability"), // Occultism INT
+  "text_167sj": new pf2e_modifier("skills.occultism.modifiers", "ability"), // Occultism INT
   "text_168qbmf": new pf2e_modifier("skills.occultism.modifiers", "proficiency"), // Occultism prof
   "text_169rkty": new pf2e_modifier("skills.occultism.modifiers", "item"), // Occultism item
   "text_170lbzo": new pf2e_modifier("skills.performance.modifiers", "ability"), // Performance CHA
@@ -248,14 +228,14 @@ export let actormap = {
   "text_197wyik": "skills.diplomacy.mod", // Diplomacy Score
   "text_198hbtt": "skills.intimidation.mod", // Intimidation Score
   "text_199ugjw": "Tx", // Lore1 Score
-  "text_200nt":   "Tx", // Lore2 Score
+  "text_200nt": "Tx", // Lore2 Score
   "text_201aqqy": "skills.medicine.mod", // Medicine Score
   "text_202nauo": "skills.nature.mod", // Nature Score
   "text_203cxsk": "skills.occultism.mod", // Occultism Score
   "text_204gfhw": "skills.performance.mod", // Performance Score
   "text_205ezoj": "skills.religion.mod", // Religion Score
   "text_206bwbb": "skills.society.mod", // Society Score
-  "text_207jpx":  "skills.stealth.mod", // Stealth Score
+  "text_207jpx": "skills.stealth.mod", // Stealth Score
   "text_208acfs": "skills.survival.mod", // Survival Score
   "text_209ocmn": "skills.thievery.mod", // Thievery Score
   "text_210xwkf": "Tx", // Weapon1 damage
@@ -266,7 +246,7 @@ export let actormap = {
   "text_215bufl": "classDC.mod", // Class DC
   "text_216bfjs": "Tx", // Weapon1 attack
   "text_217vkoh": "Tx", // Weapon2 attack
-  "text_218ktn":  "Tx", // Weapon3 attack
+  "text_218ktn": "Tx", // Weapon3 attack
   "text_219fgjb": "Tx", // Weapon4 attack
   "text_220mepi": "Tx", // Weapon5 attack
   "checkbox_221acaw": "Btn", // Weapon1 damage B
@@ -288,10 +268,10 @@ export let actormap = {
   "checkbox_237ftki": new pf2e_btneq("system.proficiencies.attacks.unarmed.rank", 2), // Weapon Unarmed E
   "checkbox_238imqe": new pf2e_btneq("system.proficiencies.attacks.unarmed.rank", 3), // Weapon Unarmed M
   "checkbox_239dxvo": new pf2e_btneq("system.proficiencies.attacks.unarmed.rank", 4), // Weapon Unarmed L
-  "checkbox_240vjwp": new pf2e_btneq("system.proficiencies.attacks.simple.rank",  1), // Weapon Simple T 
-  "checkbox_241pypb": new pf2e_btneq("system.proficiencies.attacks.simple.rank",  2), // Weapon Simple E
-  "checkbox_242bjzh": new pf2e_btneq("system.proficiencies.attacks.simple.rank",  3), // Weapon Simple M
-  "checkbox_243zlqn": new pf2e_btneq("system.proficiencies.attacks.simple.rank",  4), // Weapon Simple L
+  "checkbox_240vjwp": new pf2e_btneq("system.proficiencies.attacks.simple.rank", 1), // Weapon Simple T 
+  "checkbox_241pypb": new pf2e_btneq("system.proficiencies.attacks.simple.rank", 2), // Weapon Simple E
+  "checkbox_242bjzh": new pf2e_btneq("system.proficiencies.attacks.simple.rank", 3), // Weapon Simple M
+  "checkbox_243zlqn": new pf2e_btneq("system.proficiencies.attacks.simple.rank", 4), // Weapon Simple L
   "checkbox_244hsye": new pf2e_btneq("system.proficiencies.attacks.martial.rank", 1), // Weapon Martial T
   "checkbox_245ktxc": new pf2e_btneq("system.proficiencies.attacks.martial.rank", 2), // Weapon Martial E
   "checkbox_246xxrh": new pf2e_btneq("system.proficiencies.attacks.martial.rank", 3), // Weapon Martial M
@@ -321,7 +301,7 @@ export let actormap = {
   "checkbox_270jdwc": new pf2e_btneq("skills.crafting.rank", 3), // Crafting M
   "checkbox_271rhso": new pf2e_btneq("skills.crafting.rank", 4), // Crafting L
   "checkbox_272pejf": "Btn", // 
-  "checkbox_273vzx":  new pf2e_btneq("skills.deception.rank", 2), // Deception E
+  "checkbox_273vzx": new pf2e_btneq("skills.deception.rank", 2), // Deception E
   "checkbox_274ogyw": new pf2e_btneq("skills.deception.rank", 1), // Deception T (yes, wrong!)
   "checkbox_275ectc": new pf2e_btneq("skills.deception.rank", 3), // Deception M
   "checkbox_276ewmc": new pf2e_btneq("skills.deception.rank", 4), // Deception L
@@ -329,7 +309,7 @@ export let actormap = {
   "checkbox_278ppje": new pf2e_btneq("skills.diplomacy.rank", 2), // Diplomacy E
   "checkbox_279jfmh": new pf2e_btneq("skills.diplomacy.rank", 3), // Diplomacy M
   "checkbox_280rfpt": new pf2e_btneq("skills.diplomacy.rank", 4), // Diplomacy L
-  "checkbox_281euh":  new pf2e_btneq("skills.intimidation.rank", 1), // Intimidation T
+  "checkbox_281euh": new pf2e_btneq("skills.intimidation.rank", 1), // Intimidation T
   "checkbox_282exqd": new pf2e_btneq("skills.intimidation.rank", 2), // Intimidation E
   "checkbox_283cllo": new pf2e_btneq("skills.intimidation.rank", 3), // Intimidation M
   "checkbox_284hgll": new pf2e_btneq("skills.intimidation.rank", 4), // Intimidation L
@@ -342,11 +322,11 @@ export let actormap = {
   "checkbox_291gmgg": new pf2e_btneq("skills.lore2.rank", 3), // Lore2 M
   "checkbox_292nkxg": new pf2e_btneq("skills.lore2.rank", 4), // Lore2 L
   "checkbox_293xtmb": new pf2e_btneq("skills.medicine.rank", 1), // Medicine T
-  "checkbox_294zco":  new pf2e_btneq("skills.medicine.rank", 2), // Medicine E
+  "checkbox_294zco": new pf2e_btneq("skills.medicine.rank", 2), // Medicine E
   "checkbox_295srxf": new pf2e_btneq("skills.medicine.rank", 3), // Medicine M
-  "checkbox_296bgg":  new pf2e_btneq("skills.medicine.rank", 4), // Medicine L
+  "checkbox_296bgg": new pf2e_btneq("skills.medicine.rank", 4), // Medicine L
   "checkbox_297rswz": new pf2e_btneq("skills.nature.rank", 1), // Nature T
-  "checkbox_298ozh":  new pf2e_btneq("skills.nature.rank", 2), // Nature E
+  "checkbox_298ozh": new pf2e_btneq("skills.nature.rank", 2), // Nature E
   "checkbox_299wxgs": new pf2e_btneq("skills.nature.rank", 3), // Nature M
   "checkbox_300xkcz": new pf2e_btneq("skills.nature.rank", 4), // Nature L
   "checkbox_301gdph": new pf2e_btneq("skills.occultism.rank", 1), // Occultism T
@@ -363,13 +343,13 @@ export let actormap = {
   "checkbox_313crqt": new pf2e_btneq("skills.religion.rank", 4), // Religion L
   "checkbox_314nuzx": new pf2e_btneq("skills.society.rank", 1), // Society T
   "checkbox_315rphw": new pf2e_btneq("skills.society.rank", 2), // Society E
-  "checkbox_316hus":  new pf2e_btneq("skills.society.rank", 3), // Society M
+  "checkbox_316hus": new pf2e_btneq("skills.society.rank", 3), // Society M
   "checkbox_317ijxq": new pf2e_btneq("skills.society.rank", 4), // Society L
   "checkbox_318mkyc": new pf2e_btneq("skills.stealth.rank", 1), // Stealth T
   "checkbox_319xpgt": new pf2e_btneq("skills.stealth.rank", 2), // Stealth E
   "checkbox_320yred": new pf2e_btneq("skills.stealth.rank", 3), // Stealth M
   "checkbox_321aqow": new pf2e_btneq("skills.stealth.rank", 4), // Stealth L
-  "checkbox_322mqs":  new pf2e_btneq("skills.survival.rank", 1), // Survival T
+  "checkbox_322mqs": new pf2e_btneq("skills.survival.rank", 1), // Survival T
   "checkbox_323fohg": new pf2e_btneq("skills.survival.rank", 2), // Survival E
   "checkbox_324rrfb": new pf2e_btneq("skills.survival.rank", 3), // Survival M
   "checkbox_325sppr": new pf2e_btneq("skills.survival.rank", 4), // Survival L
@@ -377,26 +357,26 @@ export let actormap = {
   "checkbox_327rvcz": new pf2e_btneq("skills.thievery.rank", 2), // Thievery E
   "checkbox_328avwb": new pf2e_btneq("skills.thievery.rank", 3), // Thievery M
   "checkbox_329hdbx": new pf2e_btneq("skills.thievery.rank", 4), // Thievery L
-// PAGE TWO
-  "textarea_330vrxa": "Tx", // Held Items list
-  "textarea_331jggx": "Tx", // Held Items Bulk
-  "textarea_332vztk": { getValue(actor) { return actor.feats.get("class").feats.concat(actor.feats.get("classfeature").feats).filter(f => f.feat.level == 1).map(f => f.feat.name) } }, // Class Feats & Features
-  "textarea_333llv":  { getValue(actor) { return actor.feats.get("ancestry").feats.filter(f => f.level == 1).map(f => f.feat.name) } }, // L1-Ancestry and Heritage Abilities
+  // PAGE TWO
+  "textarea_330vrxa": { getValue(actor) { return actor._itemTypes.equipment.concat(actor._itemTypes.weapon).filter(it=>it.system.equipped.carryType==="held").map(it => it.name).join("\n") } }, // Held Items list
+  "textarea_331jggx": { getValue(actor) { return actor._itemTypes.equipment.concat(actor._itemTypes.weapon).filter(it=>it.system.equipped.carryType==="held").map(it => it.bulk.value).join("\n") } }, // Held Items Bulk
+  "textarea_332vztk": { getValue(actor) { return actor.feats.get("class").feats.concat(actor.feats.get("classfeature").feats).filter(f => f.feat.level == 1).map(f => f.feat.name).join("\n") } }, // Class Feats & Features
+  "textarea_333llv":  { getValue(actor) { return actor.feats.get("ancestryfeature").feats.map(f => f.feat.name) } }, // L1-Ancestry and Heritage Abilities
   "textarea_334ehgk": { getValue(actor) { return actor.feats.get("ancestry").feats.filter(f => f.level == 1).map(f => f.feat.name) } }, // L1-Ancestry Feat
-  "textarea_335xpjq": { getValue(actor) { return actor.feats.get("skill").feats.filter(f => f.level == 1).map(f => f.feat.name) } }, // L1-Background skill feat
-  "textarea_336iifg": "Tx", // Consumables list
-  "textarea_337opcp": "Tx", // Consumables bulk
-  "textarea_338kboh": "Tx", // Worn Items bulk
-  "textarea_339kiyd": "Tx", // Worn Items Invested list
-  "textarea_340bioc": "Tx", // Worn Items list
+  "textarea_335xpjq": { getValue(actor) { return actor.feats.get("skill").feats.filter(f => f.level == 1).map(f => f.feat.name).join("\n") } }, // L1-Background skill feat
+  "textarea_336iifg": { getValue(actor) { return actor._itemTypes.consumable.map(it => it.name).join("\n") } }, // Consumables list
+  "textarea_337opcp": { getValue(actor) { return actor._itemTypes.consumable.map(it => it.bulk.value).join("\n") } }, // Consumables bulk
+  "textarea_338kboh": { getValue(actor) { return actor._itemTypes.equipment.concat(actor._itemTypes.weapon).filter(it=>it.system.equipped.carryType==="worn").map(it => it.bulk.value).join("\n") } }, // Worn Items bulk
+  "textarea_339kiyd": { getValue(actor) { return actor._itemTypes.equipment.concat(actor._itemTypes.weapon).filter(it=>it.system.equipped.carryType==="worn").map(it => it.system.equipped.invested?"Y":"-").join("\n") } }, // Worn Items Invested list
+  "textarea_340bioc": { getValue(actor) { return actor._itemTypes.equipment.concat(actor._itemTypes.weapon).filter(it=>it.system.equipped.carryType==="worn").map(it => it.name).join("\n") } }, // Worn Items list
   "text_341kjcb": "inventory.bulk.value.value", // Total Bulk
   "text_342xigi": "inventory.coins.cp", // Wealth CP
   "text_343hajk": "inventory.coins.sp", // Wealth SP
   "text_344fsew": "inventory.coins.gp", // Wealth GP
   "text_345wrrp": "inventory.coins.pp", // Wealth PP
-  "textarea_346leyk": "Tx", // Gems and Artwork
-  "textarea_347whef": "Tx", // Gems/Artwork Price
-  "textarea_348elde": "Tx", // Gems/Artwork Bulk
+  "textarea_346leyk": { getValue(actor) { return actor._itemTypes.treasure.filter(it=>!it.denomination).map(it => it.name).join("\n") } }, // Gems and Artwork
+  "textarea_347whef": { getValue(actor) { return actor._itemTypes.treasure.filter(it=>!it.denomination).map(it => it.system.price.value.goldValue).join("\n") } }, // Gems/Artwork Price
+  "textarea_348elde": { getValue(actor) { return actor._itemTypes.treasure.filter(it=>!it.denomination).map(it => it.bulk.value).join("\n") } }, // Gems/Artwork Bulk
   "textarea_349lbsn": { getValue(actor) { return actor.feats.get("skill").feats.filter(f => f.level == 2).map(f => f.feat.name) } }, // L2-Skill feat
   "textarea_350gtii": { getValue(actor) { return actor.feats.get("general").feats.filter(f => f.level == 3).map(f => f.feat.name) } }, // L3-General feat
   "textarea_351ahxr": { getValue(actor) { return actor.feats.get("skill").feats.filter(f => f.level == 4).map(f => f.feat.name) } }, // L4-Skill feat
@@ -415,7 +395,7 @@ export let actormap = {
   "textarea_364eoiq": { getValue(actor) { return actor.feats.get("skill").feats.filter(f => f.level == 12).map(f => f.feat.name) } }, // L12-Skill feat
   "textarea_365zwsz": { getValue(actor) { return actor.feats.get("general").feats.filter(f => f.level == 11).map(f => f.feat.name) } }, // L11-General feat
   "textarea_366etrj": { getValue(actor) { return actor.feats.get("skill").feats.filter(f => f.level == 10).map(f => f.feat.name) } }, // L10-Skill feat
-  "textarea_367ieb":  { getValue(actor) { return actor.feats.get("ancestry").feats.filter(f => f.level == 9).map(f => f.feat.name) } }, // L9-Ancestry feat
+  "textarea_367ieb": { getValue(actor) { return actor.feats.get("ancestry").feats.filter(f => f.level == 9).map(f => f.feat.name) } }, // L9-Ancestry feat
   "textarea_368mcmh": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 2).map(f => f.feat.name) } }, // L2-Class feat
   "textarea_369arky": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.feat.level == 3).map(f => f.feat.name) } }, // L3-Class feature
   "textarea_370ucdg": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 4).map(f => f.feat.name) } }, // L4-Class feat
@@ -435,17 +415,17 @@ export let actormap = {
   "textarea_384qsoq": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 18).map(f => f.feat.name) } }, // L18-Class feat
   "textarea_385judo": { getValue(actor) { return actor.feats.get("classfeature").feats.filter(f => f.feat.level == 19).map(f => f.feat.name) } }, // L19-Class feature
   "textarea_386hfib": { getValue(actor) { return actor.feats.get("class").feats.filter(f => f.level == 20).map(f => f.feat.name) } }, // L20-Class feat
-// PAGE THREE
+  // PAGE THREE
   "textarea_387ozwo": "img", // character sketch (image)
-  "text_388sfhi": "Tx", // ethnicity
-  "text_389ysid": "Tx", // nationality
+  "text_388sfhi": "system.details.ethnicity.value", // ethnicity
+  "text_389ysid": "system.details.nationality.value", // nationality
   "text_390smqa": "system.details.biography.birthplace", // birthplace
   "text_391xzfz": "system.details.age.value", // age
   "text_392pdpc": "system.details.gender.value", // gender & pronouns
   "text_393tita": "system.details.height.value", // height
   "text_394btuu": "system.details.weight.value", // weight
   "textarea_395lsww": "system.details.biography.appearance", // appearance
-  "textarea_396gkaw": "system.details.biography.appearance", // attitude
+  "textarea_396gkaw": "system.details.biography.attitude", // attitude
   "text_397wxmj": "deity.name", // deity or philosophy
   "textarea_398heic": "system.details.biography.edicts", // edicts (array)
   "textarea_399ebez": "system.details.biography.anathema", // anethema (array)
@@ -493,18 +473,18 @@ export let actormap = {
   "text_441nvfv": "_itemTypes.action.2.actionCost.value", // Action3 numactions
   "text_442cwdd": "_itemTypes.action.3.actionCost.value", // Action4 numactions
   "textarea_443qoya": "_itemTypes.action.0.description", // Action1 effects
-  "textarea_444dxm":  "_itemTypes.action.1.description", // Action2 effects
+  "textarea_444dxm": "_itemTypes.action.1.description", // Action2 effects
   "textarea_445fmzt": "_itemTypes.action.2.description", // Action3 effects
   "textarea_446ugjv": "_itemTypes.action.3.description", // Action4 effects
-  "text_447djix": { getValue(actor) { return actor._itemTypes.action?.[0] ? Array.from(actor._itemTypes.action[0].traits).join() : undefined }}, // Action1 traits
-  "text_448wcyu": { getValue(actor) { return actor._itemTypes.action?.[1] ? Array.from(actor._itemTypes.action[1].traits).join() : undefined }}, // Action2 traits
-  "text_449sryh": { getValue(actor) { return actor._itemTypes.action?.[2] ? Array.from(actor._itemTypes.action[2].traits).join() : undefined }}, // Action3 traits
-  "text_450jkvr": { getValue(actor) { return actor._itemTypes.action?.[3] ? Array.from(actor._itemTypes.action[3].traits).join() : undefined }}, // Action4 traits
+  "text_447djix": { getValue(actor) { return actor._itemTypes.action?.[0] ? Array.from(actor._itemTypes.action[0].traits).join() : undefined } }, // Action1 traits
+  "text_448wcyu": { getValue(actor) { return actor._itemTypes.action?.[1] ? Array.from(actor._itemTypes.action[1].traits).join() : undefined } }, // Action2 traits
+  "text_449sryh": { getValue(actor) { return actor._itemTypes.action?.[2] ? Array.from(actor._itemTypes.action[2].traits).join() : undefined } }, // Action3 traits
+  "text_450jkvr": { getValue(actor) { return actor._itemTypes.action?.[3] ? Array.from(actor._itemTypes.action[3].traits).join() : undefined } }, // Action4 traits
   "text_451kmfd": "Tx", // Action1 page
   "text_452ddtc": "Tx", // Action2 page
   "text_453ukeb": "Tx", // Action3 page
-  "text_454zwl":  "Tx", // Action4 page
-// PAGE FOUR
+  "text_454zwl": "Tx", // Action4 page
+  // PAGE FOUR
   "checkbox_455jffm": new pf2e_btneq("_itemTypes.spellcastingEntry.0.tradition", "arcane"), // Magical Tradition Arcane
   "checkbox_456jtfi": new pf2e_btneq("_itemTypes.spellcastingEntry.0.tradition", "occult"), // Magical Tradition Occult
   "checkbox_457gzjp": new pf2e_btneq("_itemTypes.spellcastingEntry.0.tradition", "divine"), // Magical Tradition Divine
@@ -531,15 +511,15 @@ export let actormap = {
   "text_478ymen": "_itemTypes.spellcastingEntry.0.system.slots.slot2.max", // Spells per Day L2
   "text_479grql": "_itemTypes.spellcastingEntry.0.system.slots.slot3.max", // Spells per Day L3
   "text_480iivx": "_itemTypes.spellcastingEntry.0.system.slots.slot4.max", // Spells per Day L4
-  "text_481df":   "_itemTypes.spellcastingEntry.0.system.slots.slot5.max", // Spells per Day L5
+  "text_481df": "_itemTypes.spellcastingEntry.0.system.slots.slot5.max", // Spells per Day L5
   "text_482txib": "_itemTypes.spellcastingEntry.0.system.slots.slot6.max", // Spells per Day L6
   "text_483hpaj": "_itemTypes.spellcastingEntry.0.system.slots.slot7.max", // Spells per Day L7
-  "text_484bzr":  "_itemTypes.spellcastingEntry.0.system.slots.slot8.max", // Spells per Day L8
+  "text_484bzr": "_itemTypes.spellcastingEntry.0.system.slots.slot8.max", // Spells per Day L8
   "text_485rhnw": "_itemTypes.spellcastingEntry.0.system.slots.slot9.max", // Spells per Day L9
-  "text_486ij":   "_itemTypes.spellcastingEntry.0.system.slots.slot10.max", // Spells per Day L10
+  "text_486ij": "_itemTypes.spellcastingEntry.0.system.slots.slot10.max", // Spells per Day L10
   "text_487tilh": "_itemTypes.spellcastingEntry.0.system.slots.slot1.value", // Spells remaining L1
   "text_488tcji": "_itemTypes.spellcastingEntry.0.system.slots.slot2.value", // Spells remaining L2
-  "text_489opb":  "_itemTypes.spellcastingEntry.0.system.slots.slot3.value", // Spells remaining L3
+  "text_489opb": "_itemTypes.spellcastingEntry.0.system.slots.slot3.value", // Spells remaining L3
   "text_490essc": "_itemTypes.spellcastingEntry.0.system.slots.slot4.value", // Spells remaining L4
   "text_491uqhm": "_itemTypes.spellcastingEntry.0.system.slots.slot5.value", // Spells remaining L5
   "text_492bmbp": "_itemTypes.spellcastingEntry.0.system.slots.slot6.value", // Spells remaining L6
@@ -550,13 +530,13 @@ export let actormap = {
   "checkbox_497nalp": "Btn", // Focus Point 1
   "checkbox_498vzol": "Btn", // Focus Point 2
   "checkbox_499vcvw": "Btn", // Focus Point 3
-  "text_500fem":      "Tx", // Focus Spell Rank
-  "textarea_501fwoj": { getValue(actor) {  return actor._itemTypes.spellcastingEntry?.[0].spells.filter(s => s.isCantrip).map(s => s.name).join("\n") }}, // Cantrip Names
-  "textarea_502c":    { getValue(actor) {  return actor._itemTypes.spellcastingEntry?.[0].spells.filter(s => s.isCantrip).map(s => s.actionGlyph).join("\n") }}, // Cantrip Actions
-  "textarea_503nyfs": "Tx", // Cantrip Prep
-  "textarea_504zkkz": { getValue(actor) {  return actor._itemTypes.spellcastingEntry?.[0].spells.map(s => `${s.name} (${s.actionGlyph})`).join("\n") }}, // Spells1 Actions
+  "text_500fem": "Tx", // Focus Spell Rank
+  "textarea_501fwoj": { getValue(actor) { return actor._itemTypes.spellcastingEntry.length ? actor._itemTypes.spellcastingEntry?.[0].spells?.filter(s => s.isCantrip).map(s => s.name).join("\n") : "" } }, // Cantrip Names
+  "textarea_502c": { getValue(actor) { return actor._itemTypes.spellcastingEntry.length ? actor._itemTypes.spellcastingEntry?.[0].spells?.filter(s => s.isCantrip).map(s => s.actionGlyph).join("\n") : "" } }, // Cantrip Actions
+  "textarea_503nyfs": "Tx", // Cantrip Prep  [filter against spellcastingEntry[0].system.slots[slotX].id]
+  "textarea_504zkkz": { getValue(actor) { return actor._itemTypes.spellcastingEntry.length ? Array.from(actor._itemTypes.spellcastingEntry?.[0].spells).filter(s => !s.isCantrip).sort((a,b) => a.rank - b.rank).map(s => `${s.name} (${s.actionGlyph ?? "-"})`).join("\n") : "" } }, // Spells1 Actions
   "textarea_505pwgp": "Tx", // Spells2 Actions
-  "textarea_506nwja": { getValue(actor) {  return actor._itemTypes.spellcastingEntry?.[0].spells.map(s => s.rank).join("\n") }}, // Spells1 Rank
+  "textarea_506nwja": { getValue(actor) { return actor._itemTypes.spellcastingEntry.length ? Array.from(actor._itemTypes.spellcastingEntry?.[0].spells).filter(s => !s.isCantrip).sort((a,b) => a.rank - b.rank).map(s => s.rank).join("\n") : "" } }, // Spells1 Rank
   "textarea_507kpxe": "Tx", // Spells2 Rank
   "textarea_508pqrd": "Tx", // Rituals1 Rank
   "textarea_509iknk": "Tx", // Rituals2 Rank
@@ -567,7 +547,7 @@ export let actormap = {
   "textarea_514lwyk": "Tx", // Innate Spells Name
   "textarea_515bzeo": "Tx", // Innate Spells Actions
   "textarea_516jawj": "Tx", // Innate Spells Freq
-  "textarea_517vrw":  "Tx", // Spells1 Prep
+  "textarea_517vrw": "Tx", // Spells1 Prep
   "textarea_518jeoq": "Tx", // Spells2 Prep
   "textarea_519gydf": "Tx", // Rituals1 Cost
   "textarea_520epty": "Tx"  // Rituals2 Cost
