@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.5.2
+
+- Fix an issue where the module doesn't initialise properly if the color-picker module is not installed.
+- Add an initial (work-in-progress) read-only mapping for the PF2E fillable character sheet.
+
 ## 1.5.1
 
 - Ensure that the "label" parameter passed to the invoked Macro works.

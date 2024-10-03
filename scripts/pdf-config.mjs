@@ -321,7 +321,7 @@ Hooks.once('ready', () => {
   });
 
   let colorhandler = game.settings;
-  if (game.modules.get("color-picker").active)
+  if (game.modules.get("color-picker")?.active)
     colorhandler = ColorPicker;
 
   // Clickable Text colours
