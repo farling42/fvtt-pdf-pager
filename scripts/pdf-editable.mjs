@@ -639,7 +639,7 @@ export async function initEditor(html, id_to_display) {
             // which don't otherwise trigger HTML events.
             if (CONFIG.debug.pdfpager) console.log(`type '${element.type}', id '${element.id}'`)
             if (element.type === 'checkbox') {
-              element.addEventListener('input', event => setValue(event, "checked"));
+              element.addEventListener('click', event => setValue(event, "checked"));
               if (hasjsactions)
                 element.addEventListener('updatefromsandbox', (event) => { setValue(event, "checked", event.detail.value !== "Off") })
             } else if (element.type === 'button') {
