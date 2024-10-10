@@ -71,6 +71,8 @@ Example:
 - Click on the text that you've configured to trigger the macro
 - The macro should get invoked
 
+https://youtu.be/xtzajoAYzuU
+
 #### A manually created object mapping
 
 To map the PDF fields to Actor fields (such as hit points or armour class), a mapping is required. This can be prepared outside of Foundry and then pasted into the corresponding "Field Mappings..." box of the module settings window. The simple case is to have something like:
