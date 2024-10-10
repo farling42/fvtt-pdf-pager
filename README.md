@@ -58,6 +58,19 @@ If the [Color Picker](https://foundryvtt.com/packages/color-picker) module is en
 
 The mapping to Macros can be set when the "Edit Field Mapping" option is enabled. The mapping can also be defined in the field mapping object where the field name is `LABEL.text` (where text is the trimmed text of the span) and the value is the UUID of the macro to be triggered.
 
+Example:
+
+- Tick "Edit Field Mapping" in the module settings for PDF Pager
+- Open up an Actor sheet using a PDF
+- Left-click on one of the highlighted strings displayed within the PDF
+- A dialog box should appear showing a list of all the macros in your world
+- Choose one of the macros to be associated with the field
+- Untick "Edit Field Mapping" in the module settings for PDF Pager
+- Open up the actor sheet again
+- The previously configured text field should have its background highlighted
+- Click on the text that you've configured to trigger the macro
+- The macro should get invoked
+
 #### A manually created object mapping
 
 To map the PDF fields to Actor fields (such as hit points or armour class), a mapping is required. This can be prepared outside of Foundry and then pasted into the corresponding "Field Mappings..." box of the module settings window. The simple case is to have something like:
