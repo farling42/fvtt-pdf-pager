@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.5.3
+
+- Add additional detection so that changes to checkboxes made by JS embedded in the PDF is handled.
+
 ## 1.5.2
 
 - Fix an issue where the module doesn't initialise properly if the color-picker module is not installed.
