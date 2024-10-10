@@ -60,11 +60,15 @@ function Obj2String(obj) {
   for (let k in obj) {
     let v = obj[k];
     if (typeof v === "function") {
-      ret += v.toString() + ',';
+      const text = v.toString();
+      if (text.startsWith("class")) ret += `"${k}": `;
+      ret += text + ',';
     } else if (v instanceof Array) {
       ret += `"${k}": ${JSON.stringify(v)},`;
     } else if (typeof v === "object") {
       ret += `"${k}": ${Obj2String(v)},`;
+    } else if (typeof v === "class") {
+      ret += `"${k}": "${v}",`;
     } else {
       ret += `"${k}": "${v}",`;
     }
@@ -561,6 +565,7 @@ export async function initEditor(html, id_to_display) {
         let datalist;
         let pdfpageview = layerevent.source;
         let annotations = await pdfpageview.annotationLayer.pdfPage?.getAnnotations();
+        const hasjsactions = await pdfviewerapp.pdfDocument.hasJSActions();
         if (editor_menus) {
           const flatdoc = myFlattenObject(document);
           const objkeys = [ignore_label];
@@ -630,18 +635,24 @@ export async function initEditor(html, id_to_display) {
             // Prevent adding listeners more than once
             element.setAttribute('pdfpager', id_to_display);
 
+            // "updatefromsandbox" is to handle changes made by JS embedded within the PDF,
+            // which don't otherwise trigger HTML events.
             if (CONFIG.debug.pdfpager) console.log(`type '${element.type}', id '${element.id}'`)
             if (element.type === 'checkbox') {
-              element.addEventListener('click', event => setValue(event, "checked"));
+              element.addEventListener('input', event => setValue(event, "checked"));
+              if (hasjsactions)
+                element.addEventListener('updatefromsandbox', (event) => { setValue(event, "checked", event.detail.value !== "Off") })
             } else if (element.type === 'button') {
               element.addEventListener('click', event => setValue(event, "clicked"));
             } else if (element.type === 'radio') {
               // If this element has the ":before" computed style, then this option is enabled
               element.setAttribute('pdfradiovalue', annotations?.find(annot => annot.id == element.id)?.buttonValue ?? element.id);
               element.addEventListener('click', event => setValue(event, 'pdfradiovalue'));
+              // "updatefromsandbox" is complex
             } else if (element.nodeName === 'SELECT') {
               // select fields need to trigger as soon as a new selection is made
               element.addEventListener('change', setValue);
+              // "updatefromsandbox" is complex
             } else if (element.nodeName === 'A') {
               // "A" is the for character image; it doesn't have a name attribute normally (neither does the canvas or surrounding section)
               let img = element.ownerDocument.createElement("img");
