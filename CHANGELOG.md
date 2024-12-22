@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.5.4
+
+- Mark as NOT compatible with Foundry V13.
+
 ## 1.5.3
 
 - Add additional detection so that changes to checkboxes made by JS embedded in the PDF is handled.
