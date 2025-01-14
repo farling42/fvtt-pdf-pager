@@ -703,7 +703,7 @@ export async function initEditor(html, id_to_display) {
               add_clickable_text(span, macrouuid, span_click_edit, (document instanceof Actor) ? LABEL_DOCTYPE_ACTOR : LABEL_DOCTYPE_ITEM);
             } else {
               // Only highlight the fields which have macros mapped to them.
-              if (macrouuid) add_clickable_text(span, macrouuid, span_click);
+              if (macrouuid) add_clickable_text(span, macrouuid, span_click.bind(document) );
             }
           }
         }
@@ -857,7 +857,14 @@ async function span_click(event) {
   // FVTT 10 has actor and token fields.
   // FVTT 12 has actor, token, speaker, event fields.
   // Invoke _executeScript ourselves!
-  macro.execute({ event, label: span.textContent.trim() });
+  let context = { 
+    event,
+    label: span.textContent.trim()
+  }
+  if (this instanceof Actor) context.actor = this;
+  if (this instanceof Item) context.item = this;
+
+  macro.execute(context);
 }
 
 async function span_click_edit(event) {

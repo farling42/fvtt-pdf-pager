@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.5.5
+
+- When a macro is triggered from some text (see 1.5.0) pass `actor` or `item` within the scope of the macro so it can be referenced by the macro code.
+
 ## 1.5.4
 
 - Mark as NOT compatible with Foundry V13.
