@@ -58,7 +58,6 @@ class AnnotationManager {
     this.pdfviewerapp = pdfviewerapp;
     this.pdfViewer = pdfviewerapp.pdfViewer;
     this.editable = editable;
-    //this.uimanager = undefined;
 
     // Prevent generating events until we've loaded all the pages.
     this.pdfViewer.pdfPagerMode = IGNORE_EDIT;
@@ -66,13 +65,11 @@ class AnnotationManager {
 
     // Bind callbacks to allow eventBus.off to work
     this.bound_annotationeditoruimanager = this.#setUiManager.bind(this);
-    this.bound_reporttelemetry = this.#reporttelemetry.bind(this);
     this.bound_annotationeditorlayerrendered = this.#annotationeditorlayerrendered.bind(this);
     this.bound_annotationeditorstateschanged = this.#annotationeditorstateschanged.bind(this);
 
     // The UIManager is created very early on, and is needed for later loading of manual annotations.
     pdfviewerapp.eventBus.on('annotationeditoruimanager', this.bound_annotationeditoruimanager)
-    pdfviewerapp.eventBus.on('reporttelemetry', this.bound_reporttelemetry);
     pdfviewerapp.eventBus.on('annotationeditorlayerrendered', this.bound_annotationeditorlayerrendered);
     if (this.editable) pdfviewerapp.eventBus.on('annotationeditorstateschanged', this.bound_annotationeditorstateschanged)
   } // constructor
@@ -80,7 +77,6 @@ class AnnotationManager {
   delete() {
     if (CONFIG.debug.pdfpager) console.debug(`AnnotationManager.delete:`, this.document?.name);
     this.pdfviewerapp.eventBus.off('annotationeditoruimanager', this.bound_annotationeditoruimanager);
-    this.pdfviewerapp.eventBus.off('reporttelemetry', this.bound_reporttelemetry);
     this.pdfviewerapp.eventBus.off('annotationeditorlayerrendered', this.bound_annotationeditorlayerrendered);
     if (this.editable) this.pdfviewerapp.eventBus.off('annotationeditorstateschanged', this.bound_annotationeditorstateschanged);
     // Now this object can be safely deleted
@@ -155,6 +151,8 @@ class AnnotationManager {
   debounceUpdateFlags = foundry.utils.debounce(this.#updateFlags.bind(this), 250);
 
   #annotationeditorstateschanged(event) {
+    if (CONFIG.debug.pdfpager) console.debug(`annotationeditorstateschanged`,event)
+
     // Don't update the flags if the user hasn't performed any edits yet.
     if (this.pdfViewer.pdfPagerMode == IGNORE_EDIT) return;
 
@@ -222,13 +220,6 @@ class AnnotationManager {
   }
   debounceEndEdit = foundry.utils.debounce(this.#endEdit.bind(this), 250);
 
-  #reporttelemetry(event) {
-    // Triggered when items are being added, removed from the annotation layer
-    //if (event.details.type !== "editing") return;
-    if (CONFIG.debug.pdfpager) console.log(`reporttelemetry: pageIndex ${event.source.parent.pageIndex}, ${event.details.type} ${event.source.id}: ${event.details.data.type} ${event.details.data.action}`)
-    this.debounceEndEdit();
-  }
-
   updateAnnotations(changed) {
     let changedPages = Object.keys(changed?.flags?.[PDFCONFIG.MODULE_NAME]?.objects ?? {});
     let changes = changedPages.map(key => parseInt(key.slice(4)));  // strip leading "page" from "pageXX"
@@ -279,7 +270,7 @@ function updateAnnotations(doc, changed, options, userId) {
 function pageClosed(sheet, html) {
   if (CONFIG.debug.pdfpager) console.debug('pageClosed', { sheet, html });
   for (const [doc, app] of mapping) {
-    if (sheet.object === doc || sheet.object == doc.parent) {
+    if (sheet.document === doc || sheet.document == doc.parent) {
       if (CONFIG.debug.pdfpager) console.debug('pageClosed: deleting AnnotationManager');
       app.delete();
       break;
@@ -300,23 +291,23 @@ export async function initAnnotations(doc, pdfviewerapp, editable) {
     Hooks.on('updateActor', updateAnnotations);
     Hooks.on('updateItem', updateAnnotations);
     Hooks.on('closeJournalSheet', pageClosed);
-    Hooks.on('closeJournalPDFPageSheet', pageClosed);
+    Hooks.on('closeJournalEntryPagePDFSheet', pageClosed);
   }
 }
 
 /**
  * When initEditor isn't being used (because editing of form-fillable PDFs is disabled),
  * this function will initialize annotation editing separately.
- * @param {*} html 
+ * @param {HTMLElement} iframe The <iframe> containing the PDF
  * @param {*} id_to_display 
  * @returns 
  */
-export async function setupAnnotations(html, id_to_display) {
+export async function setupAnnotations(iframe, id_to_display) {
 
   const doc = (id_to_display.includes('.') && await fromUuid(id_to_display)) || game.actors.get(id_to_display) || game.items.get(id_to_display);
   if (!doc) return;
 
-  html.on('load', async (event) => {
+  iframe.addEventListener('load', async (event) => {
 
     // Wait for PDF to initialise before attaching to event bus.
     const pdfviewerapp = event.target.contentWindow.PDFViewerApplication;

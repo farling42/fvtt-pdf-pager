@@ -44,19 +44,18 @@ Hooks.on("renderNoteConfig", async (app,html,data) => {
         const pdfsheet = getPdfSheet(journal?.sheet, data.document.pageId)
         const linkService = pdfsheet?.pdfviewerapp?.pdfLinkService;
         if (linkService) {
-            let pageoffset = pdfsheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0;
+            let pageoffset = pdfsheet.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0;
             pdfpage = linkService.pdfViewer.currentPageNumber - pageoffset;
         }
     }
-    if (pdfpage === undefined) pdfpage = "";
-    let prompt = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.noteConfig.pdfPagePrompt`);
-	let label = $(`<div class='form-group'><label>${prompt}</label><div class='form-fields'><input name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.PIN_PDF_PAGE}" type='number' value="${pdfpage}"/></div></div>`)
-	html.find("input[name='text']").parent().parent().after(label);
 
-    // Force a recalculation of the height
-	if (!app._minimized) {
-		let pos = app.position;
-		pos.height = 'auto'
-		app.setPosition(pos);
-	}
+    const flags = new foundry.data.fields.ObjectField({label: "module-flags"}, {parent: data.document.schema.fields.flags, name: PDFCONFIG.MODULE_NAME});
+
+    const page_elem = (new foundry.data.fields.NumberField(
+        {
+          label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.noteConfig.pdfPagePrompt`),
+          initial: pdfpage ?? "" },
+        { parent: flags, name: PDFCONFIG.PIN_PDF_PAGE })).toFormGroup();
+
+	html.querySelector("select[name='pageId']").parentElement.parentElement.after(page_elem);
 })

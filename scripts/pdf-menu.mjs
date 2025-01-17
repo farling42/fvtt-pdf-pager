@@ -28,12 +28,13 @@ const MENU_ACTOR_FLAG = "menuActorCode";
 const MENU_ITEM_FLAG  = "menuItemCode";
 
 function getMapping(element) {
-    const docid = element.data("documentId");
-    if (element[0].classList.contains('actor')) {
+    const docid = element.data ? element.data("documentId") : element.dataset.entryId;
+    if (element instanceof jQuery) element = element[0];
+    if (element.classList.contains('actor')) {
         const uuid = `Actor.${docid}`
         const document = fromUuidSync(uuid);
         return { uuid, pdfcode: game.settings.get(PDFCONFIG.MODULE_NAME, `${MENU_ACTOR_FLAG}.${document.type}`) };
-    } else if (element[0].classList.contains('item')) {
+    } else if (element.classList.contains('item')) {
         const uuid = `Item.${docid}`
         const document = fromUuidSync(uuid);
         return { uuid, pdfcode: game.settings.get(PDFCONFIG.MODULE_NAME, `${MENU_ITEM_FLAG}.${document.type}`) };

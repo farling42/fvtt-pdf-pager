@@ -443,12 +443,13 @@ function myFlattenObject(obj, _d = 0) {
 }
 
 /**
- * Called from renderJournalPDFPageSheet
- * @param {jQuery} html The iframe for the PDF Page
+ * Called from renderJournalEntryPagePDFSheet
+ * @param {jQuery | HTMLElement} html The <iframe> for the PDF Page
  * @param {String} id_to_display The UUID of the Actor or Item to be displayed in the Form Fillable PDF
- * @inheritData renderJournalPDFPageSheet
+ * @inheritData renderJournalEntryPagePDFSheet
  */
 export async function initEditor(html, id_to_display) {
+  if (html instanceof jQuery) html = html[0];
 
   const document = (id_to_display.includes('.') && await fromUuid(id_to_display)) || game.actors.get(id_to_display) || game.items.get(id_to_display);
   if (!document) return;
@@ -476,7 +477,8 @@ export async function initEditor(html, id_to_display) {
   if (!map_pdf2item) map_pdf2item = {};
 
   // Wait for the IFRAME to appear in the window before any further initialisation (html = iframe)
-  html.on('load', async (event) => {
+  //html.on('load', async (event) => {
+  html.addEventListener('load', async (event) => {
     console.debug(`PDF frame loaded for '${document.name}'`);
     let read_pdf = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF);
     let editable = !read_pdf && document.isOwner &&
@@ -703,7 +705,7 @@ export async function initEditor(html, id_to_display) {
               add_clickable_text(span, macrouuid, span_click_edit, (document instanceof Actor) ? LABEL_DOCTYPE_ACTOR : LABEL_DOCTYPE_ITEM);
             } else {
               // Only highlight the fields which have macros mapped to them.
-              if (macrouuid) add_clickable_text(span, macrouuid, span_click.bind(document) );
+              if (macrouuid) add_clickable_text(span, macrouuid, span_click);
             }
           }
         }
@@ -857,14 +859,7 @@ async function span_click(event) {
   // FVTT 10 has actor and token fields.
   // FVTT 12 has actor, token, speaker, event fields.
   // Invoke _executeScript ourselves!
-  let context = { 
-    event,
-    label: span.textContent.trim()
-  }
-  if (this instanceof Actor) context.actor = this;
-  if (this instanceof Item) context.item = this;
-
-  macro.execute(context);
+  macro.execute({ event, label: span.textContent.trim() });
 }
 
 async function span_click_edit(event) {

@@ -320,6 +320,9 @@ Hooks.once('ready', () => {
     config: true
   });
 
+  // foundry.fields.ColorField does not support setting ALPHA channel !!!
+  // https://github.com/foundryvtt/foundryvtt/issues/11291
+
   let colorhandler = game.settings;
   if (game.modules.get("color-picker")?.active)
     colorhandler = ColorPicker;

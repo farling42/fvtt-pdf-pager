@@ -42,7 +42,7 @@ import { setupAnnotations } from './pdf-annotations.mjs';
 
 Hooks.once('ready', async () => {
   // Need to capture the PDF page number
-  libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalPDFPageSheet.prototype._renderInner', JournalPDFPageSheet_renderInner, libWrapper.WRAPPER);
+  //libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.applications.sheets.journal.JournalEntryPagePDFSheet.prototype._renderInner', JournalEntryPagePDFSheet_renderInner, libWrapper.WRAPPER);
   libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._onClickDocumentLink', JournalEntryPage_onClickDocumentLink, libWrapper.MIXED);
   libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype.toc', JournalEntryPage_toc, libWrapper.MIXED);
   libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render', JournalSheet_render, libWrapper.WRAPPER);
@@ -59,7 +59,7 @@ function JournalEntryPage_toc(wrapped) {
 
 /**
  * 
- * @param {JournalPDFPageSheet} pdfsheet The PDF sheet to be affected
+ * @param {JournalEntryPagePDFSheet} pdfsheet The PDF sheet to be affected
  * @param {String} anchor A page number or a TOC section string
  * @returns true if the change was made
  */
@@ -69,11 +69,11 @@ function updatePdfView(pdfsheet, anchor) {
 
   const dest = anchor.startsWith('page=') ?
     // Adjust page with configured PDF Page Offset
-    `page=${+anchor.slice(5) + (pdfsheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}` :
+    `page=${+anchor.slice(5) + (pdfsheet.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}` :
     // Convert our internal link name into a PDF outline slug
     pdfsheet.toc[anchor].pdfslug;
 
-  console.debug(`updatePdfView(sheet='${pdfsheet.object.name}', anchor='${anchor}')\n=>'${dest}'`);
+  console.debug(`updatePdfView(sheet='${pdfsheet.document.name}', anchor='${anchor}')\n=>'${dest}'`);
   linkService.setHash(dest);
   // Do the journal.sheet(false, {focus: true}) without re-rendering the app,
   // otherwise we lose the selected page.
@@ -158,7 +158,7 @@ function buildOutline(pdfoutline) {
 /**
  * Updates the TOC to show the item currently being viewed in the PDF.
  * 
- * @param {JournalPDFPageSheet} pdfsheet 
+ * @param {JournalEntryPagePDFSheet} pdfsheet 
  * @param {*} location 
  */
 async function updateOutline(pdfsheet, location) {
@@ -205,34 +205,48 @@ async function updateOutline(pdfsheet, location) {
 
 
 /**
- * Adds the "Page Offset" field to the JournalPDFPageSheet EDITOR window.
+ * Adds the "Page Offset" field to the JournalEntryPagePDFSheet EDITOR window.
  * @param {*} wrapper from libWrapper
  * @param  {sheetData} args an array of 1 element, the first element being the same as the data passed to the render function
  * @returns {jQuery} html
  */
-async function JournalPDFPageSheet_renderInner(wrapper, sheetData) {
+async function JournalEntryPagePDFSheet_renderInner(wrapper, sheetData) {
   let html = await wrapper(sheetData);   // jQuery
-  const pagedoc = sheetData.document;
+  handle_pdf(html, sheetData);
+  return html;
+}
 
-  // Ensure we have a TOC on this sheet.
+async function JournalEntryPagePDFSheet_render(sheetData, form, document, options) {
+  handle_pdf(html, sheetData);
+}
+
+function handle_pdf(html, pdfsheet) {
+  const pdfdoc = pdfsheet.document;
+    // Ensure we have a TOC on this sheet.
   // Emulate TextPageSheet._renderInner setting up the TOC
-  let toc = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+  let toc = pdfdoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
   if (toc)
-    this.toc = JSON.parse(toc);
+    pdfsheet.toc = JSON.parse(toc);
   else
-    delete this.toc;
+    delete pdfsheet.toc;
 
-  if (this.isEditable) {
-    // Editting, so add our own elements to the window
-    const page_offset = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
-    const value_offset = page_offset ? ` value="${page_offset}"` : "";
-    const label_offset = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.PageOffset.Label`);
-    const elem_offset = `<div class="form-group"><label>${label_offset}</label><input class="pageOffset" type="number" name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_OFFSET}"${value_offset}/></div>`;
+  //if (pdfsheet.isEditable2) {  // TODO
+  if (html.querySelector('file-picker[name="src"]')) {
 
-    const page_code = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
-    const value_code = page_code ? ` value="${page_code}"` : "";
-    const label_code = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Code.Label`);
-    const elem_code = `<div class="form-group"><label>${label_code}</label><input class="pageCode" type="text" name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_CODE}"${value_code}/></div>`;
+    // Page Editor - so add our own additional fields.
+    const flags = new foundry.data.fields.ObjectField({label: "module-flags"}, {parent: pdfdoc.schema.fields.flags, name: PDFCONFIG.MODULE_NAME});
+
+    const elem_offset = (new foundry.data.fields.NumberField(
+      {
+        label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.PageOffset.Label`),
+        initial: pdfdoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? "" },
+      { parent: flags, name: PDFCONFIG.FLAG_OFFSET })).toFormGroup();
+
+    const elem_code = (new foundry.data.fields.StringField(
+      {
+        label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Code.Label`),
+        initial: pdfdoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE) ?? "" },
+      { parent: flags, name: PDFCONFIG.FLAG_CODE })).toFormGroup();
 
     /*
     const zoom_selectid = `${pagedoc.id}.zoom`;
@@ -242,40 +256,43 @@ async function JournalPDFPageSheet_renderInner(wrapper, sheetData) {
     const elem_zoom = `<div class="form-group"><label for=${zoom_selectid}>${label_zoom}</label>${zoom_select}</div>`;
     */
 
-    const spread_selectid = `${pagedoc.id}.zoom`;
-    const label_spread = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.defaultSpread.Name`);
-    const cur_spread = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_SPREAD) ?? SpreadMode.UNKNOWN;
-    let spread_options = Object.entries(SpreadChoices).map(values => `<option value=${values[0]} ${cur_spread == values[0] ? "selected" : ""}>${values[1]}</option>`).join('');
-    let spread_select = `<select name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_SPREAD}" id=${spread_selectid}>${spread_options}</select>`;
-    const elem_spread = `<div class="form-group"><label for=${spread_selectid}>${label_spread}</label>${spread_select}</div>`;
+    const elem_spread = (new foundry.data.fields.NumberField(
+      {
+        label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.defaultSpread.Name`),
+        initial: pdfdoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_SPREAD) ?? SpreadMode.UNKNOWN,
+        choices: SpreadChoices },
+      { parent: flags, name: PDFCONFIG.FLAG_SPREAD })).toFormGroup();
 
+    const otherfield = html.querySelector('div.form-group div.form-fields').parentElement.parentElement;
+    otherfield.appendChild(elem_offset);
+    otherfield.appendChild(elem_code);
+    otherfield.appendChild(elem_spread);
 
-    html.find('div.picker').after(elem_offset + elem_code + elem_spread);
     // Add hook to allow drop of Actor or Item into the 'PDF Code' field
-    html.find('.pageCode').on('dragover', false).on('drop', function (event) {
+    html.querySelector(`input[name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_CODE}"]`).addEventListener('drop', function (event) {
       event.preventDefault();
       event.stopPropagation();
       // TextEditor.getDragEventData requires event.dataTransfer to exist.
-      const data = TextEditor.getDragEventData(event.originalEvent);
+      const data = TextEditor.getDragEventData(event);
       console.log(`Dropped onto pagecode: ${data}`)
       if (!data) return;
-      if (data.type === 'Actor' || data.type === 'Item') this.value = data.uuid;
+      if (data.type === 'Actor' || data.type === 'Item') event.currentTarget.value = data.uuid;
     })
 
   } else {
 
     // Not editting, so maybe replace button with actual PDF
-    let anchor = pagedoc.pdfpager_anchor;
+    let anchor = pdfdoc.pdfpager_anchor;
     if (anchor || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
       let rawlink = false;
       let pdf_slug = "";
       if (typeof anchor === 'number')
-        pdf_slug = `#page=${anchor + (pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}`;
-      else if (typeof anchor === 'string' && this.toc) {
+        pdf_slug = `#page=${anchor + (pdfdoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}`;
+      else if (typeof anchor === 'string' && pdfsheet.toc) {
         // convert TOC entry to PDFSLUG.
         // if the final slug is a string then it is an entry in the PDF's destination table.
         // if the final slug is an ARRAY, then we can't pass it as a parameter to viewer.html.
-        let docslug = this.toc[anchor].pdfslug;
+        let docslug = pdfsheet.toc[anchor].pdfslug;
         let slug = JSON.parse(docslug);
         if (typeof slug === 'string')
           pdf_slug = `#nameddest=${slug}`;
@@ -297,73 +314,66 @@ async function JournalPDFPageSheet_renderInner(wrapper, sheetData) {
         }
       }
 
-      // Replace the "div.load-pdf" with an iframe element.
-      // I can't find a way to do it properly, since html is simply a jQuery of top-level elements.
-      //
-      // Ideally it would simply involve html.closest('div.load-pdf').replaceWith(frame);
-
-      let idx = -1;
-      for (let i = 0; i < html.length; i++)
-        if (html[i].className == 'load-pdf') idx = i;
-      if (idx == -1) return html;
+      const button = html.querySelector('div.load-pdf');
+      if (!button) return html;
 
       // as JournalPagePDFSheet#_onLoadPDF, but adding optional page-number
-      const frame = document.createElement("iframe");
-      frame.src = `modules/pdf-pager/libs/pdfjs/web/viewer.html?${this._getViewerParams()}${pdf_slug}`;
-      console.debug(frame.src);
-      html[idx] = frame;
+      const iframe = document.createElement("iframe");
+      iframe.src = `modules/pdf-pager/libs/pdfjs/web/viewer.html?${pdfsheet._getViewerParams()}${pdf_slug}`;
+      console.debug(iframe.src);
+      button.replaceWith(iframe);
     }
   }
 
   // Register handler to generate the TOC after the PDF has been loaded.
   // (This is done in the editor too, so that the flag can be set as soon as a PDF is selected)
-  html.on('load', async (event) => {
+  html.querySelector("iframe").addEventListener('load', async (event) => {
     //console.debug(`PDF frame loaded for '${pagedoc.name}'`);
 
     // Wait for PDF to initialise before attaching to event bus.
-    this.pdfviewerapp = event.target.contentWindow.PDFViewerApplication;
-    await this.pdfviewerapp.initializedPromise;
+    pdfsheet.pdfviewerapp = event.target.contentWindow.PDFViewerApplication;
+    await pdfsheet.pdfviewerapp.initializedPromise;
 
     // pdfviewerapp.pdfDocument isn't defined at this point
     // Read the outline and generate a TOC object from it.
-    if (this.object.permission == CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
-      this.pdfviewerapp.eventBus.on('outlineloaded', docevent => {   // from PdfPageView
-        this.pdfviewerapp.pdfDocument.getOutline().then(outline => {
-          // Store it as JournalPDFPageSheet.toc
-          const oldflag = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+    if (pdfsheet.document.permission == CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
+      pdfsheet.pdfviewerapp.eventBus.on('outlineloaded', docevent => {   // from PdfPageView
+        pdfsheet.pdfviewerapp.pdfDocument.getOutline().then(outline => {
+          // Store it as JournalEntryPagePDFSheet.toc
+          const oldflag = pdfsheet.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
           if (outline) {
             let newflag = JSON.stringify(buildOutline(outline));
             if (oldflag !== newflag) {
-              console.debug(`Storing new TOC for '${this.object.name}'`)
-              this.object.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC, newflag)
-              this._toc = outline;
+              console.debug(`Storing new TOC for '${pdfsheet.document.name}'`)
+              pdfsheet.document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC, newflag)
+              pdfsheet._toc = outline;
             }
           } else if (oldflag !== undefined) {
-            this.object.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+            pdfsheet.document.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
           }
         })
       })
     }
 
     // Need to wait for "documentinit" event, otherwise the default options from the Viewer are loaded.
-    this.pdfviewerapp.eventBus.on("documentinit", event => {
+    pdfsheet.pdfviewerapp.eventBus.on("documentinit", event => {
 
       let value = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_SCROLL);
-      if (value !== ScrollMode.UNKNOWN) this.pdfviewerapp.pdfViewer.scrollMode = Number(value);
+      if (value !== ScrollMode.UNKNOWN) pdfsheet.pdfviewerapp.pdfViewer.scrollMode = Number(value);
 
       // Set spread mode (might be String or Number)
-      value = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_SPREAD) ?? SpreadMode.UNKNOWN;
+      value = pdfdoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_SPREAD) ?? SpreadMode.UNKNOWN;
       if (value == SpreadMode.UNKNOWN) value = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_SPREAD);
-      console.log(`existing spread mode = ${this.pdfviewerapp.pdfViewer.spreadMode}`);
-      if (value != SpreadMode.UNKNOWN) this.pdfviewerapp.pdfViewer.spreadMode = Number(value);
-      console.log(`new spread mode = ${this.pdfviewerapp.pdfViewer.spreadMode}`);
+      console.log(`existing spread mode = ${pdfsheet.pdfviewerapp.pdfViewer.spreadMode}`);
+      if (value != SpreadMode.UNKNOWN) pdfsheet.pdfviewerapp.pdfViewer.spreadMode = Number(value);
+      console.log(`new spread mode = ${pdfsheet.pdfviewerapp.pdfViewer.spreadMode}`);
     })
 
     // Keep the TOC inline with the current visible page
     if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.AUTO_SCROLL_TOC)) {
-      this.pdfviewerapp.eventBus.on("updateviewarea", location => {
-        if (!this.pdfviewerapp.pdfOutlineViewer._isPagesLoaded) return;
-        updateOutline(this, location);
+      pdfsheet.pdfviewerapp.eventBus.on("updateviewarea", location => {
+        if (!pdfsheet.pdfviewerapp.pdfOutlineViewer._isPagesLoaded) return;
+        updateOutline(pdfsheet, location);
       })
     }
   })
@@ -371,16 +381,20 @@ async function JournalPDFPageSheet_renderInner(wrapper, sheetData) {
   return html;
 }
 
-Hooks.on("renderJournalPDFPageSheet", function (sheet, html, data) {
+Hooks.on("renderJournalEntryPagePDFSheet", function (sheet, html, data) {
+  handle_pdf(html, sheet);
+
   // Ignore if it is the PDF Page Editor which is being displayed.
-  if (sheet.isEditable) return;
+  //if (sheet.isEditable2) return; // TODO
+  if (html.querySelector('file-picker[name="src"]')) return;
 
   // Initialising the editor MUST be done after the button has been replaced by the IFRAME.
   const docid = data.document.pdfpager_show_uuid ?? data.document.uuid;
+  const iframe = html.querySelector("iframe");
   if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.FORM_FILL_PDF))
-    initEditor(html, docid);
+    initEditor(iframe, docid);
   else
-    setupAnnotations(html, docid);
+    setupAnnotations(iframe, docid);
 })
 
 // Remove the flags we saved on the PAGE when the displayed window is closed.
@@ -398,7 +412,7 @@ Hooks.on("closeJournalSheet", (sheet, element) => {
   }
 })
 
-Hooks.on("closeJournalPDFPageSheet", (sheet, element) => {
+Hooks.on("closeJournalEntryPagePDFSheet", (sheet, element) => {
   //console.log(`closing PDF ${sheet.document.name}`)
   let page = sheet.document;
   delete page.pdfpager_anchor;
@@ -412,7 +426,7 @@ Hooks.on("closeJournalPDFPageSheet", (sheet, element) => {
 
 async function JournalSheet_renderHeadings(pageNode, toc) {
   const pageId = pageNode.dataset.pageId;
-  const page = this.object.pages.get(pageId);
+  const page = this.document.pages.get(pageId);
   const MAX_NESTING = (page.type == 'pdf') ? game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.MAX_TOC_DEPTH) : 2;
   const tocNode = this.element[0].querySelector(`.directory-item[data-page-id="${pageId}"]`);
   if (!tocNode || !toc) return;
@@ -435,7 +449,7 @@ async function JournalSheet_renderHeadings(pageNode, toc) {
 }
 
 /**
- * my_journal_render reads the page=xxx anchor from the original link, and stores it temporarily for use by renderJournalPDFPageSheet later
+ * my_journal_render reads the page=xxx anchor from the original link, and stores it temporarily for use by renderJournalEntryPagePDFSheet later
  * Wraps JournalSheet#_render
  */
 let webviewerloaded_set = false;
@@ -462,7 +476,7 @@ function JournalSheet_render(wrapper, force, options) {
   }
 
   // Monk's Active Tile Triggers sets the anchor to an array, so we need to check for a string here.
-  let page = this.object.pages.get(options.pageId);
+  let page = this.document.pages.get(options.pageId);
   let ispdf = page?.type === 'pdf';
   if (!this.rendered && ispdf) {
     delete page.pdfpager_anchor;
