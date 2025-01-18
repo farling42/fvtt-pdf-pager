@@ -4,6 +4,7 @@
 
 - Change code to be more compatible with Foundry V13 (this.object->this.document)
 - Get Annotations working again (remove binding to pdf.js reporttelemetry)
+- Add basic compatibility for Foundry 13.334 (not fully tested)
 
 ## 1.5.5
 
