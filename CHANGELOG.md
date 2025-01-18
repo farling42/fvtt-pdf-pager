@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.5.6
+## 1.6.0
 
 - Change code to be more compatible with Foundry V13 (this.object->this.document)
 - Get Annotations working again (remove binding to pdf.js reporttelemetry)
