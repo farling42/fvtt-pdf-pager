@@ -27,22 +27,24 @@ import { PDFCONFIG } from './pdf-config.mjs'
  * Convert existing journal entries from PDFoundry to PDF-Pager format
  */
 
-export async function migratePDFoundry(options={}) {
+export async function migratePDFoundry(options = {}) {
     async function migrateOne(entry, options) {
-        if (options.onlyIfEmpty && entry.pages.size>0) return;  // Presumably we've already converted it
+        if (options.onlyIfEmpty && entry.pages.size > 0) return;  // Presumably we've already converted it
         let pdfdata = entry.flags?.pdfoundry?.PDFData;
         if (!pdfdata) return;  // There is no PDFoundry information in this page.
 
         await entry.createEmbeddedDocuments("JournalEntryPage", [{
-            name:  pdfdata.name || entry.name,
-            type:  "pdf",
-            flags: { [PDFCONFIG.MODULE_NAME]: { 
-                [PDFCONFIG.FLAG_OFFSET]: pdfdata.offset,
-                [PDFCONFIG.FLAG_CODE]:   pdfdata.code
-            }},
-            src:   pdfdata.url
-         }]);
-         console.log(`Migrated '${pdfdata.name||entry.name}' to new PDF format`);
+            name: pdfdata.name || entry.name,
+            type: "pdf",
+            flags: {
+                [PDFCONFIG.MODULE_NAME]: {
+                    [PDFCONFIG.FLAG_OFFSET]: pdfdata.offset,
+                    [PDFCONFIG.FLAG_CODE]: pdfdata.code
+                }
+            },
+            src: pdfdata.url
+        }]);
+        console.log(`Migrated '${pdfdata.name || entry.name}' to new PDF format`);
     }
 
     console.log(`Starting migratePDFoundry`)
@@ -52,7 +54,7 @@ export async function migratePDFoundry(options={}) {
     for (const actor of game.actors) {
         if (!actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT)) {
             let pdfdata = actor.flags?.pdfoundry?.FormData;
-            if (pdfdata) 
+            if (pdfdata)
                 actor.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT, pdfdata);
         }
     }
@@ -70,12 +72,12 @@ export async function migratePDFoundry(options={}) {
  * Convert all occurrences of @PDF[source name]{label} to @UUID[type.id]{label}
  */
 
-export async function replacePDFlinks(options={}) {
+export async function replacePDFlinks(options = {}) {
 
     const pattern = /@PDF\[([^|]+)\|page=(\d*)]{([^}]+)}/g;
 
     function migrateOne(entry, options) {
-        entry.pages.filter(page => page.type === 'text').forEach( page => {
+        entry.pages.filter(page => page.type === 'text').forEach(page => {
             const text = page.text.content;
             if (!text.includes('@PDF[')) return;
 
@@ -86,7 +88,7 @@ export async function replacePDFlinks(options={}) {
                 // Look for a PDF page with the same name as the book.
                 let thepage = entry.pages.find(entry => entry.type === 'pdf' && entry.name === bookname);
                 if (!thepage) {
-                   // No page with same name as book, so use the first PDF page
+                    // No page with same name as book, so use the first PDF page
                     for (const page of entry.pages) {
                         if (page.type === 'pdf') {
                             thepage = page;
@@ -96,14 +98,14 @@ export async function replacePDFlinks(options={}) {
                 }
                 return thepage ? `@UUID[${thepage.uuid}#page=${pagenum}]{${label}}` : undefined;
             }
-            
-            let newtext = text.replaceAll(pattern, (match,bookname,pagenum,label) => {
+
+            let newtext = text.replaceAll(pattern, (match, bookname, pagenum, label) => {
                 const entry = game.journal.getName(bookname);
                 return entry ? getpdfpageid(entry, bookname, pagenum, label) : match;
             });
 
             if (newtext != text) {
-                page.update({"text.content": newtext});
+                page.update({ "text.content": newtext });
                 console.log(`Journal '${entry.name}', Page '${page.name}', replaced all @PDF`);
             }
         })

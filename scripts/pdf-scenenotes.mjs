@@ -35,7 +35,7 @@ Hooks.on('activateNote', (note, options) => {
     return true;
 })
 
-Hooks.on("renderNoteConfig", async (app,html,data) => {
+Hooks.on("renderNoteConfig", async (app, html, data) => {
     // Add option to specify the PDF page in the settings.
     let pdfpage = data.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.PIN_PDF_PAGE);
     if (pdfpage === undefined && data.document) {
@@ -50,13 +50,13 @@ Hooks.on("renderNoteConfig", async (app,html,data) => {
     }
     if (pdfpage === undefined) pdfpage = "";
     let prompt = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.noteConfig.pdfPagePrompt`);
-	let label = $(`<div class='form-group'><label>${prompt}</label><div class='form-fields'><input name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.PIN_PDF_PAGE}" type='number' value="${pdfpage}"/></div></div>`)
-	html.find("input[name='text']").parent().parent().after(label);
+    let label = $(`<div class='form-group'><label>${prompt}</label><div class='form-fields'><input name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.PIN_PDF_PAGE}" type='number' value="${pdfpage}"/></div></div>`)
+    html.find("input[name='text']").parent().parent().after(label);
 
     // Force a recalculation of the height
-	if (!app._minimized) {
-		let pos = app.position;
-		pos.height = 'auto'
-		app.setPosition(pos);
-	}
+    if (!app._minimized) {
+        let pos = app.position;
+        pos.height = 'auto'
+        app.setPosition(pos);
+    }
 })

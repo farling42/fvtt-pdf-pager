@@ -21,11 +21,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { PDFCONFIG     } from './pdf-config.mjs'
+import { PDFCONFIG } from './pdf-config.mjs'
 import { openPDFByCode } from './pdf-pager.mjs'
 
 const MENU_ACTOR_FLAG = "menuActorCode";
-const MENU_ITEM_FLAG  = "menuItemCode";
+const MENU_ITEM_FLAG = "menuItemCode";
 
 function getMapping(element) {
     const docid = element.data("documentId");
@@ -45,7 +45,7 @@ function getMapping(element) {
 
 Hooks.once('init', async () => {
     function addMenu(wrapped, ...args) {
-       return wrapped(...args).concat({
+        return wrapped(...args).concat({
             name: `${PDFCONFIG.MODULE_NAME}.showInPDF`,
             icon: '<i class="fas fa-file-pdf"></i>',
             condition: (li) => {
@@ -53,61 +53,61 @@ Hooks.once('init', async () => {
             },
             callback: async (li) => {
                 const mapping = getMapping(li);
-                openPDFByCode(mapping.pdfcode, {uuid : mapping.uuid} );
+                openPDFByCode(mapping.pdfcode, { uuid: mapping.uuid });
             },
         });
     }
     libWrapper.register(PDFCONFIG.MODULE_NAME, "ActorDirectory.prototype._getEntryContextOptions", addMenu, libWrapper.WRAPPER);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, "ItemDirectory.prototype._getEntryContextOptions",  addMenu, libWrapper.WRAPPER);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, "ItemDirectory.prototype._getEntryContextOptions", addMenu, libWrapper.WRAPPER);
 })
 
 export function configureMenuSettings() {
     const MODULE = PDFCONFIG.MODULE_NAME;
-	// One entry for each Actor type
-	for (const [type,label] of Object.entries(CONFIG.Actor.typeLabels)) {
+    // One entry for each Actor type
+    for (const [type, label] of Object.entries(CONFIG.Actor.typeLabels)) {
         let actorname = game.i18n.has(label) ? game.i18n.localize(label) : type;
-		game.settings.register(MODULE, `${MENU_ACTOR_FLAG}.${type}`, {
-			name: game.i18n.format(`${MODULE}.actorType.Name`, {'name': actorname }),
-			hint: game.i18n.format(`${MODULE}.actorType.Hint`, {'name': actorname }),
-			scope: "world",
-			type:  String,
-			default: "",
-			config: true,
-		});
-	}
-	// One entry for each Item type
-	for (const [type,label] of Object.entries(CONFIG.Item.typeLabels)) {
+        game.settings.register(MODULE, `${MENU_ACTOR_FLAG}.${type}`, {
+            name: game.i18n.format(`${MODULE}.actorType.Name`, { 'name': actorname }),
+            hint: game.i18n.format(`${MODULE}.actorType.Hint`, { 'name': actorname }),
+            scope: "world",
+            type: String,
+            default: "",
+            config: true,
+        });
+    }
+    // One entry for each Item type
+    for (const [type, label] of Object.entries(CONFIG.Item.typeLabels)) {
         let itemname = game.i18n.has(label) ? game.i18n.localize(label) : type;
-		game.settings.register(MODULE, `${MENU_ITEM_FLAG}.${type}`, {
-			name: game.i18n.format(`${MODULE}.itemType.Name`, {'name': itemname }),
-			hint: game.i18n.format(`${MODULE}.itemType.Hint`, {'name': itemname }),
-			scope: "world",
-			type:  String,
-			default: "",
-			config: true
-		});	
-	}
+        game.settings.register(MODULE, `${MENU_ITEM_FLAG}.${type}`, {
+            name: game.i18n.format(`${MODULE}.itemType.Name`, { 'name': itemname }),
+            hint: game.i18n.format(`${MODULE}.itemType.Hint`, { 'name': itemname }),
+            scope: "world",
+            type: String,
+            default: "",
+            config: true
+        });
+    }
 }
 
 Hooks.on('renderSettingsConfig', (app, html, options) => {
     const actors = Object.entries(CONFIG.Actor.typeLabels);
-    const items  = Object.entries(CONFIG.Item.typeLabels);
+    const items = Object.entries(CONFIG.Item.typeLabels);
 
     const moduleTab = html.find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
     moduleTab
-      .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${MENU_ACTOR_FLAG}\\.${actors[0][0]}]`)
-      .closest('div.form-group')
-      .before(
-        '<h2 class="setting-header">' +
-          game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleMenusActor`) +
-          '</h2>'
-      )
-      moduleTab
-      .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${MENU_ITEM_FLAG}\\.${items[0][0]}]`)
-      .closest('div.form-group')
-      .before(
-        '<h2 class="setting-header">' +
-          game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleMenusItem`) +
-          '</h2>'
-      )
+        .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${MENU_ACTOR_FLAG}\\.${actors[0][0]}]`)
+        .closest('div.form-group')
+        .before(
+            '<h2 class="setting-header">' +
+            game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleMenusActor`) +
+            '</h2>'
+        )
+    moduleTab
+        .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${MENU_ITEM_FLAG}\\.${items[0][0]}]`)
+        .closest('div.form-group')
+        .before(
+            '<h2 class="setting-header">' +
+            game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleMenusItem`) +
+            '</h2>'
+        )
 })
