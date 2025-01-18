@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.6.1
+
+- Fix issue with PDFs not loading in 1.6.0
+
 ## 1.6.0
 
 - Change code to be more compatible with Foundry V13 (this.object->this.document)
