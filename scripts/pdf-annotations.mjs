@@ -279,6 +279,12 @@ function pageClosed(sheet, html) {
 
 let hooks_set;
 
+/**
+ * 
+ * @param {Actor|Item} doc 
+ * @param {*} pdfviewerapp 
+ * @param {*} editable 
+ */
 export async function initAnnotations(doc, pdfviewerapp, editable) {
 
     new AnnotationManager(doc, pdfviewerapp, editable);

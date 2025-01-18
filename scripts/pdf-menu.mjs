@@ -28,8 +28,8 @@ const MENU_ACTOR_FLAG = "menuActorCode";
 const MENU_ITEM_FLAG = "menuItemCode";
 
 function getMapping(element) {
-    const docid = element.data("documentId");
     if (element instanceof jQuery) element = element[0];
+    const docid = element.data ? element.data("documentId") : element.dataset.entryId;
     if (element.classList.contains('actor')) {
         const uuid = `Actor.${docid}`
         const document = fromUuidSync(uuid);
