@@ -44,7 +44,7 @@ Hooks.on("renderNoteConfig", async (app,html,data) => {
         const pdfsheet = getPdfSheet(journal?.sheet, data.document.pageId)
         const linkService = pdfsheet?.pdfviewerapp?.pdfLinkService;
         if (linkService) {
-            let pageoffset = pdfsheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0;
+            let pageoffset = pdfsheet.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0;
             pdfpage = linkService.pdfViewer.currentPageNumber - pageoffset;
         }
     }

@@ -71,7 +71,7 @@ export class PDFItemSheet extends ItemSheet {
 
   activateListeners(html) {
     super.activateListeners(html);
-    initEditor(html.find('iframe'), this.object.uuid);
+    initEditor(html.find('iframe'), this.document.uuid);
   }
 
   /**

@@ -69,11 +69,11 @@ function updatePdfView(pdfsheet, anchor) {
 
   const dest = anchor.startsWith('page=') ?
     // Adjust page with configured PDF Page Offset
-    `page=${+anchor.slice(5) + (pdfsheet.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}` :
+    `page=${+anchor.slice(5) + (pdfsheet.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}` :
     // Convert our internal link name into a PDF outline slug
     pdfsheet.toc[anchor].pdfslug;
 
-  console.debug(`updatePdfView(sheet='${pdfsheet.object.name}', anchor='${anchor}')\n=>'${dest}'`);
+  console.debug(`updatePdfView(sheet='${pdfsheet.document.name}', anchor='${anchor}')\n=>'${dest}'`);
   linkService.setHash(dest);
   // Do the journal.sheet(false, {focus: true}) without re-rendering the app,
   // otherwise we lose the selected page.
@@ -216,7 +216,7 @@ async function JournalPDFPageSheet_renderInner(wrapper, sheetData) {
 
   // Ensure we have a TOC on this sheet.
   // Emulate TextPageSheet._renderInner setting up the TOC
-  let toc = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+  let toc = this.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
   if (toc)
     this.toc = JSON.parse(toc);
   else
@@ -326,20 +326,20 @@ async function JournalPDFPageSheet_renderInner(wrapper, sheetData) {
 
     // pdfviewerapp.pdfDocument isn't defined at this point
     // Read the outline and generate a TOC object from it.
-    if (this.object.permission == CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
+    if (this.document.permission == CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
       this.pdfviewerapp.eventBus.on('outlineloaded', docevent => {   // from PdfPageView
         this.pdfviewerapp.pdfDocument.getOutline().then(outline => {
           // Store it as JournalPDFPageSheet.toc
-          const oldflag = this.object.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+          const oldflag = this.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
           if (outline) {
             let newflag = JSON.stringify(buildOutline(outline));
             if (oldflag !== newflag) {
-              console.debug(`Storing new TOC for '${this.object.name}'`)
-              this.object.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC, newflag)
+              console.debug(`Storing new TOC for '${this.document.name}'`)
+              this.document.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC, newflag)
               this._toc = outline;
             }
           } else if (oldflag !== undefined) {
-            this.object.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+            this.document.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
           }
         })
       })
@@ -412,7 +412,7 @@ Hooks.on("closeJournalPDFPageSheet", (sheet, element) => {
 
 async function JournalSheet_renderHeadings(pageNode, toc) {
   const pageId = pageNode.dataset.pageId;
-  const page = this.object.pages.get(pageId);
+  const page = this.document.pages.get(pageId);
   const MAX_NESTING = (page.type == 'pdf') ? game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.MAX_TOC_DEPTH) : 2;
   const tocNode = this.element[0].querySelector(`.directory-item[data-page-id="${pageId}"]`);
   if (!tocNode || !toc) return;
@@ -462,7 +462,7 @@ function JournalSheet_render(wrapper, force, options) {
   }
 
   // Monk's Active Tile Triggers sets the anchor to an array, so we need to check for a string here.
-  let page = this.object.pages.get(options.pageId);
+  let page = this.document.pages.get(options.pageId);
   let ispdf = page?.type === 'pdf';
   if (!this.rendered && ispdf) {
     delete page.pdfpager_anchor;
