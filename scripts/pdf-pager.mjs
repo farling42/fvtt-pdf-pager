@@ -225,7 +225,7 @@ function isConfiguringPage(sheet, html) {
  */
 async function JournalEntryPagePDFSheet_renderInner(wrapper, sheetData) {
     let html = await wrapper(sheetData);   // jQuery
-    handle_pdf_sheet(html, sheetData);
+    handle_pdf_sheet(html, this);
     return html;
 }
 
