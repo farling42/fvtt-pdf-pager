@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.5.6
+
+- Change code to be more compatible with Foundry V13 (this.object->this.document)
+- Get Annotations working again (remove binding to pdf.js reporttelemetry)
+
 ## 1.5.5
 
 - When a macro is triggered from some text (see 1.5.0) pass `actor` or `item` within the scope of the macro so it can be referenced by the macro code.
