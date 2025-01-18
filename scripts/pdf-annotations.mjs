@@ -290,23 +290,25 @@ export async function initAnnotations(doc, pdfviewerapp, editable) {
         Hooks.on('updateActor', updateAnnotations);
         Hooks.on('updateItem', updateAnnotations);
         Hooks.on('closeJournalSheet', pageClosed);
-        Hooks.on('closeJournalPDFPageSheet', pageClosed);
+        Hooks.on('closeJournalPDFPageSheet', pageClosed); // before Foundry V13
+        Hooks.on('closeJournalEntryPagePDFSheet', pageClosed); // Foundry V13
     }
 }
 
 /**
  * When initEditor isn't being used (because editing of form-fillable PDFs is disabled),
  * this function will initialize annotation editing separately.
- * @param {*} html 
+ * @param {jQuery || HTMLElement} iframe 
  * @param {*} id_to_display 
  * @returns 
  */
-export async function setupAnnotations(html, id_to_display) {
+export async function setupAnnotations(iframe, id_to_display) {
+    if (iframe instanceof jQuery) iframe = iframe[0];
 
     const doc = (id_to_display.includes('.') && await fromUuid(id_to_display)) || game.actors.get(id_to_display) || game.items.get(id_to_display);
     if (!doc) return;
 
-    html.on('load', async (event) => {
+    iframe.addEventListener('load', async (event) => {
 
         // Wait for PDF to initialise before attaching to event bus.
         const pdfviewerapp = event.target.contentWindow.PDFViewerApplication;

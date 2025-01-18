@@ -49,14 +49,28 @@ Hooks.on("renderNoteConfig", async (app, html, data) => {
         }
     }
     if (pdfpage === undefined) pdfpage = "";
-    let prompt = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.noteConfig.pdfPagePrompt`);
-    let label = $(`<div class='form-group'><label>${prompt}</label><div class='form-fields'><input name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.PIN_PDF_PAGE}" type='number' value="${pdfpage}"/></div></div>`)
-    html.find("input[name='text']").parent().parent().after(label);
 
-    // Force a recalculation of the height
-    if (!app._minimized) {
-        let pos = app.position;
-        pos.height = 'auto'
-        app.setPosition(pos);
+    if (game.release.generation < 13) {
+        let prompt = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.noteConfig.pdfPagePrompt`);
+        let label = $(`<div class='form-group'><label>${prompt}</label><div class='form-fields'><input name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.PIN_PDF_PAGE}" type='number' value="${pdfpage}"/></div></div>`)
+        html.find("input[name='text']").parent().parent().after(label);
+
+        // Force a recalculation of the height
+        if (!app._minimized) {
+            let pos = app.position;
+            pos.height = 'auto'
+            app.setPosition(pos);
+        }
+    } else {
+        const flags = new foundry.data.fields.ObjectField({ label: "module-flags" }, { parent: data.document.schema.fields.flags, name: PDFCONFIG.MODULE_NAME });
+
+        const page_elem = (new foundry.data.fields.NumberField(
+            {
+                label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.noteConfig.pdfPagePrompt`),
+                initial: pdfpage ?? ""
+            },
+            { parent: flags, name: PDFCONFIG.PIN_PDF_PAGE })).toFormGroup();
+
+        html.querySelector("select[name='pageId']").parentElement.parentElement.after(page_elem);
     }
 })

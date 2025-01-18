@@ -444,11 +444,12 @@ function myFlattenObject(obj, _d = 0) {
 
 /**
  * Called from renderJournalPDFPageSheet
- * @param {jQuery} html The iframe for the PDF Page
+ * @param {jQuery | HTMLElement} iframe The iframe for the PDF Page
  * @param {String} id_to_display The UUID of the Actor or Item to be displayed in the Form Fillable PDF
  * @inheritData renderJournalPDFPageSheet
  */
-export async function initEditor(html, id_to_display) {
+export async function initEditor(iframe, id_to_display) {
+    if (iframe instanceof jQuery) iframe = iframe[0];
 
     const document = (id_to_display.includes('.') && await fromUuid(id_to_display)) || game.actors.get(id_to_display) || game.items.get(id_to_display);
     if (!document) return;
@@ -475,8 +476,8 @@ export async function initEditor(html, id_to_display) {
     if (!map_pdf2actor) map_pdf2actor = {};
     if (!map_pdf2item) map_pdf2item = {};
 
-    // Wait for the IFRAME to appear in the window before any further initialisation (html = iframe)
-    html.on('load', async (event) => {
+    // Wait for the IFRAME to appear in the window before any further initialisation
+    iframe.addEventListener('load', async (event) => {
         console.debug(`PDF frame loaded for '${document.name}'`);
         let read_pdf = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF);
         let editable = !read_pdf && document.isOwner &&
