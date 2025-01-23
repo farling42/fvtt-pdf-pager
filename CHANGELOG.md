@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.6.2
+
+- Get "Choose PDF" button working again in the Actor/Item Sheet title bar.
+
 ## 1.6.1
 
 - Fix issue with PDFs not loading in 1.6.0
