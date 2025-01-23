@@ -308,8 +308,8 @@ export async function initAnnotations(doc, pdfviewerapp, editable) {
  * @param {*} id_to_display 
  * @returns 
  */
-export async function setupAnnotations(iframe, id_to_display) {
-    if (iframe instanceof jQuery) iframe = iframe[0];
+export async function setupAnnotations(html, id_to_display) {
+    const iframe = html2iframe(html);
 
     const doc = (id_to_display.includes('.') && await fromUuid(id_to_display)) || game.actors.get(id_to_display) || game.items.get(id_to_display);
     if (!doc) return;
@@ -325,4 +325,12 @@ export async function setupAnnotations(iframe, id_to_display) {
             (!doc.parent?.pack || !game.packs.get(doc.parent.pack)?.locked);
         initAnnotations(doc, pdfviewerapp, editable);
     })
+}
+
+export function html2iframe(html) {
+    if (!(html instanceof jQuery)) return html;
+
+    for (let i=0; i<html.length; i++)
+        if (html[i].nodeName === "IFRAME") return html[i];
+    return null;
 }

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.6.3
+
+- Get Annotations working again in journal pages.
+
 ## 1.6.2
 
 - Get "Choose PDF" button working again in the Actor/Item Sheet title bar.

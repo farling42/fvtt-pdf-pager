@@ -34,7 +34,7 @@ SOFTWARE.
 // let hasjsactions = await pdfviewerapp.pdfDocument.hasJSActions();
 
 import { PDFCONFIG } from './pdf-config.mjs';
-import { initAnnotations } from './pdf-annotations.mjs';
+import { initAnnotations, html2iframe } from './pdf-annotations.mjs';
 
 let map_pdf2actor;                   // key = pdf field name, value = actor field name
 let map_pdf2item;                    // key = pdf field name, value = item  field name
@@ -444,12 +444,12 @@ function myFlattenObject(obj, _d = 0) {
 
 /**
  * Called from renderJournalPDFPageSheet
- * @param {jQuery | HTMLElement} iframe The iframe for the PDF Page
+ * @param {jQuery | HTMLElement} html The iframe for the PDF Page (or a jQuery which contains the iframe)
  * @param {String} id_to_display The UUID of the Actor or Item to be displayed in the Form Fillable PDF
  * @inheritData renderJournalPDFPageSheet
  */
-export async function initEditor(iframe, id_to_display) {
-    if (iframe instanceof jQuery) iframe = iframe[0];
+export async function initEditor(html, id_to_display) {
+    const iframe = html2iframe(html);
 
     const document = (id_to_display.includes('.') && await fromUuid(id_to_display)) || game.actors.get(id_to_display) || game.items.get(id_to_display);
     if (!document) return;
