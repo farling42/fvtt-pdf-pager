@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.6.4
+
+- Get Annotations working in Foundry V13 (again).
+
 ## 1.6.3
 
 - Get Annotations working again in journal pages.
