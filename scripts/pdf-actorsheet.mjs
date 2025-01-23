@@ -32,7 +32,7 @@ import { initEditor, logPdfFields, getPdfViewer } from './pdf-editable.mjs';
 import { PDFDataBrowser } from './pdf-databrowser.mjs';
 
 export class PDFSheetConfig extends FormApplication {
-    // this.document = PDFActorSheet or PDFItemSheet
+    // this.object = PDFActorSheet or PDFItemSheet
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
             width: 600,
@@ -42,11 +42,11 @@ export class PDFSheetConfig extends FormApplication {
         return `modules/${PDFCONFIG.MODULE_NAME}/templates/choose-pdf.hbs`;
     }
     get title() {
-        return game.i18n.format(`${PDFCONFIG.MODULE_NAME}.ChoosePdfForm.Title`, { name: this.document.document.name });
+        return game.i18n.format(`${PDFCONFIG.MODULE_NAME}.ChoosePdfForm.Title`, { name: this.object.document.name });
     }
     getData() {
         return {
-            filename: this.document.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
+            filename: this.object.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
         }
     }
     /**
@@ -57,7 +57,7 @@ export class PDFSheetConfig extends FormApplication {
      */
     async _updateObject(event, formData) {
         event.preventDefault();
-        const doc = this.document.document;
+        const doc = this.object.document;
         const oldflag = doc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF);
         if (formData.filename == oldflag) return;
 
@@ -69,7 +69,7 @@ export class PDFSheetConfig extends FormApplication {
             doc.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
         }
         // Regenerate the PDFActorSheet with the new PDF
-        this.document.render(true);
+        this.object.render(true);
     }
 }
 

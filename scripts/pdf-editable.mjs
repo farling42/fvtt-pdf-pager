@@ -186,7 +186,7 @@ function storeFieldText(document, value) {
  * @param {Object} options  Can contain any of { disabled : true , hidebg : true, hideborder: true, nospellcheck: false }
  */
 async function setFormFromDocument(pdfviewer, document, options = {}) {
-    if (CONFIG.debug.pdfpager) console.debug(`Loading PDF from ${document.documentName} '${document.name}'`);
+    if (CONFIG.debug.pdfpager) console.debug(`Loading PDF from ${documentName} '${document.name}'`);
     let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT) || {}
     let buttonvalues;  // support for radio buttons
 
@@ -299,7 +299,7 @@ async function setFormFromDocument(pdfviewer, document, options = {}) {
  * @param {*} options 
  */
 async function setDocumentFromForm(pdfviewer, document, options) {
-    console.debug(`Setting ${document.documentName} '${document.name}' from PDF fields`);
+    console.debug(`Setting ${documentName} '${document.name}' from PDF fields`);
     const inputs = pdfviewer.viewer.querySelectorAll('input,select,textarea');
     let buttonvalues; // support for radio buttons
 
