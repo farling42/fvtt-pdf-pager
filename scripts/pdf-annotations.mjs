@@ -328,7 +328,7 @@ export async function setupAnnotations(html, id_to_display) {
 }
 
 export function html2iframe(html) {
-    if (!(html instanceof jQuery)) return html;
+    if (!(html instanceof jQuery)) return html.querySelector("iframe");
 
     for (let i=0; i<html.length; i++)
         if (html[i].nodeName === "IFRAME") return html[i];
