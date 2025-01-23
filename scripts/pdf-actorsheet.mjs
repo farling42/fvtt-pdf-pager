@@ -69,7 +69,7 @@ export class PDFSheetConfig extends FormApplication {
             doc.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
         }
         // Regenerate the PDFActorSheet with the new PDF
-        this.object.render(true);
+        //this.object.render(true);
     }
 }
 
