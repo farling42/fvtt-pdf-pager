@@ -23,7 +23,7 @@ SOFTWARE.
 
 import { PDFCONFIG, ScrollMode, SpreadMode, SpreadChoices } from './pdf-config.mjs';
 import { initEditor } from './pdf-editable.mjs';
-import { getPDFByCode } from './pdf-linker.mjs';
+import { getPDFByCode, getPDFByName } from './pdf-linker.mjs';
 import { setupAnnotations } from './pdf-annotations.mjs';
 
 /**
@@ -563,37 +563,55 @@ function JournalSheet_render(wrapper, force, options) {
 }
 
 
+function openPDF(pagedoc, options) {
+    const journalsheet = pagedoc.parent.sheet;
+    // Render journal entry showing the appropriate page (JournalEntryPage#_onClickDocumentLink)
+    if (!options?.uuid && options.page &&
+        journalsheet?._state === Application.RENDER_STATES.RENDERED &&
+        journalsheet._pages[journalsheet.pageIndex]?._id === pagedoc.id &&
+        updatePdfView(journalsheet.getPageSheet(pagedoc.id), `page=${options.page}`)) {
+        // We updated the already displayed PDF document
+        return;
+    } else {
+        // updatePdfView didn't do the work, so do it here instead.
+        let pageoptions = { pageId: pagedoc.id };
+        if (options?.page) pageoptions.anchor = `page=${options.page}`;
+        if (options?.uuid) pageoptions.showUuid = options.uuid;
+        pagedoc.parent.sheet.render(true, pageoptions);
+    }
+}
+
 /**
  * 
  * @param {*} pdfcode The short code of the PDF page to be displayed
  * @param {*} options Can include {page: <number>}  and/or { pdfcode: <code> } and/or { showUuid : <docid> }
  */
 export function openPDFByCode(pdfcode, options = {}) {
-    if (!options) options = {};
     console.log(`openPDFByCode('${pdfcode}', '${JSON.stringify(options)}')`);
 
     const pagedoc = getPDFByCode(pdfcode);
     // Stop now if no page was found
-    if (pagedoc) {
-        const journalsheet = pagedoc.parent.sheet;
-        // Render journal entry showing the appropriate page (JournalEntryPage#_onClickDocumentLink)
-        if (!options?.uuid && options.page &&
-            journalsheet?._state === Application.RENDER_STATES.RENDERED &&
-            journalsheet._pages[journalsheet.pageIndex]?._id === pagedoc.id &&
-            updatePdfView(journalsheet.getPageSheet(pagedoc.id), `page=${options.page}`)) {
-            // We updated the already displayed PDF document
-            return;
-        } else {
-            // updatePdfView didn't do the work, so do it here instead.
-            let pageoptions = { pageId: pagedoc.id };
-            if (options?.page) pageoptions.anchor = `page=${options.page}`;
-            if (options?.uuid) pageoptions.showUuid = options.uuid;
-            pagedoc.parent.sheet.render(true, pageoptions);
-        }
-    } else {
+    if (pagedoc) 
+        openPDF(pagedoc, options);
+    else {
         console.error(`openPdfByCode: unable to find PDF with code '${pdfcode}'`)
         ui.notifications.error(game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Error.NoPDFWithCode`))
     }
+}
+
+
+/**
+ * 
+ * @param {String} pdfname The name that would appear in a `@PDF[pdfname]` link
+ */
+export function openPDFByName(pdfname, options = {}) {
+    console.log(`openPDFByName('${pdfname}', '${JSON.stringify(options)}')`);
+
+    const pagedoc = getPDFByName(pdfname);
+    if (pagedoc)
+        openPDF(pagedoc, options)
+    else
+        return openPDFByCode(pdfname, options);
 }
 
 

@@ -189,3 +189,17 @@ export function getPDFByCode(pdfcode) {
     return pagedoc;
 }
 
+/**
+ * 
+ * @param {*} pdfname Either "journal name" or "journal name#journal page"
+ * @returns JournalEntryPage
+ */
+export function getPDFByName(pdfname) {
+    const [journalname, journalpage=journalname] = pdfname.split('#');
+    let pagedoc;
+    for (const journal of game.journal.contents.filter(journal => journal.name === journalname)) {
+        pagedoc = journal.pages.find(pg => pg.type === 'pdf' && pg.name === journalpage);
+        if (pagedoc) break;
+    }
+    return pagedoc;    
+}

@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { openPDFByCode, deleteOutlines } from './pdf-pager.mjs';
+import { openPDFByCode, openPDFByName, deleteOutlines } from './pdf-pager.mjs';
 import { migratePDFoundry, replacePDFlinks } from './pdf-migrate.mjs';
 import { registerActorMapping, registerItemMapping, getPDFValue, setPDFValue } from './pdf-editable.mjs';
 import { configureMenuSettings } from './pdf-menu.mjs';
@@ -403,7 +403,7 @@ Hooks.once('ready', () => {
 
     if (!ui.pdfpager) {
         ui.pdfpager = {
-            openPDFByCode, migratePDFoundry, replacePDFlinks,
+            openPDFByCode, openPDFByName, migratePDFoundry, replacePDFlinks,
             registerActorMapping, registerItemMapping, getPDFValue, setPDFValue, deleteOutlines
         };
     }

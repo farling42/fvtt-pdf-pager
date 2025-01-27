@@ -142,6 +142,17 @@ ui.pdfpager.openPDFByCode("DMG", { page : 30 } )
 ui.pdfpager.openPDFByCode("SHEET", { uuid: 'Actor.CY4zUd7qYUeer3d4' } )
 ```
 
+### Method 3.a: Open PDF from a macro/module
+
+Rather than using the PDF Code, you can open a PDF merely by using the name of the journal (and the page if it is different, separated by "#").
+
+```js
+ui.pdfpager.openPDFByName("Player Handbook")
+ui.pdfpager.openPDFByName("PDFs#Player Handbook")
+ui.pdfpager.openPDFByName("DMs Guide", { page : 30 } )
+ui.pdfpager.openPDFByNAme("Actor Sheet", { uuid: 'Actor.CY4zUd7qYUeer3d4' } )
+```
+
 ### Method 4: Specify page of PDF in Scene Note
 
 The Note Config window contains an optional "PDF Page Number" field. If a number is put into this field, then clicking on the Note will open the PDF at the specified page (if the journal PDF is already open, then the PDF will be scrolled to the specified page).
