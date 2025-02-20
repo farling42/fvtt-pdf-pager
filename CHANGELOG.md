@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 1.6.6
+
+- Add german translations, provided by @CePeU
+
+## 1.6.5
+
+- Add `ui.pdfpager.openPDFByName` which existed in PDFoundry.
+
 ## 1.6.4
 
 - Get Annotations working in Foundry V13 (again).
