@@ -26,8 +26,10 @@
         "hideFieldBg.Hint" : "Hebt die Hervorhebung der Formularfelder durch eine eigene Hintergrundfarbe für alle editierbaren Formularfelder auf (überschreibt das standard PDFJS Styling)",
         "hideFieldBorder.Name" : "Verberge Ränder der editierbaren Felder",
         "hideFieldBorder.Hint" : "Deaktiviere die Hervorhebung editierbarer Felder (überschreibt den Default PDFJS Stil)",
+        "editableAnnotations.Name": "Erlaube Anmerkungen auf PDF Seiten",
+        "editableAnnotations.Hint": "Erlaubt es Spielern mit Besitzerrechten Tinten- und Textanmerkungen auf PDF Seiten zu hinterlegen. Die Anmerkungen werden auf der Journal Startseite hinterlegt und können so von jedem Spieler eingesehen werden.",
         "noSpellCheck.Name": "Deaktiviere die Rechtschreibprüfung",
-        "noSpellCheck.Hint": "Sofern Ausgewählt wird die Rechtschreibprüfung innerhalb editierbarer Felder deaktiviert",  
+        "noSpellCheck.Hint": "Sofern Ausgewählt wird die Rechtschreibprüfung innerhalb editierbarer Felder deaktiviert",
         "readPdfFields.Name": "Lese Felder aus dem PDF aus",
         "readPdfFields.Hint": "Sofern dieser Punkt aktiviert ist, wird wenn ein PDF geöffnet wird, jedes Datenfeld (annotations) in der geladenen PDF Datei in das korrespondierende Akteurfeld kopiert. Dabei werden alle anderen im Akteur gespeicherten Werte ÜBERSCHRIEBEN! (Die Editiermöglichkeit des PDF's ist ausgeschaltet solange diese Option aktiviert ist)",     
         "ignoreBookmarkZoom.Name": "Ignoriere den Zoom für Lesezeichen",
@@ -44,6 +46,22 @@
         "showFieldMenus.Hint": "Ersetzt jedes editierbare Feld mit einem drop-down Menu aus dem ein Feld des Akteurs/Gegenstandes ausgewählt werden kann. (Fall ein Feld bereits durch eine getter/setter function konfiguriert wurde dann ist das Feld nicht mehr editierbar)",
         "showTitleBarButtons.Name": "Zeige Schaltflächen in der Titelleiste an",
         "showTitleBarButtons.Hint": "Falls aktiviert werden in der Titelleiste Hinweise zu Schaltflächen von Akteure/Gegenstand PDF's angezeigt",
+        "showGmButtons.Name": "Zeige Spielleiterschaltflächen in der Titelleiste",
+        "showGmButtons.Hint": "Zeige 'Log PDF Felder' and 'Inspiziere Daten' Schaltflächen in der Titelleiste",
+        "autoScrollToc.Name": "Automatische Zeilenvorschub für das Inhaltsverzeichnis",
+        "autoScrollToc.Hint": "Falls die Ansicht im PDF angepasst wird, passe das Inhaltsverzeichnis des Journals so an dass die aktuellen Informationen sichtbar bleiben",
+        "labelClickableColor": {
+            "Name": "Farbe für auswählbaren Text",
+            "Hint": "Hintergrundfarbe für auswählbare Labels (Idealwerweise sollte diese Farbe einen kleinen Alphawert haben)"
+        },
+        "labelHoverColor": {
+            "Name": "Mausover Farbe für auswählbaren Text",
+            "Hint": "Hintergrundfarbe für auswählbare Text wenn die Maus darüber gleitet (Idealwerweise sollte diese Farbe einen kleinen Alphawert haben)"
+        },
+        "labelClickColor": {
+            "Name": "Farbe für ausgewählten Text",
+            "Hint": "Hinntergrundfarbe sobald auswählbarer Text ausgewählt wurde (Idealwerweise sollte diese Farbe einen kleinen Alphawert haben)"
+        },
         "ChoosePdfForm" : {
             "Title": "Wähle das PDF Dokument für '{name}'",
             "Prompt": "Individuelles PDF:",
@@ -72,7 +90,7 @@
             "none" : "---",
             "vertical" : "Vertikal",
             "horizontal" : "Horizontal",
-            "wrapped" : "Wrapped",
+            "wrapped" : "Umlaufend",
             "page" : "Seite"
         },
         "zoomPercentage.Name" : "Standard Zoom fester Prozentsatz",
@@ -103,11 +121,13 @@
         },
         "actorSheetButton": {
             "CustomPDF":   "Individuelles PDF",
+            "chooseImage":  "Wähle das Portrait",
             "ShowPdfFields": "Übersicht PDF Felder",
             "InspectData": "Untersuche Daten"
         },
         "itemSheetButton": {
             "CustomPDF":   "Individuelles PDF",
+            "chooseImage":  "Wähle das Portrai",
             "ShowPdfFields": "Übersicht PDF Felder",
             "InspectData": "Untersuche Daten"
         },
@@ -117,6 +137,10 @@
         },
         "noteConfig": {
             "pdfPagePrompt": "PDF Seitennummer"
-        }    
+        },
+        "ignoreField": {
+            "label": "<<<Ignoriere dieses Feld>>>"
+        },
+        "noMacroMapping": "--Kein MAPPING--"    
     }
 }
