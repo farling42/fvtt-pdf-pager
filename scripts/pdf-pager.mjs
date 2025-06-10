@@ -41,19 +41,68 @@ import { setupAnnotations } from './pdf-annotations.mjs';
  */
 
 Hooks.once('ready', async () => {
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._onClickDocumentLink', JournalEntryPage_onClickDocumentLink, libWrapper.MIXED);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype.toc', JournalEntryPage_toc, libWrapper.MIXED);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.appv1.sheets.JournalSheet.prototype._render', JournalSheet_render, libWrapper.WRAPPER);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.appv1.sheets.JournalSheet.prototype.goToPage', JournalSheet_goToPage, libWrapper.MIXED);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.appv1.sheets.JournalSheet.prototype._renderHeadings', JournalSheet_renderHeadings, libWrapper.OVERRIDE);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.documents.JournalEntryPage.prototype._onClickDocumentLink', JournalEntryPage_onClickDocumentLink, libWrapper.MIXED);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.applications.sheets.journal.JournalEntrySheet.prototype.goToPage', JournalEntrySheet_goToPage, libWrapper.MIXED);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.applications.sheets.journal.JournalEntrySheet.prototype._renderPageViews', JournalEntrySheet_renderPageViews, libWrapper.WRAPPER);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.applications.sheets.journal.JournalEntrySheet.prototype._renderHeadings', JournalEntrySheet_renderHeadings, libWrapper.OVERRIDE);
 });
 
-// JournalEntryPage#toc only works when type === 'text'
-function JournalEntryPage_toc(wrapped) {
-    if (this.type !== 'pdf') return wrapped();
-    if (!this._toc) this._toc = JSON.parse(this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC) ?? "{}");
-    return this._toc;
+class PDFSheet extends foundry.applications.sheets.journal.JournalEntryPagePDFSheet {
+    /** @override */
+    static DEFAULT_OPTIONS = {
+        includeTOC: true
+    };
+
+    /** @inheritDoc */
+    async _onRender(context, options) {
+        await super._onRender(context, options);
+        if (this.options.includeTOC) this.toc[this.document.name.slugify()].children = JSON.parse(this.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC) ?? "{}");
+    }
 }
+
+Hooks.on("ready", () => {
+    foundry.applications.apps.DocumentSheetConfig.registerSheet(foundry.documents.JournalEntryPage, "pdfpager", PDFSheet, {
+        types: ["pdf"],
+        makeDefault: true
+    });
+})
+
+/**
+ * Process a click on a link to this document.
+ * 
+ * Don't rerender the PDF page if we can switch the displayed PDF internally to the correct page.
+ * @param {} wrapper 
+ * @param {*} event 
+ * @returns 
+ */
+function JournalEntryPage_onClickDocumentLink(wrapper, event) {
+    let pdfsheet = getPdfSheet(this.parent.sheet, this.id);
+    if (updatePdfView(pdfsheet, decodeURIComponent(event.currentTarget.getAttribute('data-hash')))) {
+        // Cancel any previous stored anchor
+        delete pdfsheet.document.pdfpager_anchor;
+        return;
+    } else
+        return wrapper(event);
+}
+
+/**
+ * Process a click in the TOC.
+ */
+function JournalEntrySheet_goToPage(wrapper, pageId, anchor) {
+    let pdfsheet = getPdfSheet(this, pageId);
+    if (pdfsheet && anchor) {
+        if (anchor.anchor) anchor = anchor.anchor;
+        if (updatePdfView(pdfsheet, anchor)) {
+            // Moved within existing page - so no need to invoke the normal goToPage processing that will render a new page.
+            delete pdfsheet.document.pdfpager_anchor;
+            return;
+        }
+        // switch to the relevant page with the relevant slug (after page gets rendered)
+        pdfsheet.document.pdfpager_anchor = anchor;
+    }
+    return wrapper(pageId, anchor);
+}
+
 
 /**
  * 
@@ -81,47 +130,16 @@ function updatePdfView(pdfsheet, anchor) {
 
 /* Determine if the PDF page is visible in the supplied journal sheet */
 export function getPdfSheet(journalsheet, pageId) {
-    if (journalsheet?._state === Application.RENDER_STATES.RENDERED &&
-        journalsheet._pages[journalsheet.pageIndex]?._id === pageId) {
+    if (journalsheet?.state === Application.RENDER_STATES.RENDERED &&
+        journalsheet.pageId === pageId) {
         let sheet = journalsheet.getPageSheet(pageId);
         if (sheet?.document?.type === 'pdf') return sheet;
     }
     return null;
 }
-/**
- * Process a click on a link to this document.
- * 
- * Don't rerender the PDF page if we can switch the displayed PDF internally to the correct page.
- * @param {} wrapper 
- * @param {*} event 
- * @returns 
- */
-function JournalEntryPage_onClickDocumentLink(wrapper, event) {
-    let pdfsheet = getPdfSheet(this.parent.sheet, this.id);
-    if (updatePdfView(pdfsheet, decodeURIComponent(event.currentTarget.getAttribute('data-hash')))) {
-        // Cancel any previous stored anchor
-        delete pdfsheet.document.pdfpager_anchor;
-        return;
-    } else
-        return wrapper(event);
-}
 
-/**
- * Process a click in the TOC.
- */
-function JournalSheet_goToPage(wrapper, pageId, anchor) {
-    let pdfsheet = getPdfSheet(this, pageId);
-    if (pdfsheet && anchor) {
-        if (updatePdfView(pdfsheet, anchor)) {
-            // Moved within existing page - so no need to invoke the normal goToPage processing that will render a new page.
-            delete pdfsheet.document.pdfpager_anchor;
-            return;
-        }
-        // switch to the relevant page with the relevant slug (after page gets rendered)
-        pdfsheet.document.pdfpager_anchor = anchor;
-    }
-    return wrapper(pageId, anchor);
-}
+
+
 
 /**
  * Convert PDF outline to Foundry TOC (see JournalEntryPage#buildTOC)
@@ -210,18 +228,13 @@ async function updateOutline(pdfsheet, location) {
 function isConfiguringPage(sheet, html) {
     return html.querySelector('file-picker[name="src"]');
 }
+
 /**
  * Adds the "Page Offset" field to the JournalPDFPageSheet EDITOR window.
  * @param {*} wrapper from libWrapper
  * @param  {sheetData} args an array of 1 element, the first element being the same as the data passed to the render function
  * @returns {jQuery} html
  */
-async function JournalEntryPagePDFSheet_renderInner(wrapper, sheetData) {
-    let html = await wrapper(sheetData);   // jQuery
-    handle_pdf_sheet(html, this);
-    return html;
-}
-
 function handle_pdf_sheet(html, pdfsheet) {
     const pagedoc = pdfsheet.document;  // JournalEntryPage
 
@@ -427,33 +440,33 @@ Hooks.on("closeViewJournalEntryPagePDFSheet", (sheet) => {
 })
 
 /**
- * An exact copy of JournalSheet#_renderHeading from foundry.js,
+ * An exact copy of JournalEntrySheet#_renderHeading from foundry.js,
  * with the only change to set MAX_NESTING depending on whether the page is a PDF or not.
  */
 
-async function JournalSheet_renderHeadings(pageNode, toc) {
+
+
+async function JournalEntrySheet_renderHeadings(pageNode, toc) {
     const pageId = pageNode.dataset.pageId;
-    const page = this.document.pages.get(pageId);
+    const page = this.entry.pages.get(pageId);
     const MAX_NESTING = (page.type == 'pdf') ? game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.MAX_TOC_DEPTH) : 2;
-    const tocNode = this.element[0].querySelector(`.directory-item[data-page-id="${pageId}"]`);
+    const tocNode = this.element.querySelector(`.toc [data-page-id="${pageId}"]`);
     if (!tocNode || !toc) return;
-    const headings = Object.values(toc);
+    let headings = Object.values(toc);
     headings.sort((a, b) => a.order - b.order);
     if (page.title.show) headings.shift();
     const minLevel = Math.min(...headings.map(node => node.level));
     tocNode.querySelector(":scope > ol")?.remove();
-    const tocHTML = await renderTemplate("templates/journal/journal-page-toc.html", {
-        headings: headings.reduce((arr, { text, level, slug, element }) => {
-            if (element) element.dataset.anchor = slug;
-            if (level < minLevel + MAX_NESTING) arr.push({ text, slug, level: level - minLevel + 2 });
-            return arr;
-        }, [])
-    });
-    tocNode.innerHTML += tocHTML;
-    tocNode.querySelectorAll(".heading-link").forEach(el =>
-        el.addEventListener("click", this._onClickPageLink.bind(this)));
-    this._dragDrop.forEach(d => d.bind(tocNode));
+    headings = headings.reduce((arr, { text, level, slug, element }) => {
+        if (element) element.dataset.anchor = slug;
+        if (level < minLevel + MAX_NESTING) arr.push({ text, slug, level: level - minLevel + 2 });
+        return arr;
+    }, []);
+    const html = await foundry.applications.handlebars.renderTemplate("templates/journal/toc.hbs", { headings });
+    tocNode.insertAdjacentHTML("beforeend", html);
 }
+
+
 
 /**
  * my_journal_render reads the page=xxx anchor from the original link, and stores it temporarily for use by renderJournalPDFPageSheet later
@@ -461,7 +474,17 @@ async function JournalSheet_renderHeadings(pageNode, toc) {
  */
 let webviewerloaded_set = false;
 
-function JournalSheet_render(wrapper, force, options) {
+function JournalEntrySheet_renderPageViews(wrapper, context, options) {
+
+    if (!options.anchor && !options.showUuid) return wrapper(context, options);
+
+    let pagedoc;
+    for (const id of options.parts) {
+        if (!(id in this._pages)) continue;
+        pagedoc = this.document.pages.get(id);
+        if (pagedoc) pagedoc.pdfpager_anchor = +options.anchor.slice(5);
+    }
+    if (!pagedoc || pagedoc.type !== 'pdf') return wrapper(context, options);
 
     if (!webviewerloaded_set) {
         // Add to the window only ONCE!
@@ -482,26 +505,18 @@ function JournalSheet_render(wrapper, force, options) {
         });
     }
 
-    // Monk's Active Tile Triggers sets the anchor to an array, so we need to check for a string here.
-    let page = this.document.pages.get(options.pageId);
-    let ispdf = page?.type === 'pdf';
-    if (!this.rendered && ispdf) {
-        delete page.pdfpager_anchor;
-        delete page.pdfpager_show_uuid;
-    }
-    if (options.anchor &&
-        typeof options.anchor === 'string' &&
-        ispdf) {
+
+    if (options.anchor) {
         console.log(`render: ${JSON.stringify(options)}`)
-        page.pdfpager_anchor = options.anchor?.startsWith('page=') ? +options.anchor.slice(5) : decodeURIComponent(options.anchor);
-        delete options.anchor;   // we don't want the wrapper trying to set the anchor
+        pagedoc.pdfpager_anchor = options.anchor?.startsWith('page=') ? +options.anchor.slice(5) : decodeURIComponent(options.anchor);
+        delete options.anchor;
     }
     if (options.showUuid) {
         console.log(`rendering for Document '${options.showUuid}'`)
         page.pdfpager_show_uuid = options.showUuid;
         delete options.showUuid;
     }
-    return wrapper(force, options);
+    return wrapper(context, options);
 }
 
 

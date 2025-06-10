@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 13.0.0
+
+- Updates for Foundry 13 (and makes the module only support Foundry 13)
+- Page selection now working.
+- PDF Actor sheets appear to be working.
+- TOC working.
+- >>> Please raise an Issue if anything isn't working <<<
+
 ## 1.6.6
 
 - Add german translations, provided by @CePeU
