@@ -44,10 +44,6 @@ import { PDFCONFIG } from './pdf-config.mjs'
 const pattern = /@PDF\[(.+?)(?:#(.+?))?(?:\|(.+?))?\]{(.+?)}/g;
 
 Hooks.once('ready', () => {
-    // Fields on Actors and Items call enrichHTML with async=false (only on Foundry versions prior to V12)
-    if (game.release.generation < 12)
-        libWrapper.register(PDFCONFIG.MODULE_NAME, 'TextEditor.enrichHTML', TextEditor_enrichHTML, libWrapper.WRAPPER);
-
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._createDocumentLink', JournalEntryPage_createDocumentLink, libWrapper.MIXED);
 
     // The TextEditor.encrichers only works when enrichHTML is called with async=true
@@ -195,11 +191,11 @@ export function getPDFByCode(pdfcode) {
  * @returns JournalEntryPage
  */
 export function getPDFByName(pdfname) {
-    const [journalname, journalpage=journalname] = pdfname.split('#');
+    const [journalname, journalpage = journalname] = pdfname.split('#');
     let pagedoc;
     for (const journal of game.journal.contents.filter(journal => journal.name === journalname)) {
         pagedoc = journal.pages.find(pg => pg.type === 'pdf' && pg.name === journalpage);
         if (pagedoc) break;
     }
-    return pagedoc;    
+    return pagedoc;
 }

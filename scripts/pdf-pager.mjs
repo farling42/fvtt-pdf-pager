@@ -41,10 +41,6 @@ import { setupAnnotations } from './pdf-annotations.mjs';
  */
 
 Hooks.once('ready', async () => {
-    // Need to capture the PDF page number
-    if (game.release.generation < 13)
-        libWrapper.register(PDFCONFIG.MODULE_NAME, `JournalPDFPageSheet.prototype._renderInner`, JournalEntryPagePDFSheet_renderInner, libWrapper.WRAPPER);
-
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._onClickDocumentLink', JournalEntryPage_onClickDocumentLink, libWrapper.MIXED);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype.toc', JournalEntryPage_toc, libWrapper.MIXED);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render', JournalSheet_render, libWrapper.WRAPPER);
@@ -212,10 +208,7 @@ async function updateOutline(pdfsheet, location) {
  * @returns 
  */
 function isConfiguringPage(sheet, html) {
-    if (game.release.generation<13)
-        return sheet.isEditable;
-    else
-        return html.querySelector('file-picker[name="src"]');
+    return html.querySelector('file-picker[name="src"]');
 }
 /**
  * Adds the "Page Offset" field to the JournalPDFPageSheet EDITOR window.
@@ -242,87 +235,48 @@ function handle_pdf_sheet(html, pdfsheet) {
 
     if (isConfiguringPage(pdfsheet, html)) {
         // Editting, so add our own elements to the window
-        if (game.release.generation < 13) {
-            const page_offset = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET);
-            const value_offset = page_offset ? ` value="${page_offset}"` : "";
-            const label_offset = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.PageOffset.Label`);
-            const elem_offset = `<div class="form-group"><label>${label_offset}</label><input class="pageOffset" type="number" name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_OFFSET}"${value_offset}/></div>`;
 
-            const page_code = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE);
-            const value_code = page_code ? ` value="${page_code}"` : "";
-            const label_code = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Code.Label`);
-            const elem_code = `<div class="form-group"><label>${label_code}</label><input class="pageCode" type="text" name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_CODE}"${value_code}/></div>`;
+        // Foundry V13+
+        // Editting, so add our own elements to the window
+        const flags = new foundry.data.fields.ObjectField({ label: "module-flags" }, { parent: pagedoc.schema.fields.flags, name: PDFCONFIG.MODULE_NAME });
 
-            /*
-            const zoom_selectid = `${pagedoc.id}.zoom`;
-            const label_zoom = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.defaultZoom.Name`);
-            let zoom_options=Object.entries(ZoomChoices).map(values => `<option value="${values[0]}">${values[1]}</option>`).join('');
-            let zoom_select=`<select name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_ZOOM}" id=${zoom_selectid}>${zoom_options}</select>`;
-            const elem_zoom = `<div class="form-group"><label for=${zoom_selectid}>${label_zoom}</label>${zoom_select}</div>`;
-            */
+        const elem_offset = (new foundry.data.fields.NumberField(
+            {
+                label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.PageOffset.Label`),
+                initial: pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? ""
+            },
+            { parent: flags, name: PDFCONFIG.FLAG_OFFSET })).toFormGroup();
 
-            const spread_selectid = `${pagedoc.id}.zoom`;
-            const label_spread = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.defaultSpread.Name`);
-            const cur_spread = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_SPREAD) ?? SpreadMode.UNKNOWN;
-            let spread_options = Object.entries(SpreadChoices).map(values => `<option value=${values[0]} ${cur_spread == values[0] ? "selected" : ""}>${values[1]}</option>`).join('');
-            let spread_select = `<select name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_SPREAD}" id=${spread_selectid}>${spread_options}</select>`;
-            const elem_spread = `<div class="form-group"><label for=${spread_selectid}>${label_spread}</label>${spread_select}</div>`;
+        const elem_code = (new foundry.data.fields.StringField(
+            {
+                label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Code.Label`),
+                initial: pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE) ?? ""
+            },
+            { parent: flags, name: PDFCONFIG.FLAG_CODE })).toFormGroup();
 
+        const elem_spread = (new foundry.data.fields.NumberField(
+            {
+                label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.defaultSpread.Name`),
+                initial: pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_SPREAD) ?? SpreadMode.UNKNOWN,
+                choices: SpreadChoices
+            },
+            { parent: flags, name: PDFCONFIG.FLAG_SPREAD })).toFormGroup();
 
-            html.find('div.picker').after(elem_offset + elem_code + elem_spread);
-            // Add hook to allow drop of Actor or Item into the 'PDF Code' field
-            html.find('.pageCode').on('dragover', false).on('drop', function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-                // TextEditor.getDragEventData requires event.dataTransfer to exist.
-                const data = TextEditor.getDragEventData(event.originalEvent);
-                console.log(`Dropped onto pagecode: ${data}`)
-                if (!data) return;
-                if (data.type === 'Actor' || data.type === 'Item') pdfsheet.value = data.uuid;
-            })
+        const otherfield = html.querySelector('div.form-group div.form-fields').parentElement.parentElement;
+        otherfield.appendChild(elem_offset);
+        otherfield.appendChild(elem_code);
+        otherfield.appendChild(elem_spread);
 
-        } else {
-            // Foundry V13+
-            // Editting, so add our own elements to the window
-            const flags = new foundry.data.fields.ObjectField({ label: "module-flags" }, { parent: pagedoc.schema.fields.flags, name: PDFCONFIG.MODULE_NAME });
+        html.querySelector(`input[name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_CODE}"]`).addEventListener('drop', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            // TextEditor.getDragEventData requires event.dataTransfer to exist.
+            const data = TextEditor.getDragEventData(event);
+            console.log(`Dropped onto pagecode: ${data}`)
+            if (!data) return;
+            if (data.type === 'Actor' || data.type === 'Item') event.currentTarget.value = data.uuid;
+        })
 
-            const elem_offset = (new foundry.data.fields.NumberField(
-                {
-                    label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.PageOffset.Label`),
-                    initial: pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? ""
-                },
-                { parent: flags, name: PDFCONFIG.FLAG_OFFSET })).toFormGroup();
-
-            const elem_code = (new foundry.data.fields.StringField(
-                {
-                    label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.Code.Label`),
-                    initial: pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CODE) ?? ""
-                },
-                { parent: flags, name: PDFCONFIG.FLAG_CODE })).toFormGroup();
-
-            const elem_spread = (new foundry.data.fields.NumberField(
-                {
-                    label: game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.defaultSpread.Name`),
-                    initial: pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_SPREAD) ?? SpreadMode.UNKNOWN,
-                    choices: SpreadChoices
-                },
-                { parent: flags, name: PDFCONFIG.FLAG_SPREAD })).toFormGroup();
-
-            const otherfield = html.querySelector('div.form-group div.form-fields').parentElement.parentElement;
-            otherfield.appendChild(elem_offset);
-            otherfield.appendChild(elem_code);
-            otherfield.appendChild(elem_spread);
-
-            html.querySelector(`input[name="flags.${PDFCONFIG.MODULE_NAME}.${PDFCONFIG.FLAG_CODE}"]`).addEventListener('drop', function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-                // TextEditor.getDragEventData requires event.dataTransfer to exist.
-                const data = TextEditor.getDragEventData(event);
-                console.log(`Dropped onto pagecode: ${data}`)
-                if (!data) return;
-                if (data.type === 'Actor' || data.type === 'Item') event.currentTarget.value = data.uuid;
-            })
-        }
 
     } else {
 
@@ -368,12 +322,12 @@ function handle_pdf_sheet(html, pdfsheet) {
                 // Replace entry in jQuery array
                 let found;
                 for (let i = 0; i < html.length; i++)
-                  if (html[i].className == 'load-pdf') {
-                    html[i] = iframe;
-                    found=true;
-                    break;
-                  }
-                  if (!found) return html;
+                    if (html[i].className == 'load-pdf') {
+                        html[i] = iframe;
+                        found = true;
+                        break;
+                    }
+                if (!found) return html;
             } else {
                 // Replace button in actual HTML tree
                 const button = html.querySelector('div.load-pdf');
@@ -435,16 +389,14 @@ function handle_pdf_sheet(html, pdfsheet) {
             })
         }
     };
-    if (game.release.generation<13)
-        html.on('load', loadiframe);
-    else
-        html.querySelector("iframe").addEventListener('load', loadiframe);
+    html.querySelector("iframe").addEventListener('load', loadiframe);
 
     return html;
 }
 
 function render_pdf_sheet(sheet, html, data) {
-    if (game.release.generation>=13) handle_pdf_sheet(html, sheet);
+    handle_pdf_sheet(html, sheet);
+
     // Ignore if it is the PDF Page Editor which is being displayed.
     if (isConfiguringPage(sheet, html)) return;
 
@@ -496,7 +448,7 @@ async function JournalSheet_renderHeadings(pageNode, toc) {
     const tocNode = this.element[0].querySelector(`.directory-item[data-page-id="${pageId}"]`);
     if (!tocNode || !toc) return;
     const headings = Object.values(toc);
-    if (game.release.generation >= 12) headings.sort((a, b) => a.order - b.order);
+    headings.sort((a, b) => a.order - b.order);
     if (page.title.show) headings.shift();
     const minLevel = Math.min(...headings.map(node => node.level));
     tocNode.querySelector(":scope > ol")?.remove();
@@ -591,7 +543,7 @@ export function openPDFByCode(pdfcode, options = {}) {
 
     const pagedoc = getPDFByCode(pdfcode);
     // Stop now if no page was found
-    if (pagedoc) 
+    if (pagedoc)
         openPDF(pagedoc, options);
     else {
         console.error(`openPdfByCode: unable to find PDF with code '${pdfcode}'`)
