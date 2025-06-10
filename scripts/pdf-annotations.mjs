@@ -267,10 +267,10 @@ function updateAnnotations(doc, changed, options, userId) {
 
 
 function pageClosed(sheet, html) {
-    if (CONFIG.debug.pdfpager) console.debug('pageClosed', { sheet, html });
+    if (CONFIG.debug.pdfpager) console.debug('pdf-annotations: pageClosed', { sheet, html });
     for (const [doc, app] of mapping) {
         if (sheet.document === doc || sheet.document == doc.parent) {
-            if (CONFIG.debug.pdfpager) console.debug('pageClosed: deleting AnnotationManager');
+            if (CONFIG.debug.pdfpager) console.debug('pdf-annotations: pageClosed: deleting AnnotationManager');
             app.delete();
             break;
         }
@@ -295,9 +295,8 @@ export async function initAnnotations(doc, pdfviewerapp, editable) {
         Hooks.on('updateJournalEntryPage', updateAnnotations);
         Hooks.on('updateActor', updateAnnotations);
         Hooks.on('updateItem', updateAnnotations);
-        Hooks.on('closeJournalSheet', pageClosed);
-        Hooks.on('closeJournalPDFPageSheet', pageClosed); // before Foundry V13
-        Hooks.on('closeJournalEntryPagePDFSheet', pageClosed); // Foundry V13
+        Hooks.on('closeJournalEntrySheet', pageClosed);
+        Hooks.on('closeViewJournalEntryPagePDFSheet', pageClosed);
     }
 }
 

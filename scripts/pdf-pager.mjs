@@ -43,9 +43,9 @@ import { setupAnnotations } from './pdf-annotations.mjs';
 Hooks.once('ready', async () => {
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._onClickDocumentLink', JournalEntryPage_onClickDocumentLink, libWrapper.MIXED);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype.toc', JournalEntryPage_toc, libWrapper.MIXED);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._render', JournalSheet_render, libWrapper.WRAPPER);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype.goToPage', JournalSheet_goToPage, libWrapper.MIXED);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalSheet.prototype._renderHeadings', JournalSheet_renderHeadings, libWrapper.OVERRIDE);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.appv1.sheets.JournalSheet.prototype._render', JournalSheet_render, libWrapper.WRAPPER);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.appv1.sheets.JournalSheet.prototype.goToPage', JournalSheet_goToPage, libWrapper.MIXED);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.appv1.sheets.JournalSheet.prototype._renderHeadings', JournalSheet_renderHeadings, libWrapper.OVERRIDE);
 });
 
 // JournalEntryPage#toc only works when type === 'text'
@@ -235,9 +235,6 @@ function handle_pdf_sheet(html, pdfsheet) {
 
     if (isConfiguringPage(pdfsheet, html)) {
         // Editting, so add our own elements to the window
-
-        // Foundry V13+
-        // Editting, so add our own elements to the window
         const flags = new foundry.data.fields.ObjectField({ label: "module-flags" }, { parent: pagedoc.schema.fields.flags, name: PDFCONFIG.MODULE_NAME });
 
         const elem_offset = (new foundry.data.fields.NumberField(
@@ -376,9 +373,9 @@ function handle_pdf_sheet(html, pdfsheet) {
             // Set spread mode (might be String or Number)
             value = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_SPREAD) ?? SpreadMode.UNKNOWN;
             if (value == SpreadMode.UNKNOWN) value = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_SPREAD);
-            console.log(`existing spread mode = ${pdfsheet.pdfviewerapp.pdfViewer.spreadMode}`);
+            if (CONFIG.debug.pdfpager) console.log(`existing spread mode = ${pdfsheet.pdfviewerapp.pdfViewer.spreadMode}`);
             if (value != SpreadMode.UNKNOWN) pdfsheet.pdfviewerapp.pdfViewer.spreadMode = Number(value);
-            console.log(`new spread mode = ${pdfsheet.pdfviewerapp.pdfViewer.spreadMode}`);
+            if (CONFIG.debug.pdfpager) console.log(`new spread mode = ${pdfsheet.pdfviewerapp.pdfViewer.spreadMode}`);
         })
 
         // Keep the TOC inline with the current visible page
@@ -394,7 +391,7 @@ function handle_pdf_sheet(html, pdfsheet) {
     return html;
 }
 
-function render_pdf_sheet(sheet, html, data) {
+Hooks.on("renderJournalEntryPagePDFSheet", (sheet, html, data) => {
     handle_pdf_sheet(html, sheet);
 
     // Ignore if it is the PDF Page Editor which is being displayed.
@@ -406,35 +403,28 @@ function render_pdf_sheet(sheet, html, data) {
         initEditor(html, docid);
     else
         setupAnnotations(html, docid);
-};
-Hooks.on("renderJournalPDFPageSheet", render_pdf_sheet);
-Hooks.on("renderJournalEntryPagePDFSheet", render_pdf_sheet);
-
+});
 
 // Remove the flags we saved on the PAGE when the displayed window is closed.
 
-Hooks.on("closeJournalSheet", (sheet, element) => {
-    //console.log(`closing ${sheet.document.name}`)
-    for (const node of sheet._pages) {
-        if (node.type === 'pdf') {
-            let page = sheet.getPageSheet(node._id)?.document;
-            if (page) {
-                delete page.pdfpager_anchor;
-                delete page.pdfpager_show_uuid;
-            }
+Hooks.on("closeJournalEntrySheet", (sheet) => {
+    if (CONFIG.debug.pdfpager) console.log(`closing Journal '${sheet.document.name}'`)
+    for (const pageid in sheet._pages) {
+        const page = sheet.getPageSheet(pageid)?.document;
+        if (page?.type === 'pdf') {
+            if (CONFIG.debug.pdfpager) console.log(`cleaning PDF page '${page.name}'`)
+            delete page.pdfpager_anchor;
+            delete page.pdfpager_show_uuid;
         }
     }
 })
 
-function close_pdf_sheet(sheet, element) {
-    //console.log(`closing PDF ${sheet.document.name}`)
+Hooks.on("closeViewJournalEntryPagePDFSheet", (sheet) => {
+    if (CONFIG.debug.pdfpager) console.log(`cleaning PDF page '${sheet.document.name}'`)
     let page = sheet.document;
     delete page.pdfpager_anchor;
     delete page.pdfpager_show_uuid;
-}
-Hooks.on("closeJournalPDFPageSheet", close_pdf_sheet);
-Hooks.on("closeJournalEntryPagePDFSheet", close_pdf_sheet); // Foundry V13+
-
+})
 
 /**
  * An exact copy of JournalSheet#_renderHeading from foundry.js,
