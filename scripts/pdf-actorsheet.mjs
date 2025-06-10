@@ -124,7 +124,7 @@ export class PDFActorSheet extends foundry.appv1.sheets.ActorSheet {
      */
     activateListeners(html) {
         super.activateListeners(html);
-        initEditor(html.querySelectorAll('iframe'), this.document.uuid);
+        initEditor(html.find('iframe'), this.document.uuid);
     }
 
     /**

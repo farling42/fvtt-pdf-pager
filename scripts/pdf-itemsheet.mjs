@@ -71,7 +71,7 @@ export class PDFItemSheet extends foundry.appv1.sheets.ItemSheet {
 
     activateListeners(html) {
         super.activateListeners(html);
-        initEditor(html.querySelectorAll('iframe')[0], this.document.uuid);
+        initEditor(html.find('iframe')[0], this.document.uuid);
     }
 
     /**
