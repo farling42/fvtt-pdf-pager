@@ -74,7 +74,7 @@ export class PDFSheetConfig extends FormApplication {
 }
 
 
-export class PDFActorSheet extends ActorSheet {
+export class PDFActorSheet extends foundry.appv1.sheets.ActorSheet {
 
     /**
      * 
@@ -124,7 +124,7 @@ export class PDFActorSheet extends ActorSheet {
      */
     activateListeners(html) {
         super.activateListeners(html);
-        initEditor(html.find('iframe'), this.document.uuid);
+        initEditor(html.querySelectorAll('iframe'), this.document.uuid);
     }
 
     /**
@@ -249,7 +249,7 @@ export function configureActorSettings() {
         if (types != defined_types) {
             console.log(`Changing registered Actor sheets to ${JSON.stringify(types)}`)
             defined_types = types;
-            Actors.unregisterSheet(modulename, PDFActorSheet);
+            foundry.documents.collections.Actors.unregisterSheet(modulename, PDFActorSheet);
 
             // Add new list of registered sheets
             if (types.length) {
@@ -259,7 +259,7 @@ export function configureActorSettings() {
                 }
                 // Simple World Building doesn't set the 'types' field, and on Foundry 11 it won't work if WE set the 'types' field.
                 if (actorTypes.length > 1) options.types = types;
-                Actors.registerSheet(modulename, PDFActorSheet, options)
+                foundry.documents.collections.Actors.registerSheet(modulename, PDFActorSheet, options)
             }
         }
     }
@@ -282,15 +282,12 @@ export function configureActorSettings() {
 }
 
 Hooks.on('renderSettingsConfig', (app, html, options) => {
-    const moduleTab = html.find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
+    const moduleTab = html.querySelectorAll(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
     const actorTypes = game.documentTypes["Actor"].filter(t => t !== CONST.BASE_DOCUMENT_TYPE);
-    // input for V10/11, file-picker for V12
-    moduleTab
-        .find(`input[name="${PDFCONFIG.MODULE_NAME}.${actorTypes[0]}Sheet"],file-picker[name="${PDFCONFIG.MODULE_NAME}.${actorTypes[0]}Sheet"]`)
-        .closest('div.form-group')
-        .before(
-            '<h2 class="setting-header">' +
-            game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleActorPDFs`) +
-            '</h2>'
-        )
+    const label = document.createElement("h4");
+    label.classList.add("setting-header");
+    label.innerText = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleActorPDFs`);
+
+    let picker = moduleTab[0].querySelectorAll(`file-picker[name="${PDFCONFIG.MODULE_NAME}.${actorTypes[0]}Sheet"]`);
+    if (picker) picker[0].closest('div.form-group').before(label);
 })

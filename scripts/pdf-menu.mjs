@@ -58,8 +58,8 @@ Hooks.once('init', async () => {
             },
         });
     }
-    libWrapper.register(PDFCONFIG.MODULE_NAME, "ActorDirectory.prototype._getEntryContextOptions", addMenu, libWrapper.WRAPPER);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, "ItemDirectory.prototype._getEntryContextOptions", addMenu, libWrapper.WRAPPER);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, "foundry.applications.sidebar.tabs.ActorDirectory.prototype._getEntryContextOptions", addMenu, libWrapper.WRAPPER);
+    libWrapper.register(PDFCONFIG.MODULE_NAME, "foundry.applications.sidebar.tabs.ItemDirectory.prototype._getEntryContextOptions", addMenu, libWrapper.WRAPPER);
 })
 
 export function configureMenuSettings() {
@@ -94,21 +94,18 @@ Hooks.on('renderSettingsConfig', (app, html, options) => {
     const actors = Object.entries(CONFIG.Actor.typeLabels);
     const items = Object.entries(CONFIG.Item.typeLabels);
 
-    const moduleTab = html.find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
-    moduleTab
-        .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${MENU_ACTOR_FLAG}\\.${actors[0][0]}]`)
-        .closest('div.form-group')
-        .before(
-            '<h2 class="setting-header">' +
-            game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleMenusActor`) +
-            '</h2>'
-        )
-    moduleTab
-        .find(`input[name=${PDFCONFIG.MODULE_NAME}\\.${MENU_ITEM_FLAG}\\.${items[0][0]}]`)
-        .closest('div.form-group')
-        .before(
-            '<h2 class="setting-header">' +
-            game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleMenusItem`) +
-            '</h2>'
-        )
+    const moduleTab = html.querySelectorAll(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
+
+    let label = document.createElement("h4");
+    label.classList.add("setting-header");
+    label.innerText = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleMenusActor`);
+    let picker = moduleTab[0].querySelectorAll(`input[name=${PDFCONFIG.MODULE_NAME}\\.${MENU_ACTOR_FLAG}\\.${actors[0][0]}]`);
+    if (picker) picker[0].closest('div.form-group').before(label);          
+
+    label = document.createElement("h4");
+    label.classList.add("setting-header");
+    label.innerText = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleMenusItem`);
+    picker = moduleTab[0].querySelectorAll(`input[name=${PDFCONFIG.MODULE_NAME}\\.${MENU_ITEM_FLAG}\\.${items[0][0]}]`);
+    if (picker) picker[0].closest('div.form-group').before(label);          
+
 })

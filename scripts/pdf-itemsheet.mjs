@@ -32,7 +32,7 @@ import { initEditor, logPdfFields, getPdfViewer } from './pdf-editable.mjs';
 import { PDFSheetConfig } from './pdf-actorsheet.mjs';
 import { PDFDataBrowser } from './pdf-databrowser.mjs';
 
-export class PDFItemSheet extends ItemSheet {
+export class PDFItemSheet extends foundry.appv1.sheets.ItemSheet {
 
     constructor(item, options) {
         super(item, options);
@@ -71,7 +71,7 @@ export class PDFItemSheet extends ItemSheet {
 
     activateListeners(html) {
         super.activateListeners(html);
-        initEditor(html.find('iframe')[0], this.document.uuid);
+        initEditor(html.querySelectorAll('iframe')[0], this.document.uuid);
     }
 
     /**
@@ -196,7 +196,7 @@ export function configureItemSettings() {
         if (types != defined_types) {
             console.log(`Changing registered Item sheets to ${JSON.stringify(types)}`)
             defined_types = types;
-            Items.unregisterSheet(modulename, PDFItemSheet);
+            foundry.documents.collections.Items.unregisterSheet(modulename, PDFItemSheet);
 
             // Add new list of registered sheets
             if (types.length) {
@@ -206,7 +206,7 @@ export function configureItemSettings() {
                 }
                 // Simple World Building doesn't set the 'types' field, and on Foundry 11 it won't work if WE set the 'types' field.
                 if (itemTypes.length > 1) options.types = types;
-                Items.registerSheet(modulename, PDFItemSheet, options)
+                foundry.documents.collections.Items.registerSheet(modulename, PDFItemSheet, options)
             }
         }
     }
@@ -229,15 +229,12 @@ export function configureItemSettings() {
 }
 
 Hooks.on('renderSettingsConfig', (app, html, options) => {
-    const moduleTab = html.find(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
+    const moduleTab = html.querySelectorAll(`.tab[data-tab=${PDFCONFIG.MODULE_NAME}]`);
     const itemTypes = game.documentTypes["Item"].filter(t => t !== CONST.BASE_DOCUMENT_TYPE);
-    // input for V10/11, file-picker for V12
-    moduleTab
-        .find(`input[name="${PDFCONFIG.MODULE_NAME}.${itemTypes[0]}Sheet"],file-picker[name="${PDFCONFIG.MODULE_NAME}.${itemTypes[0]}Sheet"]`)
-        .closest('div.form-group')
-        .before(
-            '<h2 class="setting-header">' +
-            game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleItemPDFs`) +
-            '</h2>'
-        )
+    const label = document.createElement("h4");
+    label.classList.add("setting-header");
+    label.innerText = game.i18n.localize(`${PDFCONFIG.MODULE_NAME}.TitleItemPDFs`);
+
+    let picker = moduleTab[0].querySelectorAll(`file-picker[name="${PDFCONFIG.MODULE_NAME}.${itemTypes[0]}Sheet"]`);
+    if (picker) picker[0].closest('div.form-group').before(label);        
 })
