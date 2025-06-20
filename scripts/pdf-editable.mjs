@@ -367,7 +367,7 @@ function modifyDocument(document, fieldname, value) {
         let flags = document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_FIELDTEXT);
         if (!(flags instanceof Object)) flags = {};
         if (foundry.utils.getProperty(flags, fieldname) === value) return;
-        console.debug(`Hiding value '${document.name}'['${fieldname}'] = '${value}'`);
+        if (CONFIG.debug.pdfpager) console.debug(`Hiding value '${document.name}'['${fieldname}'] = '${value}'`);
         foundry.utils.setProperty(flags, fieldname, value);
         storeFieldText(document, flags);
     } else if (typeof docfield === 'string') {
@@ -381,13 +381,13 @@ function modifyDocument(document, fieldname, value) {
             }
         }
         if (currentvalue === value) return;
-        console.debug(`Setting '${document.name}'['${docfield}'] = '${value}'`);
+        if (CONFIG.debug.pdfpager) console.debug(`Setting '${document.name}'['${docfield}'] = '${value}'`);
         // It doesn't seem like we can prevent calling document.update twice
         // when the change is received by both 'dispatcheventinsandbox' and the 'change' event handler.
         // calling foundry.utils.setProperty(document,docfield,value) doesn't retain the value.
         document.update({ [docfield]: value });
     } else if (docfield.setValue) {
-        console.debug(`Calling setValue function for '${document.name}'['${fieldname}'] with '${value}'`);
+        if (CONFIG.debug.pdfpager) console.debug(`Calling setValue function for '${document.name}'['${fieldname}'] with '${value}'`);
         docfield.setValue(document, value);
     }
 }
@@ -480,7 +480,7 @@ export async function initEditor(html, id_to_display) {
 
     // Wait for the IFRAME to appear in the window before any further initialisation
     iframe.addEventListener('load', async (event) => {
-        console.debug(`PDF frame loaded for '${document.name}'`);
+        if (CONFIG.debug.pdfpager) console.debug(`PDF frame loaded for '${document.name}'`);
         let read_pdf = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.READ_FIELDS_FROM_PDF);
         let editable = !read_pdf && document.isOwner &&
             (!document.pack || !game.packs.get(document.pack)?.locked) &&
