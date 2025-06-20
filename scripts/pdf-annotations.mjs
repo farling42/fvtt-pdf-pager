@@ -309,6 +309,7 @@ export async function initAnnotations(doc, pdfviewerapp, editable) {
  */
 export async function setupAnnotations(html, id_to_display) {
     const iframe = html2iframe(html);
+    if (!iframe) return;  // maybe no PDF assigned to the page yet
 
     const doc = (id_to_display.includes('.') && await fromUuid(id_to_display)) || game.actors.get(id_to_display) || game.items.get(id_to_display);
     if (!doc) return;

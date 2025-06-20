@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 13.0.1
+
+- Fix an issue when creating new PDF pages.
+- Ensure all debug output is hidden behind `CONFIG.debug.pdfpager`
+- Ensure the PDF configure dialog has the correct height
+
+*NOTE* The changes for V13 removed support for legacy (appV1) journal sheets. This might affect your game system (such as Pendragon) if they haven't transitioned to Application V2 for their journals.
+
 ## 13.0.0
 
 - Updates for Foundry 13 (and makes the module only support Foundry 13)

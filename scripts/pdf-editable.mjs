@@ -299,7 +299,7 @@ async function setFormFromDocument(pdfviewer, document, options = {}) {
  * @param {*} options 
  */
 async function setDocumentFromForm(pdfviewer, document, options) {
-    console.debug(`Setting ${document.documentName} '${document.name}' from PDF fields`);
+    if (CONFIG.debug.pdfpager) console.debug(`Setting ${document.documentName} '${document.name}' from PDF fields`);
     const inputs = pdfviewer.viewer.querySelectorAll('input,select,textarea');
     let buttonvalues; // support for radio buttons
 
@@ -450,6 +450,8 @@ function myFlattenObject(obj, _d = 0) {
  */
 export async function initEditor(html, id_to_display) {
     const iframe = html2iframe(html);
+    // Maybe no PDF has been assigned to the page yet
+    if (!iframe) return;
 
     const document = (id_to_display.includes('.') && await fromUuid(id_to_display)) || game.actors.get(id_to_display) || game.items.get(id_to_display);
     if (!document) return;
@@ -522,7 +524,7 @@ export async function initEditor(html, id_to_display) {
 
             // Wait until the scripting engine is ready before doing either setDocumentFromForm or setFormFromDocument
             if (timeout) {
-                console.debug(`pdf-pager: disabling previous load timeout`);
+                if (CONFIG.debug.pdfpager) console.debug(`pdf-pager: disabling previous load timeout`);
                 clearTimeout(timeout);
                 timeout = undefined;
             }

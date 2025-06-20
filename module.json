@@ -1,83 +1,83 @@
 {
-  "id": "pdf-pager",
-  "title": "PDF Pager",
-  "description": "Allows automatically loading of PDFs, and addition of specific page numbers in document links.",
-  "version": "0.49.0",
-  "library": "false",
-  "compatibility": {
-    "minimum": 13,
-    "verified": 13.345
-  },
-  "authors": [
-		{
-			"name": "Farling",
-			"url": "https://github.com/farling42",
-			"email": "foundryvtt@amusingtime.uk",
-			"discord": "farling",
-			"ko-fi": "farling",
-			"patreon": "amusingtime",
-			"twitter": "@shambles42"
-		}
-  ],
-  "relationships": {
-    "requires": [
-      {
-        "id": "lib-wrapper",
-        "type": "module",
-        "manifest": "https://github.com/ruipin/fvtt-lib-wrapper/releases/latest/download/module.json"
-      }
+    "id": "pdf-pager",
+    "title": "PDF Pager",
+    "description": "Allows automatically loading of PDFs, and addition of specific page numbers in document links.",
+    "version": "13.0.0",
+    "library": "false",
+    "compatibility": {
+        "minimum": 13,
+        "verified": 13.345
+    },
+    "authors": [
+        {
+            "name": "Farling",
+            "url": "https://github.com/farling42",
+            "email": "foundryvtt@amusingtime.uk",
+            "discord": "farling",
+            "ko-fi": "farling",
+            "patreon": "amusingtime",
+            "twitter": "@shambles42"
+        }
     ],
-    "recommends": [
-      {
-        "id": "color-picker",
-        "type": "module",
-        "manifest": "https://github.com/Larkinabout/fvtt-color-picker/releases/latest/download/module.json"
-      }
-    ]
-  },
-  "esmodules": [
-    "scripts/pdf-actorsheet.mjs",
-    "scripts/pdf-databrowser.mjs",
-    "scripts/pdf-editable.mjs",
-    "scripts/pdf-config.mjs",
-    "scripts/pdf-itemsheet.mjs",
-    "scripts/pdf-linker.mjs",
-    "scripts/pdf-menu.mjs",
-    "scripts/pdf-pager.mjs",
-    "scripts/pdf-migrate.mjs",
-    "scripts/pdf-scenenotes.mjs"
-  ],
-  "styles": [
-    "style/style.css"
-  ],
-  "packs": [
-    {
-      "name": "macros",
-      "label": "PDF Pager Macros",
-      "path": "./packs/macros.db",
-      "type": "Macro"
-    }
-  ],
-  "languages": [
-    {
-      "lang": "en",
-      "name": "English",
-      "path": "languages/en.json"
+    "relationships": {
+        "requires": [
+            {
+                "id": "lib-wrapper",
+                "type": "module",
+                "manifest": "https://github.com/ruipin/fvtt-lib-wrapper/releases/latest/download/module.json"
+            }
+        ],
+        "recommends": [
+            {
+                "id": "color-picker",
+                "type": "module",
+                "manifest": "https://github.com/Larkinabout/fvtt-color-picker/releases/latest/download/module.json"
+            }
+        ]
     },
-    {
-      "lang": "fr",
-      "name": "French",
-      "path": "languages/fr.json"
-    },
-    {
-      "lang": "de",
-      "name": "German",
-      "path": "languages/de.json"
-    }
-  ],
-  "url": "https://github.com/farling42/fvtt-pdf-pager",
-  "manifest": "https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json",
-  "download": "https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.zip",
-  "license": "LICENSE",
-  "readme": "README.md"
+    "esmodules": [
+        "scripts/pdf-actorsheet.mjs",
+        "scripts/pdf-databrowser.mjs",
+        "scripts/pdf-editable.mjs",
+        "scripts/pdf-config.mjs",
+        "scripts/pdf-itemsheet.mjs",
+        "scripts/pdf-linker.mjs",
+        "scripts/pdf-menu.mjs",
+        "scripts/pdf-pager.mjs",
+        "scripts/pdf-migrate.mjs",
+        "scripts/pdf-scenenotes.mjs"
+    ],
+    "styles": [
+        "style/style.css"
+    ],
+    "packs": [
+        {
+            "name": "macros",
+            "label": "PDF Pager Macros",
+            "path": "./packs/macros.db",
+            "type": "Macro"
+        }
+    ],
+    "languages": [
+        {
+            "lang": "en",
+            "name": "English",
+            "path": "languages/en.json"
+        },
+        {
+            "lang": "fr",
+            "name": "French",
+            "path": "languages/fr.json"
+        },
+        {
+            "lang": "de",
+            "name": "German",
+            "path": "languages/de.json"
+        }
+    ],
+    "url": "https://github.com/farling42/fvtt-pdf-pager",
+    "manifest": "https://github.com/farling42/fvtt-pdf-pager/releases/latest/download/module.json",
+    "download": "https://github.com/farling42/fvtt-pdf-pager/releases/download/13.0.0/module.zip",
+    "license": "LICENSE",
+    "readme": "README.md"
 }

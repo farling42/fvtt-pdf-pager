@@ -42,6 +42,11 @@ import { setupAnnotations } from './pdf-annotations.mjs';
 
 Hooks.once('ready', async () => {
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.documents.JournalEntryPage.prototype._onClickDocumentLink', JournalEntryPage_onClickDocumentLink, libWrapper.MIXED);
+    // APPv1
+    //libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.appv1.sheets.JournalSheet.prototype.goToPage', JournalEntrySheet_goToPage, libWrapper.MIXED);
+    //libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.appv1.sheets.JournalSheet.prototype._renderPageViews', JournalEntrySheet_renderPageViews, libWrapper.WRAPPER);
+    //libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.appv1.sheets.JournalSheet.prototype._renderHeadings', JournalEntrySheet_renderHeadings, libWrapper.OVERRIDE);
+    // APPv2
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.applications.sheets.journal.JournalEntrySheet.prototype.goToPage', JournalEntrySheet_goToPage, libWrapper.MIXED);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.applications.sheets.journal.JournalEntrySheet.prototype._renderPageViews', JournalEntrySheet_renderPageViews, libWrapper.WRAPPER);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.applications.sheets.journal.JournalEntrySheet.prototype._renderHeadings', JournalEntrySheet_renderHeadings, libWrapper.OVERRIDE);
@@ -56,7 +61,10 @@ class PDFSheet extends foundry.applications.sheets.journal.JournalEntryPagePDFSh
     /** @inheritDoc */
     async _onRender(context, options) {
         await super._onRender(context, options);
-        if (this.options.includeTOC) this.toc[this.document.name.slugify()].children = JSON.parse(this.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC) ?? "{}");
+        if (this.options.includeTOC) {
+            const toc = this.toc[this.document.name.slugify()];
+            if (toc) toc.children = JSON.parse(this.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC) ?? "{}");
+        }
     }
 }
 
@@ -120,11 +128,11 @@ function updatePdfView(pdfsheet, anchor) {
         // Convert our internal link name into a PDF outline slug
         pdfsheet.toc[anchor].pdfslug;
 
-    console.debug(`updatePdfView(sheet='${pdfsheet.document.name}', anchor='${anchor}')\n=>'${dest}'`);
+    if (CONFIG.debug.pdfpager) console.debug(`updatePdfView(sheet='${pdfsheet.document.name}', anchor='${anchor}')\n=>'${dest}'`);
     linkService.setHash(dest);
     // Do the journal.sheet(false, {focus: true}) without re-rendering the app,
     // otherwise we lose the selected page.
-    pdfsheet.document?.parent?.sheet?.bringToTop();
+    pdfsheet.document?.parent?.sheet?.bringToFront();
     return true;
 }
 
@@ -189,7 +197,7 @@ async function updateOutline(pdfsheet, location) {
         return;
     }
     const html = pdfsheet?.document?.parent?.sheet?.element[0];
-    if (!html) return;
+    if (!html || !pdfsheet.toc) return;
 
     for (let i = outline._currentPageNumber; i > 0; i--) {
         const destHash = pageNumberToDestHash.get(i);
@@ -287,6 +295,8 @@ function handle_pdf_sheet(html, pdfsheet) {
             if (data.type === 'Actor' || data.type === 'Item') event.currentTarget.value = data.uuid;
         })
 
+        // Ensure window is resized to account for the additional buttons
+        pdfsheet.setPosition({height: "auto"});
 
     } else {
 
@@ -326,7 +336,7 @@ function handle_pdf_sheet(html, pdfsheet) {
             // as JournalPagePDFSheet#_onLoadPDF, but adding optional page-number
             const iframe = document.createElement("iframe");
             iframe.src = `modules/pdf-pager/libs/pdfjs/web/viewer.html?${pdfsheet._getViewerParams()}${pdf_slug}`;
-            console.debug(iframe.src);
+            if (CONFIG.debug.pdfpager) console.debug(iframe.src);
 
             if (html instanceof jQuery) {
                 // Replace entry in jQuery array
@@ -350,7 +360,7 @@ function handle_pdf_sheet(html, pdfsheet) {
     // Register handler to generate the TOC after the PDF has been loaded.
     // (This is done in the editor too, so that the flag can be set as soon as a PDF is selected)
     async function loadiframe(event) {
-        //console.debug(`PDF frame loaded for '${pagedoc.name}'`);
+        if (CONFIG.debug.pdfpager) console.debug(`PDF frame loaded for '${pagedoc.name}'`);
 
         // Wait for PDF to initialise before attaching to event bus.
         pdfsheet.pdfviewerapp = event.target.contentWindow.PDFViewerApplication;
@@ -366,7 +376,7 @@ function handle_pdf_sheet(html, pdfsheet) {
                     if (outline) {
                         let newflag = JSON.stringify(buildOutline(outline));
                         if (oldflag !== newflag) {
-                            console.debug(`Storing new TOC for '${pagedoc.name}'`)
+                            if (CONFIG.debug.pdfpager) console.debug(`Storing new TOC for '${pagedoc.name}'`)
                             pagedoc.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC, newflag)
                             pdfsheet._toc = outline;
                         }
@@ -399,7 +409,7 @@ function handle_pdf_sheet(html, pdfsheet) {
             })
         }
     };
-    html.querySelector("iframe").addEventListener('load', loadiframe);
+    html.querySelector("iframe")?.addEventListener('load', loadiframe);
 
     return html;
 }
