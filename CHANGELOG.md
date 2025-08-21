@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 13.0.2
+
+- Provide some additional styling so that the PDF iframe is resized when the Journal is resized (since core Foundry doesn't provide it).
+
 ## 13.0.1
 
 - Fix an issue when creating new PDF pages.
