@@ -13,3 +13,9 @@
 .sheet.journal-entry.application .journal-sidebar .toc .h7 .heading-link {
   text-indent: calc(6 * var(--level-indent));
 }
+
+article.journal-entry-page.pdf,
+article.journal-entry-page.pdf>div,
+article.journal-entry-page.pdf>div>iframe {
+    height: 100%
+}
