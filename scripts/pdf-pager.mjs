@@ -311,12 +311,12 @@ function handle_pdf_sheet(html, pdfsheet) {
                 // convert TOC entry to PDFSLUG.
                 // if the final slug is a string then it is an entry in the PDF's destination table.
                 // if the final slug is an ARRAY, then we can't pass it as a parameter to viewer.html.
-                let docslug = pdfsheet.toc[anchor].pdfslug;
-                let slug = JSON.parse(docslug);
+                let docslug = pdfsheet.toc[anchor]?.pdfslug;
+                let slug = docslug && JSON.parse(docslug);
                 if (typeof slug === 'string')
                     pdf_slug = `#nameddest=${slug}`;
-                else {
-                    // Pas array directly
+                else if (slug) {
+                    // Pass array directly
                     pdf_slug = `#${docslug}`;
                     rawlink = true;
                 }

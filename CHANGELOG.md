@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 13.0.3
+
+- Prevent error when loading a PDF page with an unsupported anchor.
+
 ## 13.0.2
 
 - Provide some additional styling so that the PDF iframe is resized when the Journal is resized (since core Foundry doesn't provide it).
