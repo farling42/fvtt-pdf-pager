@@ -17,18 +17,13 @@ export class PDFSheetConfig extends foundry.applications.api.HandlebarsApplicati
     content: { template: `modules/${PDFCONFIG.MODULE_NAME}/templates/choose-pdf.hbs` }
   }
 
-  constructor (config, renderOptions) {
-    super({}, renderOptions);
-    this.object = config;
-  }
-
   get title() {
-    return game.i18n.format(`${PDFCONFIG.MODULE_NAME}.ChoosePdfForm.Title`, { name: this.object.document.name });
+    return game.i18n.format(`${PDFCONFIG.MODULE_NAME}.ChoosePdfForm.Title`, { name: this.options.object.document.name });
   }
 
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
-    context.filename = this.object.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF);
+    context.filename = this.options.object.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF);
     return context;
   }
 
@@ -40,7 +35,7 @@ export class PDFSheetConfig extends foundry.applications.api.HandlebarsApplicati
    */
   static async #onSubmit(event, _form, submitData) {
     event.preventDefault();
-    const doc = this.object.document;
+    const doc = this.options.object.document;
     const oldvalue = doc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF);
     const newvalue = submitData.object.filename;
     if (newvalue == oldvalue) return;

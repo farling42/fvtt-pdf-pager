@@ -114,9 +114,12 @@ export class PDFItemSheet extends foundry.applications.api.HandlebarsApplication
 	 * @param {Event} event 
 	 */
 	static #onChoosePdf() {
-		new PDFSheetConfig(this, {
-			top: this.position.top + 40,
-			left: this.position.left + ((this.position.width - PDFSheetConfig.defaultOptions.width) / 2)
+		new PDFSheetConfig({
+			object: this,
+			position: {
+				top: this.position.top + 40,
+				left: this.position.left + ((this.position.width - PDFSheetConfig.DEFAULT_OPTIONS.width) / 2)
+			}
 		}).render(true);
 		console.log('choose a custom PDF')
 	}
@@ -165,7 +168,7 @@ export class PDFItemSheet extends foundry.applications.api.HandlebarsApplication
 	 * @param {Object} context 
 	 */
 	render(force = false, context = {}) {
-		if (!this.rendered && this.document.permission >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER) 
+		if (!this.rendered && this.document.permission >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER)
 			super.render(force, context);
 	}
 
@@ -175,7 +178,7 @@ export class PDFItemSheet extends foundry.applications.api.HandlebarsApplication
 	 */
 	_onResize(event) {
 		super._onResize(event);
-		this.item.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_WINDOW_SIZE, 
+		this.item.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_WINDOW_SIZE,
 			{ width: this.position.width, height: this.position.height });
 	}
 }

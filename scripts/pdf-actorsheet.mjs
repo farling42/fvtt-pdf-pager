@@ -120,12 +120,12 @@ export class PDFActorSheet extends foundry.applications.api.HandlebarsApplicatio
 	 * 
 	 * @param {Event} event 
 	 */
-	static async #onChoosePdf() {
-		new PDFSheetConfig(this, 
-			{
+	static #onChoosePdf() {
+		new PDFSheetConfig({
+			object: this,
 			position: {
-			top: this.position.top + 40,
-			left: this.position.left + ((this.position.width - PDFSheetConfig.DEFAULT_OPTIONS.position.width) / 2)
+				top: this.position.top + 40,
+				left: this.position.left + ((this.position.width - PDFSheetConfig.DEFAULT_OPTIONS.position.width) / 2)
 			}
 		}).render(true);
 	}
