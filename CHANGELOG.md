@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 14.0.0
+- Migrate Actor and Item sheets to ApplicationV2.
+- First version that supports Foundry V14.
+
 ## 13.0.4
 
 - Only register listeners for each macro button once.
