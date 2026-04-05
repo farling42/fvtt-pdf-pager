@@ -84,6 +84,7 @@ export class PDFActorSheet extends foundry.applications.api.HandlebarsApplicatio
 			logFields: PDFActorSheet.#onLogFields,
 		},
 		window: {
+			resizable: true,
 			controls: [
 				{
 					icon: "fas fa-user",
