@@ -1,21 +1,33 @@
 .sheet.journal-entry.application .journal-sidebar .toc .h2 .heading-link {
   text-indent: var(--level-indent);
 }
+
 .sheet.journal-entry.application .journal-sidebar .toc .h4 .heading-link {
   text-indent: calc(3 * var(--level-indent));
 }
+
 .sheet.journal-entry.application .journal-sidebar .toc .h5 .heading-link {
   text-indent: calc(4 * var(--level-indent));
 }
+
 .sheet.journal-entry.application .journal-sidebar .toc .h6 .heading-link {
   text-indent: calc(5 * var(--level-indent));
 }
+
 .sheet.journal-entry.application .journal-sidebar .toc .h7 .heading-link {
   text-indent: calc(6 * var(--level-indent));
+}
+
+.pdfsheet {
+  height: 100%;
+
+  iframe {
+    height: 100%
+  }
 }
 
 article.journal-entry-page.pdf,
 article.journal-entry-page.pdf>div,
 article.journal-entry-page.pdf>div>iframe {
-    height: 100%
+  height: 100%
 }
