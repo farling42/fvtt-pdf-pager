@@ -30,50 +30,7 @@ SOFTWARE.
 import { PDFCONFIG } from './pdf-config.mjs';
 import { initEditor, logPdfFields, getPdfViewer } from './pdf-editable.mjs';
 import { PDFDataBrowser } from './pdf-databrowser.mjs';
-
-export class PDFSheetConfig extends FormApplication {
-	// this.object = PDFActorSheet or PDFItemSheet
-	static get defaultOptions() {
-		return foundry.utils.mergeObject(super.defaultOptions, {
-			width: 600,
-		})
-	}
-	get template() {
-		return `modules/${PDFCONFIG.MODULE_NAME}/templates/choose-pdf.hbs`;
-	}
-	get title() {
-		return game.i18n.format(`${PDFCONFIG.MODULE_NAME}.ChoosePdfForm.Title`, { name: this.object.document.name });
-	}
-	getData() {
-		return {
-			filename: this.object.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
-		}
-	}
-	/**
-	 * 
-	 * @param {Event} event 
-	 * @param {Object} formData 
-	 * @returns 
-	 */
-	async _updateObject(event, formData) {
-		event.preventDefault();
-		const doc = this.object.document;
-		const oldflag = doc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF);
-		if (formData.filename == oldflag) return;
-
-		if (formData.filename) {
-			console.log(`Configuring Actor '${doc.name}' to use PDF sheet '${formData.filename}'`)
-			doc.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF, formData.filename)
-		} else {
-			console.log(`Removing custom PDF sheet for Actor '${doc.name}'`)
-			doc.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF)
-		}
-		// Regenerate the PDFActorSheet with the new PDF
-		//this.object.render(true);
-	}
-}
-
-
+import { PDFSheetConfig } from './pdf-sheetconfig.mjs';
 export class PDFActorSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
 
 	static DEFAULT_OPTIONS = {
@@ -135,10 +92,10 @@ export class PDFActorSheet extends foundry.applications.api.HandlebarsApplicatio
 		// Check for a custom PDF local to the Actor before using the generic sheet.
 		let pdffile = actor.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF) ||
 			game.settings.get(PDFCONFIG.MODULE_NAME, `${actor.type}Sheet`);
-		// URL.parseSafe is to cope with where a user has specified a full URL for the PDF path
+		// URL.parse is to cope with where a user has specified a full URL for the PDF path
 		// instead of a file relative to the Foundry USERDATA area.
 		// (This would typically be an issue on The Forge hosting service.)
-		context.pdfFilename = URL.parseSafe(pdffile) ? pdffile : foundry.utils.getRoute(pdffile);
+		context.pdfFilename = URL.parse(pdffile) ? pdffile : foundry.utils.getRoute(pdffile);
 
 		// Perhaps set zoom level
 		context.zoomLevel = "";
@@ -164,9 +121,12 @@ export class PDFActorSheet extends foundry.applications.api.HandlebarsApplicatio
 	 * @param {Event} event 
 	 */
 	static async #onChoosePdf() {
-		new PDFSheetConfig(this, {
+		new PDFSheetConfig(this, 
+			{
+			position: {
 			top: this.position.top + 40,
-			left: this.position.left + ((this.position.width - PDFSheetConfig.defaultOptions.width) / 2)
+			left: this.position.left + ((this.position.width - PDFSheetConfig.DEFAULT_OPTIONS.position.width) / 2)
+			}
 		}).render(true);
 	}
 

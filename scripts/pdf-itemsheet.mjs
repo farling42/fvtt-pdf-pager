@@ -29,7 +29,7 @@ SOFTWARE.
 
 import { PDFCONFIG } from './pdf-config.mjs';
 import { initEditor, logPdfFields, getPdfViewer } from './pdf-editable.mjs';
-import { PDFSheetConfig } from './pdf-actorsheet.mjs';
+import { PDFSheetConfig } from './pdf-sheetconfig.mjs';
 import { PDFDataBrowser } from './pdf-databrowser.mjs';
 
 export class PDFItemSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ItemSheetV2) {
@@ -89,10 +89,10 @@ export class PDFItemSheet extends foundry.applications.api.HandlebarsApplication
 		const item = this.document;
 		// Check for a custom PDF local to the Item before using the generic sheet.
 		let pdffile = item.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_CUSTOM_PDF) || game.settings.get(PDFCONFIG.MODULE_NAME, `${item.type}Sheet`);
-		// URL.parseSafe is to cope with where a user has specified a full URL for the PDF path
+		// URL.parse is to cope with where a user has specified a full URL for the PDF path
 		// instead of a file relative to the Foundry USERDATA area.
 		// (This would typically be an issue on The Forge hosting service.)
-		context.pdfFilename = URL.parseSafe(pdffile) ? pdffile : foundry.utils.getRoute(pdffile);
+		context.pdfFilename = URL.parse(pdffile) ? pdffile : foundry.utils.getRoute(pdffile);
 
 		// Perhaps set zoom level
 		context.zoomLevel = "";
