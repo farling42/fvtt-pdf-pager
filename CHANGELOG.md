@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 13.0.5
+- Only copy value into IMG field if there is a mapping defined (since IMG fields are not editable in the PDF).
+
 ## 13.0.4
 
 - Only register listeners for each macro button once.
