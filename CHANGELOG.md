@@ -1,8 +1,14 @@
 # CHANGELOG
 
+## 14.0.1
+- Only copy value into IMG field if there is a mapping defined (since IMG fields are not editable in the PDF).
+
 ## 14.0.0
 - Migrate Actor and Item sheets to ApplicationV2.
 - First version that supports Foundry V14.
+
+## 13.0.5
+- Only copy value into IMG field if there is a mapping defined (since IMG fields are not editable in the PDF).
 
 ## 13.0.4
 

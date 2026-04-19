@@ -270,7 +270,7 @@ async function setFormFromDocument(pdfviewer, document, options = {}) {
 			// Ensure pdfjs is notified of the change
 			elem.dispatchEvent(new Event("change"));
 		} else if (elem.nodeName === 'IMG') {
-			if (!elem.parentElement.classList.contains('linkAnnotation')) {
+			if (docfield) {
 				elem.setAttribute('src', value ? foundry.utils.getRoute(value) : "");
 				elem.dispatchEvent(new Event("change"));
 			}
