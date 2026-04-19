@@ -5,8 +5,8 @@
     "version": "13.0.0",
     "library": "false",
     "compatibility": {
-        "minimum": 13,
-        "verified": 13.351
+        "minimum": 14,
+        "verified": 14
     },
     "authors": [
         {
@@ -36,10 +36,11 @@
         ]
     },
     "esmodules": [
+        "scripts/pdf-init.mjs",
+        "scripts/pdf-config.mjs",
         "scripts/pdf-actorsheet.mjs",
         "scripts/pdf-databrowser.mjs",
         "scripts/pdf-editable.mjs",
-        "scripts/pdf-config.mjs",
         "scripts/pdf-itemsheet.mjs",
         "scripts/pdf-linker.mjs",
         "scripts/pdf-menu.mjs",
