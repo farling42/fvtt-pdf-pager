@@ -118,8 +118,9 @@ function JournalEntrySheet_goToPage(wrapper, pageId, anchor) {
  * @param {String} anchor A page number or a TOC section string
  * @returns true if the change was made
  */
-function updatePdfView(pdfsheet, anchor) {
+function updatePdfView(pdfsheet, options) {
     const linkService = pdfsheet?.pdfviewerapp?.pdfLinkService;
+    const anchor = (typeof options === 'object') ? options?.anchor : options;
     if (!linkService || !anchor || anchor === "null") return false;
 
     const dest = anchor.startsWith('page=') ?

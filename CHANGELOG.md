@@ -1,10 +1,13 @@
 # CHANGELOG
 
+## 13.0.6
+- Restore ability to drag page title to create a link, to include the page number in the link.
+- Restore ability to use `#page=xxx` in `@UUID` links to the PDF's JournalEntryPage.
+
 ## 13.0.5
 - Only copy value into IMG field if there is a mapping defined (since IMG fields are not editable in the PDF).
 
 ## 13.0.4
-
 - Only register listeners for each macro button once.
 - Default mapping for dnd5e fixed for saving throws.
 - Listen for correct event before initialising editor.
