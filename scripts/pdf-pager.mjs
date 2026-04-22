@@ -86,7 +86,7 @@ Hooks.on("ready", () => {
  */
 function JournalEntryPage_onClickDocumentLink(wrapper, event) {
     let pdfsheet = getPdfSheet(this.parent.sheet, this.id);
-    if (updatePdfView(pdfsheet, decodeURIComponent(event.currentTarget.getAttribute('data-hash')))) {
+    if (updatePdfView(pdfsheet, decodeURIComponent(event.srcElement.dataset.hash))) {
         // Cancel any previous stored anchor
         delete pdfsheet.document.pdfpager_anchor;
         return;
@@ -119,8 +119,9 @@ function JournalEntrySheet_goToPage(wrapper, pageId, anchor) {
  * @param {String} anchor A page number or a TOC section string
  * @returns true if the change was made
  */
-function updatePdfView(pdfsheet, anchor) {
+function updatePdfView(pdfsheet, options) {
     const linkService = pdfsheet?.pdfviewerapp?.pdfLinkService;
+    const anchor = (typeof options === 'object') ? options?.anchor : options;
     if (!linkService || !anchor || anchor === "null") return false;
 
     const dest = anchor.startsWith('page=') ?

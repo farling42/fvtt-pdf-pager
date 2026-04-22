@@ -1,11 +1,19 @@
 # CHANGELOG
 
+## 14.0.2
+- Get link creation working in both `@PDF` and `@UUID` format (even dragging page title to create link with current page).
+- Merge of fixes from version 13.0.6
+
 ## 14.0.1
 - Only copy value into IMG field if there is a mapping defined (since IMG fields are not editable in the PDF).
 
 ## 14.0.0
 - Migrate Actor and Item sheets to ApplicationV2.
 - First version that supports Foundry V14.
+
+## 13.0.6
+- Restore ability to drag page title to create a link, to include the page number in the link.
+- Restore ability to use `#page=xxx` in `@UUID` links to the PDF's JournalEntryPage.
 
 ## 13.0.5
 - Only copy value into IMG field if there is a mapping defined (since IMG fields are not editable in the PDF).

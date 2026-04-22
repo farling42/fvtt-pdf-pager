@@ -112,22 +112,15 @@ async function enricher(match, options) {
  * 
  * @param {function} wrapped the original JournalEntryPage.prototype._createDocumentLink
  * @param {Object}} eventData first parameter for JournalEntryPage.prototype._createDocumentLink
- * @param {Object} args second parameter for JournalEntryPage.prototype._createDocumentLink
+ * @param {Object} options second parameter for JournalEntryPage.prototype._createDocumentLink
  * @returns 
  */
-function JournalEntryPage_createDocumentLink(wrapped, eventData, args) {
+function JournalEntryPage_createDocumentLink(wrapped, eventData, options) {
+    if (this.type !== 'pdf') return wrapped(eventData, options);
+
     // Always convert slug for PDF into encoded-URI format
-    if (this.type === 'pdf' && eventData?.anchor?.slug)
-        eventData.anchor.slug = encodeURIComponent(eventData.anchor.slug);
-
-    if (this.type !== 'pdf' || !game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.CREATE_PDF_LINK_ON_DROP))
-        return wrapped(eventData, args);
-
-    let slug, label;
     if (eventData?.anchor?.slug) {
-        // Use slug of section name
-        label = eventData.anchor.name;
-        slug = eventData.anchor.slug;
+        eventData.anchor.slug = encodeURIComponent(eventData.anchor.slug);
     } else {
         // Use page=xxx as slug
         let pagenum = 1;
@@ -136,21 +129,25 @@ function JournalEntryPage_createDocumentLink(wrapped, eventData, args) {
         let iframe;
 
         if (game.MonksEnhancedJournal)
-            iframe = game.MonksEnhancedJournal.journal?.element?.querySelector('iframe');
+            iframe = game.MonksEnhancedJournal.journal?.element?.querySelector('iframe')?.[0];
         else if (jentry && jentry.pages && jentry.pages.contents[jentry.sheet.pageIndex]._id == this.id)
             iframe = jentry.sheet.element?.querySelector('iframe');
 
-        if (iframe?.length > 0) iframe = iframe[0];
         if (iframe) {
             // Read current page from PDF viewer, then remove the user-configured offset from that number.
             pagenum = iframe.contentWindow.PDFViewerApplication.page - (this.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0);
         }
-        slug = `page=${pagenum}`
-        label = this.name;
+        eventData.anchor.slug = `page=${pagenum}`
+        eventData.anchor.name = this.name;
     }
+
+    // Create normal `@UUID` format
+    if (!game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.CREATE_PDF_LINK_ON_DROP))
+      return wrapped(eventData, options);
+
     // If journal and page have same name, only put the name in once.
     const fullname = (this.parent.name === this.name) ? this.name : `${this.parent.name}#${this.name}`;
-    return `@PDF[${fullname}|${slug}]{${label}}`;
+    return `@PDF[${fullname}|${eventData.anchor.slug}]{${eventData.anchor.name}}`;
 }
 
 // Key = PDFCODE; Value = UUID of JournalPage(PDF)
