@@ -85,7 +85,7 @@ Hooks.on("ready", () => {
  */
 function JournalEntryPage_onClickDocumentLink(wrapper, event) {
     let pdfsheet = getPdfSheet(this.parent.sheet, this.id);
-    if (updatePdfView(pdfsheet, decodeURIComponent(event.currentTarget.getAttribute('data-hash')))) {
+    if (updatePdfView(pdfsheet, decodeURIComponent(event.srcElement.dataset.hash))) {
         // Cancel any previous stored anchor
         delete pdfsheet.document.pdfpager_anchor;
         return;
