@@ -21,11 +21,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { PDFCONFIG } from './pdf-config.mjs';
+import { PDFCONFIG, ScrollMode, SpreadMode, SpreadChoices } from './pdf-config.mjs';
 import { initEditor } from './pdf-editable.mjs';
 import { getPDFByCode, getPDFByName } from './pdf-linker.mjs';
 import { setupAnnotations } from './pdf-annotations.mjs';
-import { SpreadChoices } from './pdf-init.mjs';
 
 /**
  * @UUID{JournalEntry.T29aMDmLCPYybApI.JournalEntryPage.iYV6uMnFwdgZORxi#page=10}

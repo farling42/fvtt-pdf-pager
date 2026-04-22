@@ -53,7 +53,6 @@ export let actormap = {
     //"Class and Level":
     "Background":       "system.details.background",
     //"Player Name":      "system.details.playerName",   "=game.actors.get(system.ownership.first)"
-    "378R":             "img",
     "Race ":            "system.details.race",
     "Alignment":        "system.details.alignment",
     "XP":               "system.details.xp.value",
