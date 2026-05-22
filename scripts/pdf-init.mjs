@@ -61,14 +61,17 @@ Hooks.once('ready', () => {
         config: true
     });
 
+    // Foundry 14.361 does NOT allow us to use our own viewer.html which would
+    // expose the Annotation tools in the PDF viewer.
+    // Thus annotations are disabled permanently.
     param = PDFCONFIG.EDITABLE_ANNOTATIONS;
     game.settings.register(name, param, {
         name: game.i18n.localize(`${name}.${param}.Name`),
         hint: game.i18n.localize(`${name}.${param}.Hint`),
         scope: "world",
         type: Boolean,
-        default: true,
-        config: true
+        default: false,
+        config: false
     });
 
     param = PDFCONFIG.HIDE_EDITABLE_BG;
