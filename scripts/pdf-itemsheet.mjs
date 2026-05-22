@@ -41,6 +41,7 @@ export class PDFItemSheet extends foundry.applications.api.HandlebarsApplication
 			browseData: PDFItemSheet.#onBrowseData,
 			listFields: PDFItemSheet.#onListFields,
 		},
+    position: { width: 500, height: 500 },
 		window: {
 			resizable: true,
 			controls: [
@@ -170,16 +171,6 @@ export class PDFItemSheet extends foundry.applications.api.HandlebarsApplication
 	render(force = false, context = {}) {
 		if (!this.rendered && this.document.permission >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER)
 			super.render(force, context);
-	}
-
-	/**
-	 * 
-	 * @param {Event} event 
-	 */
-	_onResize(event) {
-		super._onResize(event);
-		this.item.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_WINDOW_SIZE,
-			{ width: this.position.width, height: this.position.height });
 	}
 }
 
