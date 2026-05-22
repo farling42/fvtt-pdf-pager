@@ -40,6 +40,7 @@ export class PDFActorSheet extends foundry.applications.api.HandlebarsApplicatio
 			browseData: PDFActorSheet.#onBrowseData,
 			logFields: PDFActorSheet.#onLogFields,
 		},
+        position: { width: 800, height: 800 },
 		window: {
 			resizable: true,
 			controls: [
@@ -176,16 +177,6 @@ export class PDFActorSheet extends foundry.applications.api.HandlebarsApplicatio
 		// since the `initEditor` call will otherwise handle changes to actor field data.
 		if (!this.rendered && this.document.permission >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER)
 			super.render(force, context);
-	}
-
-	/**
-	 * Remember the current window size whenever it is resized.
-	 * @param {Event} event 
-	 */
-	_onResize(event) {
-		super._onResize(event);
-		this.actor.setFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_WINDOW_SIZE,
-			{ width: this.position.width, height: this.position.height });
 	}
 }
 
