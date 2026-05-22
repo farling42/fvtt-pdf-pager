@@ -337,7 +337,7 @@ function handle_pdf_sheet(html, pdfsheet) {
 
             // as JournalPagePDFSheet#_onLoadPDF, but adding optional page-number
             const iframe = document.createElement("iframe");
-            iframe.src = `modules/pdf-pager/libs/pdfjs/web/viewer.html?${pdfsheet._getViewerParams()}${pdf_slug}`;
+            iframe.src = `scripts/pdfjs/web/viewer.html?${pdfsheet._getViewerParams()}${pdf_slug}`;
             if (CONFIG.debug.pdfpager) console.debug(iframe.src);
 
             if (html instanceof jQuery) {

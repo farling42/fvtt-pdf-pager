@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 14.1.0 - Use Foundry-supplied pdfjs library
+- Foundry 14.361 removed the ability to use our own pdfjs library.
+  - Annotations, Save file and Print file are no longer available.
+- Set a default Actor sheet size to 800x800.
+- Set a default Item sheet size to 500x500.
+
 ## 14.0.2
 - Get link creation working in both `@PDF` and `@UUID` format (even dragging page title to create link with current page).
 - Merge of fixes from version 13.0.6

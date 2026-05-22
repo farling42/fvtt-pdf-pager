@@ -12,6 +12,10 @@ This module augments the core PDF functionality by adding support for opening PD
 
 It also generates reads the Outline from the PDF file to use as the Table of Contents in the page navigation panel.
 
+## IMPORTANT
+
+**Foundry 14.361 imposed a restriction that prevents the module from using its own version of the PDFJS library, this means that annotations are NOT available on Foundry 14.361 or later. Also Print and Save options are not available.**
+
 ## Automatically load PDF
 
 The module option "Immediately Display PDF" will remove the "Load PDF" button from the PDF pages of journal and will instead immediately load the PDF into the window.
@@ -159,13 +163,13 @@ The Note Config window contains an optional "PDF Page Number" field. If a number
 
 Dragging an open PDF page onto the Canvas to create a Note will automatically populate the PDF Page Number field with the number of the currently open page in the PDF (adjusted by the "PDF Page Offset" defined for the PDF).
 
-## Ink/Text Annotations on PDF Pages
+## ~~Ink/Text Annotations on PDF Pages (not Foundry 14.361 onwards)~~
 
-From version 1.1.0 onwards, Ink and Text annotations can be added to Journal PDF pages as well as Actor/Item PDF sheets. These annotations are stored as part of the Foundry document in which they are displayed. This means that they will be restored when the page is next opened, and they will be transferred to other players for them to view these changes also.
+~~From version 1.1.0 onwards, Ink and Text annotations can be added to Journal PDF pages as well as Actor/Item PDF sheets. These annotations are stored as part of the Foundry document in which they are displayed. This means that they will be restored when the page is next opened, and they will be transferred to other players for them to view these changes also.~~
 
-This has required bundling the standard PDF.JS library (version 4.4.168) since the core Foundry PDF.JS library (4.0.137) removes the ability to use annotations.
+~~This has required bundling the standard PDF.JS library (version 4.4.168) since the core Foundry PDF.JS library (4.0.137) removes the ability to use annotations.~~
 
-**IMPORTANT NOTE**: You must _deselect_ the annotation tool after making changes in order for the annotations to get saved and sent to other players. (This does NOT automatically happen when you close the window.)
+~~**IMPORTANT NOTE**: You must _deselect_ the annotation tool after making changes in order for the annotations to get saved and sent to other players. (This does NOT automatically happen when you close the window.)~~
 
 
 ## Installation
