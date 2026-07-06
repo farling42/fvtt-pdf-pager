@@ -23,9 +23,9 @@ SOFTWARE.
 
 import { PDFCONFIG } from './pdf-config.mjs';
 import { initEditor } from './pdf-editable.mjs';
-import { getPDFByCode, getPDFByName } from './pdf-linker.mjs';
+import { getPDFByCode, getPDFByName, initLinker } from './pdf-linker.mjs';
 import { setupAnnotations } from './pdf-annotations.mjs';
-import { SpreadChoices } from './pdf-init.mjs';
+import { SpreadChoices, initConfig } from './pdf-init.mjs';
 
 /**
  * @UUID{JournalEntry.T29aMDmLCPYybApI.JournalEntryPage.iYV6uMnFwdgZORxi#page=10}
@@ -42,6 +42,8 @@ import { SpreadChoices } from './pdf-init.mjs';
  */
 
 Hooks.once('ready', async () => {
+    initConfig();
+    initLinker();
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.documents.JournalEntryPage.prototype._onClickDocumentLink', JournalEntryPage_onClickDocumentLink, libWrapper.MIXED);
     // APPv1
     //libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.appv1.sheets.JournalSheet.prototype.goToPage', JournalEntrySheet_goToPage, libWrapper.MIXED);
@@ -50,7 +52,13 @@ Hooks.once('ready', async () => {
     // APPv2
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.applications.sheets.journal.JournalEntrySheet.prototype.goToPage', JournalEntrySheet_goToPage, libWrapper.MIXED);
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.applications.sheets.journal.JournalEntrySheet.prototype._renderPageViews', JournalEntrySheet_renderPageViews, libWrapper.WRAPPER);
-    libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.applications.sheets.journal.JournalEntrySheet.prototype._renderHeadings', JournalEntrySheet_renderHeadings, libWrapper.OVERRIDE);
+    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HEADINGS_AS_TOC))
+      libWrapper.register(PDFCONFIG.MODULE_NAME, 'foundry.applications.sheets.journal.JournalEntrySheet.prototype._renderHeadings', JournalEntrySheet_renderHeadings, libWrapper.OVERRIDE);
+
+    foundry.applications.apps.DocumentSheetConfig.registerSheet(foundry.documents.JournalEntryPage, "pdfpager", PDFSheet, {
+        types: ["pdf"],
+        makeDefault: true
+    });
 });
 
 class PDFSheet extends foundry.applications.sheets.journal.JournalEntryPagePDFSheet {
@@ -62,19 +70,12 @@ class PDFSheet extends foundry.applications.sheets.journal.JournalEntryPagePDFSh
     /** @inheritDoc */
     async _onRender(context, options) {
         await super._onRender(context, options);
-        if (this.options.includeTOC) {
+        if (this.options.includeTOC && game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HEADINGS_AS_TOC)) {
             const toc = this.toc[this.document.name.slugify()];
             if (toc) toc.children = JSON.parse(this.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC) ?? "{}");
         }
     }
 }
-
-Hooks.on("ready", () => {
-    foundry.applications.apps.DocumentSheetConfig.registerSheet(foundry.documents.JournalEntryPage, "pdfpager", PDFSheet, {
-        types: ["pdf"],
-        makeDefault: true
-    });
-})
 
 /**
  * Process a click on a link to this document.
@@ -128,7 +129,8 @@ function updatePdfView(pdfsheet, options) {
         // Adjust page with configured PDF Page Offset
         `page=${+anchor.slice(5) + (pdfsheet.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}` :
         // Convert our internal link name into a PDF outline slug
-        pdfsheet.toc[anchor].pdfslug;
+        pdfsheet.toc?.[anchor]?.pdfslug;
+    if (!dest) return false;  // presumably HEADINGS_AS_TOC is false
 
     if (CONFIG.debug.pdfpager) console.debug(`updatePdfView(sheet='${pdfsheet.document.name}', anchor='${anchor}')\n=>'${dest}'`);
     linkService.setHash(dest);
@@ -250,11 +252,13 @@ function handle_pdf_sheet(html, pdfsheet) {
 
     // Ensure we have a TOC on this sheet.
     // Emulate TextPageSheet._renderInner setting up the TOC
-    let toc = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
-    if (toc)
-        pdfsheet.toc = JSON.parse(toc);
-    else
-        delete pdfsheet.toc;
+    if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HEADINGS_AS_TOC)) {
+      let toc = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+      if (toc)
+          pdfsheet.toc = JSON.parse(toc);
+      else
+          delete pdfsheet.toc;
+    }
 
     if (isConfiguringPage(pdfsheet, html)) {
         // Editting, so add our own elements to the window
@@ -370,7 +374,8 @@ function handle_pdf_sheet(html, pdfsheet) {
 
         // pdfviewerapp.pdfDocument isn't defined at this point
         // Read the outline and generate a TOC object from it.
-        if (pagedoc.permission == CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
+        if (pagedoc.permission == CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER &&
+           game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HEADINGS_AS_TOC)) {
             pdfsheet.pdfviewerapp.eventBus.on('outlineloaded', docevent => {   // from PdfPageView
                 pdfsheet.pdfviewerapp.pdfDocument.getOutline().then(outline => {
                     // Store it as JournalPDFPageSheet.toc
@@ -404,7 +409,8 @@ function handle_pdf_sheet(html, pdfsheet) {
         })
 
         // Keep the TOC inline with the current visible page
-        if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.AUTO_SCROLL_TOC)) {
+        if (game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.HEADINGS_AS_TOC) && 
+            game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.AUTO_SCROLL_TOC)) {
             pdfsheet.pdfviewerapp.eventBus.on("updateviewarea", location => {
                 if (!pdfsheet.pdfviewerapp.pdfOutlineViewer._isPagesLoaded) return;
                 updateOutline(pdfsheet, location);

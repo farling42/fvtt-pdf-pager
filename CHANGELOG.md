@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 14.2.0 - New Option to not show the PDF's outline as the journal page's TOC
+- Add a new option "Show PDF Outline as page TOC" (defaults to True) which can be unchecked to prevent the PDF's outline from appearing as the Foundry journal page's TOC.
+  - Since the outline is not extracted from the PDF, links that point to headings within the PDF will not work.
+- Internally, ensure there is a single 'ready' hook handler to ensure correct order of initialisation.
+
 ## 14.1.0 - Use Foundry-supplied pdfjs library
 - Foundry 14.361 removed the ability to use our own pdfjs library.
   - Annotations, Save file and Print file are no longer available.

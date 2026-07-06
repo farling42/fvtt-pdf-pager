@@ -43,12 +43,12 @@ import { PDFCONFIG } from './pdf-config.mjs'
 
 const pattern = /@PDF\[(.+?)(?:#(.+?))?(?:\|(.+?))?\]{(.+?)}/g;
 
-Hooks.once('ready', () => {
+export function initLinker() {
     libWrapper.register(PDFCONFIG.MODULE_NAME, 'JournalEntryPage.prototype._createDocumentLink', JournalEntryPage_createDocumentLink, libWrapper.MIXED);
 
     // The TextEditor.encrichers only works when enrichHTML is called with async=true
     CONFIG.TextEditor.enrichers.push({ pattern, enricher });
-})
+}
 
 function getAnchor(match) {
     // the pattern will put the page into p2 if only bookname is provided

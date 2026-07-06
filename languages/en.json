@@ -46,6 +46,8 @@
         "showFieldMenus.Hint": "Replaces each editable field with a drop-down menu from which can be selected a field in the Actor/Item. (If a field is already configured to use getter/setter functions, then the field is not editable.)",
         "showTitleBarButtons.Name": "Show Buttons in Sheet Controls Menu",
         "showTitleBarButtons.Hint": "When checked, display helpful buttons in the Sheet Controls Menu of Actor/Item PDF Sheets",
+        "showHeadingsAsToc.Name": "Show PDF Outline as page TOC",
+        "showHeadingsAsToc.Hint": "When checked, the outline for the PDF page in a journal is built from the outline in the PDF",
         "showGmButtons.Name": "Show GM buttons in Sheet Controls Menu",
         "showGmButtons.Hint": "Show 'Log PDF Fields' and 'Inspect Data' buttons in Sheet Controls Menu",
         "autoScrollToc.Name": "Scroll TOC automatically",

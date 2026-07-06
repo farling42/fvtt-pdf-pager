@@ -40,6 +40,7 @@ export let PDFCONFIG = {
     NO_SPELL_CHECK: "noSpellCheck",
     IGNORE_BOOKMARK_ZOOM: "ignoreBookmarkZoom",
     MAX_TOC_DEPTH: "maxTocDepth",
+    HEADINGS_AS_TOC: "showHeadingsAsToc",
     HIDE_TOOLBAR: "hideToolbar",
     SHOW_MAP_TOOLTIPS: "showMapTooltips",
     FIELD_MAPPING_MODE: "showFieldMenus",
