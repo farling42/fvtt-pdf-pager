@@ -2,9 +2,9 @@
     "id": "pdf-pager",
     "title": "PDF Pager",
     "description": "Allows automatically loading of PDFs, and addition of specific page numbers in document links.",
-    "version": "14.1.0",
+    "version": "14.3.0",
     "compatibility": {
-        "minimum": "14.362",
+        "minimum": "14.371",
         "verified": "14.371"
     },
     "authors": [
@@ -14,8 +14,7 @@
             "email": "foundryvtt@amusingtime.uk",
             "discord": "farling",
             "ko-fi": "farling",
-            "patreon": "amusingtime",
-            "twitter": "@shambles42"
+            "patreon": "amusingtime"
         }
     ],
     "relationships": {

@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { PDFCONFIG, SpreadMode } from './pdf-config.mjs';
+import { PDFCONFIG, ScrollMode, SpreadMode } from './pdf-config.mjs';
 import { initEditor } from './pdf-editable.mjs';
 import { getPDFByCode, getPDFByName, initLinker } from './pdf-linker.mjs';
 import { setupAnnotations } from './pdf-annotations.mjs';
@@ -525,6 +525,24 @@ let webviewerloaded_set = false;
 
 function JournalEntrySheet_renderPageViews(wrapper, context, options) {
 
+    if (!webviewerloaded_set) {
+        // Add to the window only ONCE!
+        // Even though it is triggered for every PDF page load.
+        webviewerloaded_set = true;
+
+        window.document.addEventListener("webviewerloaded", event => {
+            const AppOptions = event.detail.source.PDFViewerApplicationOptions;
+
+            const always_ignore = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.IGNORE_BOOKMARK_ZOOM);
+            const default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
+            const ignore = always_ignore || (default_zoom && default_zoom !== 'none');
+
+            if (CONFIG.debug.pdfpager) console.debug(`Setting ignoreDestinationZoom=${ignore}`);
+            AppOptions.set("disablePreferences", true);
+            AppOptions.set("ignoreDestinationZoom", ignore);
+        });
+    }
+
     if (!options.anchor && !options.showUuid) return wrapper(context, options);
 
     let pagedoc;
@@ -534,26 +552,6 @@ function JournalEntrySheet_renderPageViews(wrapper, context, options) {
         if (pagedoc) pagedoc.pdfpager_anchor = options.anchor.slice(5);
     }
     if (!pagedoc || pagedoc.type !== 'pdf') return wrapper(context, options);
-
-    if (!webviewerloaded_set) {
-        // Add to the window only ONCE!
-        // Even though it is triggered for every PDF page load.
-        webviewerloaded_set = true;
-
-        window.document.addEventListener("webviewerloaded", event => {
-            //console.log("webviewerloaded", event, source);
-            const source = event.detail.source;
-
-            const always_ignore = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.IGNORE_BOOKMARK_ZOOM);
-            const default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
-            const ignore = always_ignore || (default_zoom && default_zoom !== 'none');
-
-            if (CONFIG.debug.pdfpager) console.debug(`Setting ignoreDestinationZoom=${ignore}`);
-            source.PDFViewerApplicationOptions.set("disablePreferences", true);
-            source.PDFViewerApplicationOptions.set("ignoreDestinationZoom", ignore);
-        });
-    }
-
 
     if (options.anchor) {
         if (CONFIG.debug.pdfpager) console.log(`render: ${JSON.stringify(options)}`)
