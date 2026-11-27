@@ -132,7 +132,6 @@ function updatePdfView(pdfsheet, options) {
     if (!linkService || !anchorbase || anchorbase === "null") return false;
     const [ anchor, extra ] = anchorbase.split('?');
 
-    let dest;
     if (anchor.startsWith('page=')) {
       const pos = anchor.slice(5);
       if (Number.isNumeric(pos)) 
@@ -142,17 +141,16 @@ function updatePdfView(pdfsheet, options) {
         linkService.goToPage(pos);  // Page Label
     } else {
       // Convert our internal link name into a PDF outline slug
-        dest = pdfsheet.toc?.[anchor]?.pdfslug;
+        const dest = pdfsheet.toc?.[anchor]?.pdfslug;
         if (!dest) return false;  // presumably HEADINGS_AS_TOC is false
-    }
-
-    if (dest) {
         if (CONFIG.debug.pdfpager) console.debug(`updatePdfView(sheet='${pdfsheet.document.name}', anchor='${anchor}')\n=>'${dest}'`);
         linkService.setHash(dest);
     }
+
     // Now either bring the PDF window to the front, or enter presentation mode
     if (extra === 'presentationMode')
-        pdfsheet.pdfviewerapp.eventBus.dispatch("presentationmode");
+        // Need to wait for page change before setting presentation mode
+        setTimeout(() => pdfsheet.pdfviewerapp.eventBus.dispatch("presentationmode"), 100);
     else
         pdfsheet.document?.parent?.sheet?.bringToFront();
 
@@ -359,7 +357,7 @@ function handle_pdf_sheet(html, pdfsheet) {
                 // Add configured zoom
                 let default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM);
                 if (default_zoom && default_zoom !== 'none') {
-                    console.log(`displaying PDF with default zoom of ${default_zoom}%`);
+                    if (CONFIG.debug.pdfpager) console.log(`displaying PDF with default zoom of ${default_zoom}%`);
                     if (default_zoom === 'number') default_zoom = game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.DEFAULT_ZOOM_NUMBER)
                     slugs.push(`zoom=${default_zoom}`);
                 }
@@ -558,12 +556,12 @@ function JournalEntrySheet_renderPageViews(wrapper, context, options) {
 
 
     if (options.anchor) {
-        console.log(`render: ${JSON.stringify(options)}`)
+        if (CONFIG.debug.pdfpager) console.log(`render: ${JSON.stringify(options)}`)
         pagedoc.pdfpager_anchor = options.anchor?.startsWith('page=') ? options.anchor.slice(5) : decodeURIComponent(options.anchor);
         delete options.anchor;
     }
     if (options.showUuid) {
-        console.log(`rendering for Document '${options.showUuid}'`)
+        if (CONFIG.debug.pdfpager) console.log(`rendering for Document '${options.showUuid}'`)
         page.pdfpager_show_uuid = options.showUuid;
         delete options.showUuid;
     }
