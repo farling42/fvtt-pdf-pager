@@ -98,10 +98,10 @@ function JournalEntryPage_onClickDocumentLink(wrapper, event) {
 /**
  * Process a click in the TOC.
  */
-function JournalEntrySheet_goToPage(wrapper, pageId, anchor) {
-    let pdfsheet = getPdfSheet(this, pageId);
+function JournalEntrySheet_goToPage(wrapper, pageId, options) {
+    const pdfsheet = getPdfSheet(this, pageId);
+    const { anchor } = options;
     if (pdfsheet && anchor) {
-        if (anchor.anchor) anchor = anchor.anchor;
         if (updatePdfView(pdfsheet, anchor)) {
             // Moved within existing page - so no need to invoke the normal goToPage processing that will render a new page.
             delete pdfsheet.document.pdfpager_anchor;
@@ -110,7 +110,13 @@ function JournalEntrySheet_goToPage(wrapper, pageId, anchor) {
         // switch to the relevant page with the relevant slug (after page gets rendered)
         pdfsheet.document.pdfpager_anchor = anchor;
     }
-    return wrapper(pageId, anchor);
+    if (pdfsheet && pageId && !Number.isNumeric(pageId)) {
+      // switching to page label.
+      const labelPage = pdfsheet.pdfviewerapp.pdfViewer.pageLabelToPageNumber(pageId);
+      if (labelPage !== undefined) 
+        pageId = labelPage;
+    }
+    return wrapper(pageId, options);
 }
 
 
@@ -126,17 +132,25 @@ function updatePdfView(pdfsheet, options) {
     if (!linkService || !anchorbase || anchorbase === "null") return false;
     const [ anchor, extra ] = anchorbase.split('?');
 
-    const dest = anchor.startsWith('page=') ?
+    let dest;
+    if (anchor.startsWith('page=')) {
+      const pos = anchor.slice(5);
+      if (Number.isNumeric(pos)) 
         // Adjust page with configured PDF Page Offset
-        `page=${+anchor.slice(5) + (pdfsheet.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0)}` :
-        // Convert our internal link name into a PDF outline slug
-        pdfsheet.toc?.[anchor]?.pdfslug;
-    if (!dest) return false;  // presumably HEADINGS_AS_TOC is false
+        linkService.goToPage(Number(anchor.slice(5)) + (pdfsheet.document.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_OFFSET) ?? 0));
+      else
+        linkService.goToPage(pos);  // Page Label
+    } else {
+      // Convert our internal link name into a PDF outline slug
+        dest = pdfsheet.toc?.[anchor]?.pdfslug;
+        if (!dest) return false;  // presumably HEADINGS_AS_TOC is false
+    }
 
-    if (CONFIG.debug.pdfpager) console.debug(`updatePdfView(sheet='${pdfsheet.document.name}', anchor='${anchor}')\n=>'${dest}'`);
-    linkService.setHash(dest);
-    // Do the journal.sheet(false, {focus: true}) without re-rendering the app,
-    // otherwise we lose the selected page.
+    if (dest) {
+        if (CONFIG.debug.pdfpager) console.debug(`updatePdfView(sheet='${pdfsheet.document.name}', anchor='${anchor}')\n=>'${dest}'`);
+        linkService.setHash(dest);
+    }
+    // Now either bring the PDF window to the front, or enter presentation mode
     if (extra === 'presentationMode')
         pdfsheet.pdfviewerapp.eventBus.dispatch("presentationmode");
     else
@@ -254,6 +268,7 @@ function isConfiguringPage(sheet, html) {
  */
 function handle_pdf_sheet(html, pdfsheet) {
     const pagedoc = pdfsheet.document;  // JournalEntryPage
+    let namedpage;
 
     // Ensure we have a TOC on this sheet.
     // Emulate TextPageSheet._renderInner setting up the TOC
@@ -310,9 +325,11 @@ function handle_pdf_sheet(html, pdfsheet) {
         pdfsheet.setPosition({height: "auto"});
 
     } else {
-
         // Not editting, so maybe replace button with actual PDF
-        let anchor = pagedoc.pdfpager_anchor;
+
+        // Not allowed to enter presentation mode when first opening the PDF.
+        let [anchor] = pagedoc?.pdfpager_anchor?.split('?') ?? [];
+        if (Number.isNumeric(anchor)) anchor = Number(anchor);
         if (anchor || game.settings.get(PDFCONFIG.MODULE_NAME, PDFCONFIG.ALWAYS_LOAD_PDF)) {
             let rawlink = false;
             let slugs = [];
@@ -330,6 +347,10 @@ function handle_pdf_sheet(html, pdfsheet) {
                     // Pass array directly
                     slugs.push(docslug);
                     rawlink = true;
+                } else {
+                    // Assume the anchor is a PDF Page Label (page will be selected AFTER the PDF has loaded)
+                    slugs.push(`page='${anchor}'`);
+                    namedpage = anchor;
                 }
                 // In all likelihood the outline's array is likely to have an explicit zoom value anyway.
             }
@@ -386,6 +407,8 @@ function handle_pdf_sheet(html, pdfsheet) {
                 pdfsheet.pdfviewerapp.pdfDocument.getOutline().then(outline => {
                     // Store it as JournalPDFPageSheet.toc
                     const oldflag = pagedoc.getFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
+                    if (CONFIG.debug.pdfpager) 
+                        pdfsheet.pdfviewerapp.pdfDocument.getPageLabels().then(labels => console.log("Page Labels", labels));
                     if (outline) {
                         let newflag = JSON.stringify(buildOutline(outline));
                         if (oldflag !== newflag) {
@@ -397,6 +420,10 @@ function handle_pdf_sheet(html, pdfsheet) {
                         pagedoc.unsetFlag(PDFCONFIG.MODULE_NAME, PDFCONFIG.FLAG_TOC);
                     }
                 })
+                if (namedpage) {
+                    const linkService = pdfsheet?.pdfviewerapp?.pdfLinkService;
+                    if (linkService) linkService.goToPage(namedpage);
+                }
             })
         }
 
@@ -506,7 +533,7 @@ function JournalEntrySheet_renderPageViews(wrapper, context, options) {
     for (const id of options.parts) {
         if (!(id in this._pages)) continue;
         pagedoc = this.document.pages.get(id);
-        if (pagedoc) pagedoc.pdfpager_anchor = +options.anchor.slice(5);
+        if (pagedoc) pagedoc.pdfpager_anchor = options.anchor.slice(5);
     }
     if (!pagedoc || pagedoc.type !== 'pdf') return wrapper(context, options);
 
@@ -532,7 +559,7 @@ function JournalEntrySheet_renderPageViews(wrapper, context, options) {
 
     if (options.anchor) {
         console.log(`render: ${JSON.stringify(options)}`)
-        pagedoc.pdfpager_anchor = options.anchor?.startsWith('page=') ? +options.anchor.slice(5) : decodeURIComponent(options.anchor);
+        pagedoc.pdfpager_anchor = options.anchor?.startsWith('page=') ? options.anchor.slice(5) : decodeURIComponent(options.anchor);
         delete options.anchor;
     }
     if (options.showUuid) {

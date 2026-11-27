@@ -1,6 +1,9 @@
 # CHANGELOG
 
 ## NEXT
+- Allow page label to be used in anchors, examples:
+  - `@UUID[JournalEntry.oLKOztEHBGREVp8D.JournalEntryPage.X16msWTp3wIENLMe#page=Copyright]{Page Labels}`
+  - `@PDF[COC|page=Copyright]{Page Labels}`
 - German translation for "Show Headings as TOC" option from CePeU.
 - Change EN tooltip to reference TOC in foundry rather than outline (also CePeU).
 
