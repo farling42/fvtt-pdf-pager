@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## NEXT
+## 14.3.0 - PDF Page Labels
 - Allow PDF page label to be used in anchors (the page labels are embedded data inside the PDF), examples:
   - `@UUID[JournalEntry.oLKOztEHBGREVp8D.JournalEntryPage.X16msWTp3wIENLMe#page=Copyright]{Page Labels}`
   - `@PDF[COC|page=Copyright]{Page Labels}`
